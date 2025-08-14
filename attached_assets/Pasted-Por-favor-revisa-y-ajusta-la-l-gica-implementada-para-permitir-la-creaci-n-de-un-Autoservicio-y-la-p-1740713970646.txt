@@ -1,0 +1,40 @@
+Por favor revisa y ajusta la lógica implementada para permitir la creación de un Autoservicio y la posterior asignación de uno o varios Servicios a dicho Autoservicio. Una vez asignados los Servicios, el usuario podrá seleccionar uno o más Formularios y vincularlos a uno o varios de los Servicios previamente asociados. Cabe resaltar que un mismo Formulario puede estar asignado a múltiples Servicios simultáneamente. A continuación se detalla el flujo del proceso:
+
+1. Creación del Autoservicio  
+   1.1. El usuario accede a la sección “Autoservicios”.  
+   1.2. Selecciona la opción “Agregar Autoservicio”.  
+   1.3. Ingresa la información necesaria para crear el Autoservicio.
+   1.4. El sistema registra el nuevo Autoservicio y lo muestra en la lista o panel correspondiente.
+
+2. Asignación de Servicios al Autoservicio  
+   2.1. El usuario selecciona el Autoservicio creado (o uno existente).  
+   2.2. El sistema muestra la opción “Asignar Servicios” o una sección donde se listan los Servicios disponibles.  
+   2.3. El usuario elige uno o varios Servicios de la lista y confirma la asignación.  
+   2.4. El sistema asocia los Servicios seleccionados al Autoservicio y los muestra en la interfaz, indicando su vinculación.
+
+3. Asignación de Formularios a los Servicios  
+   3.1. El usuario selecciona uno o varios Servicios ya asignados al Autoservicio.  
+   3.2. El sistema muestra la opción “Asignar Formularios” (de forma individual o en lote).  
+   3.3. El usuario elige los Formularios deseados para cada Servicio o un conjunto de Servicios.  
+   3.4. El sistema registra la relación entre cada Servicio y el/los Formularios seleccionados.  
+   3.5. Un mismo Formulario puede ser asociado a múltiples Servicios sin restricciones, siempre que exista la necesidad funcional.
+
+4. Visualización y Gestión  
+   4.1. El usuario puede ver en la interfaz una lista de los Servicios asociados al Autoservicio y, dentro de cada Servicio, los Formularios asignados.  
+   4.2. El usuario puede eliminar o modificar la asignación de Formularios o Servicios según sea necesario.  
+   4.3. El sistema confirma las acciones de agregar o eliminar con mensajes de éxito o advertencia para evitar errores involuntarios.
+
+   - Se recomienda utilizar un diseño claro con secciones diferenciadas para “Autoservicio”, “Servicios” y “Formularios”.  
+   - Incluir tooltips o mensajes de ayuda que expliquen las acciones “Asignar Servicios” y “Asignar Formularios (en lote)” para que los usuarios comprendan el proceso.  
+   - Implementar confirmaciones o ventanas modales al eliminar Servicios o Formularios para prevenir acciones accidentales.
+   - Solo los usuarios con privilegios adecuados deberían poder crear o editar Autoservicios, así como asignar o eliminar Servicios y Formularios.  
+
+A continuación se muestra un ejemplo del proceso a implementar:
+1. El administrador crea un nuevo Autoservicio llamado “Autoservicio Sede Central”.  
+2. Asigna los Servicios “Matrícula” y “Pagos” a este Autoservicio.  
+3. Decide asignar el Formulario “F01 - Solicitud de Matrícula” a ambos Servicios.  
+4. Asigna también el Formulario “F02 - Solicitud de Recibo de Pago” únicamente al Servicio “Pagos”.  
+5. Verifica en la interfaz que:  
+   - El Autoservicio “Sede Central” tiene 2 Servicios asociados.  
+   - El Servicio “Matrícula” tiene 1 Formulario asignado (F01).  
+   - El Servicio “Pagos” tiene 2 Formularios asignados (F01 y F02).
