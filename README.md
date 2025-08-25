@@ -1616,26 +1616,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
----
-
-## 📞 Soporte y Contacto
-
-### 🆘 Obtener Ayuda
-
-- **📖 Documentación**: Revisa este README y los comentarios en el código
-- **🐛 Issues**: [Crear Issue en GitHub](https://github.com/tu-usuario/gestion-atencion-plus/issues)
-- **💬 Discusiones**: [GitHub Discussions](https://github.com/tu-usuario/gestion-atencion-plus/discussions)
-
-### 📧 Contacto
-
-- **Email**: contacto@creatisoft.com
-- **Website**: [www.creatisoft.com](https://www.creatisoft.com)
-- **LinkedIn**: [Creatisoft](https://www.linkedin.com/company/creatisoft)
-
-### 🏆 Créditos
-
-**Desarrollado por**: [Creatisoft](https://www.creatisoft.com)
-
+--
 **Tecnologías que hacen esto posible**:
 - [React](https://reactjs.org/) - Biblioteca de UI
 - [TypeScript](https://www.typescriptlang.org/) - Tipado estático
@@ -1646,10 +1627,3 @@ SOFTWARE.
 
 ---
 
-<div align="center">
-
-**⭐ ¡No olvides dar una estrella si este proyecto te fue útil! ⭐**
-
-Hecho con ❤️ por [Creatisoft](https://www.creatisoft.com)
-
-</div>
