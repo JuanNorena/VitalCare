@@ -3,6 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Pre-paint accessibility bootstrap: apply saved theme and font scale to avoid FOUC -->
+    <script>
+      (function(){
+        try{
+          var t = localStorage.getItem('vc:theme');
+          if(t === 'dark') document.documentElement.classList.add('dark');
+          var s = parseFloat(localStorage.getItem('vc:fontScale') || '1');
+          if(!isNaN(s)) document.documentElement.style.setProperty('--vc-font-scale', String(s));
+        }catch(e){/* ignore */}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

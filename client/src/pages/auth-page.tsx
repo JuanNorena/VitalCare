@@ -248,19 +248,19 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4">
-      <Card className="w-full max-w-md mx-auto shadow-xl border-0 rounded-xl overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md mx-auto shadow-xl border-0 rounded-xl overflow-hidden bg-card">
         {/* Header con branding y título */}
-        <CardHeader className="text-center pb-4 px-6 pt-8">
+          <CardHeader className="text-center pb-4 px-6 pt-8">
           <div className="flex justify-center mb-4">
             <div className="p-3 bg-primary/10 rounded-full">
               <CalendarDays className="h-8 w-8 text-primary" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-gray-900 mb-2">
+          <CardTitle className="text-2xl font-bold text-foreground mb-2">
             {t("common.appTitle")}
           </CardTitle>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             {activeTab === "login" 
               ? t("auth.welcomeBack") 
               : t("auth.createAccount")
@@ -283,15 +283,15 @@ export default function AuthPage() {
 
             {/* Tab triggers con indicador animado */}
             <div className="relative">
-              <div className="grid grid-cols-2 gap-1 p-1 bg-gray-100 rounded-lg">
+              <div className="grid grid-cols-2 gap-1 p-1 bg-popover rounded-lg">
                 <button
                   type="button"
                   onClick={() => handleTabChange("login")}
                   disabled={isAnimating}
-                  className={`relative z-10 px-4 py-2.5 text-sm font-medium rounded-md transition-all duration-300 ${
+                  className={`relative z-10 px-4 py-2.5 text-sm font-medium rounded-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/40 ${
                     activeTab === "login"
-                      ? "text-gray-900 bg-white shadow-sm"
-                      : "text-gray-600 hover:text-gray-900"
+                      ? "bg-primary/10 text-primary shadow-md ring-2 ring-primary/30"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {t("auth.login")}
@@ -300,10 +300,10 @@ export default function AuthPage() {
                   type="button"
                   onClick={() => handleTabChange("register")}
                   disabled={isAnimating}
-                  className={`relative z-10 px-4 py-2.5 text-sm font-medium rounded-md transition-all duration-300 ${
+                  className={`relative z-10 px-4 py-2.5 text-sm font-medium rounded-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/40 ${
                     activeTab === "register"
-                      ? "text-gray-900 bg-white shadow-sm"
-                      : "text-gray-600 hover:text-gray-900"
+                      ? "bg-primary/10 text-primary shadow-md ring-2 ring-primary/30"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {t("auth.register")}
@@ -311,21 +311,14 @@ export default function AuthPage() {
               </div>
             </div>
 
-            {/* Contenedor con altura adaptable para evitar saltos */}
+            {/* Contenedor que renderiza solo el formulario activo para evitar overflow */}
             <div className="relative">
-              <div className={`transition-all duration-300 ${activeTab === "register" ? "min-h-[320px]" : "min-h-[240px]"}`}>
-                {/* Formulario de Login */}
-                <div 
-                  className={`absolute inset-0 transition-all duration-300 ease-in-out ${
-                    activeTab === "login"
-                      ? "opacity-100 translate-x-0 pointer-events-auto"
-                      : "opacity-0 -translate-x-4 pointer-events-none"
-                  }`}
-                >
+              <div className="transition-all duration-300">
+                {activeTab === "login" ? (
                   <form onSubmit={(e) => handleSubmit(e, "login")} className="space-y-5">
                     {/* Campo Username */}
                     <div className="space-y-2">
-                      <Label htmlFor="username" className="text-sm font-medium text-gray-700">
+                      <Label htmlFor="username" className="text-sm font-medium text-muted-foreground">
                         {t("auth.username")}
                       </Label>
                       <Input
@@ -342,7 +335,7 @@ export default function AuthPage() {
 
                     {/* Campo Password con toggle de visibilidad */}
                     <div className="space-y-2">
-                      <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+                      <Label htmlFor="password" className="text-sm font-medium text-muted-foreground">
                         {t("auth.password")}
                       </Label>
                       <div className="relative">
@@ -360,14 +353,14 @@ export default function AuthPage() {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="absolute right-1 top-1 h-9 w-9 hover:bg-gray-100"
+                          className="absolute right-1 top-1 h-9 w-9 hover:bg-popover/10"
                           onClick={() => setShowLoginPassword(!showLoginPassword)}
                           disabled={isLoading}
                         >
                           {showLoginPassword ? (
-                            <EyeOff className="h-4 w-4 text-gray-500" />
+                            <EyeOff className="h-4 w-4 text-muted-foreground" />
                           ) : (
-                            <Eye className="h-4 w-4 text-gray-500" />
+                            <Eye className="h-4 w-4 text-muted-foreground" />
                           )}
                           <span className="sr-only">
                             {showLoginPassword ? t("auth.hidePassword") : t("auth.showPassword")}
@@ -392,20 +385,11 @@ export default function AuthPage() {
                       )}
                     </Button>
                   </form>
-                </div>
-
-                {/* Formulario de Register */}
-                <div 
-                  className={`absolute inset-0 transition-all duration-300 ease-in-out ${
-                    activeTab === "register"
-                      ? "opacity-100 translate-x-0 pointer-events-auto"
-                      : "opacity-0 translate-x-4 pointer-events-none"
-                  }`}
-                >
+                ) : (
                   <form onSubmit={(e) => handleSubmit(e, "register")} className="space-y-4">
                     {/* Campo Username */}
                     <div className="space-y-2">
-                      <Label htmlFor="r-username" className="text-sm font-medium text-gray-700">
+                      <Label htmlFor="r-username" className="text-sm font-medium text-muted-foreground">
                         {t("auth.username")}
                       </Label>
                       <Input
@@ -422,7 +406,7 @@ export default function AuthPage() {
 
                     {/* Campo Email */}
                     <div className="space-y-2">
-                      <Label htmlFor="r-email" className="text-sm font-medium text-gray-700">
+                      <Label htmlFor="r-email" className="text-sm font-medium text-muted-foreground">
                         {t("auth.email")}
                       </Label>
                       <Input
@@ -439,7 +423,7 @@ export default function AuthPage() {
 
                     {/* Campo Password con toggle de visibilidad */}
                     <div className="space-y-2">
-                      <Label htmlFor="r-password" className="text-sm font-medium text-gray-700">
+                      <Label htmlFor="r-password" className="text-sm font-medium text-muted-foreground">
                         {t("auth.password")}
                       </Label>
                       <div className="relative">
@@ -457,14 +441,14 @@ export default function AuthPage() {
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="absolute right-1 top-1 h-9 w-9 hover:bg-gray-100"
+                          className="absolute right-1 top-1 h-9 w-9 hover:bg-popover/10"
                           onClick={() => setShowRegisterPassword(!showRegisterPassword)}
                           disabled={isLoading}
                         >
                           {showRegisterPassword ? (
-                            <EyeOff className="h-4 w-4 text-gray-500" />
+                            <EyeOff className="h-4 w-4 text-muted-foreground" />
                           ) : (
-                            <Eye className="h-4 w-4 text-gray-500" />
+                            <Eye className="h-4 w-4 text-muted-foreground" />
                           )}
                           <span className="sr-only">
                             {showRegisterPassword ? t("auth.hidePassword") : t("auth.showPassword")}
@@ -489,7 +473,7 @@ export default function AuthPage() {
                       )}
                     </Button>
                   </form>
-                </div>
+                )}
               </div>
             </div>
           </div>
