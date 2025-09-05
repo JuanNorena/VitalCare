@@ -52,15 +52,30 @@ export function AccessibilityProvider({ children }: AccessibilityProviderProps) 
     const root = document.documentElement;
     const body = document.body;
     
+    // Limpiar todas las clases de tema primero
+    root.classList.remove('dark', 'light');
+    body.classList.remove('dark', 'light');
+    
     if (isDarkMode) {
       root.classList.add('dark');
       body.classList.add('dark');
-      console.log('🌙 Modo oscuro activado');
+      // Forzar estilos inline para asegurar aplicación
+      root.style.colorScheme = 'dark';
+      body.style.backgroundColor = '#1f2937';
+      body.style.color = '#f9fafb';
+      console.log('🌙 Modo oscuro activado - clases aplicadas:', root.classList.toString());
     } else {
-      root.classList.remove('dark');
-      body.classList.remove('dark');
-      console.log('☀️ Modo claro activado');
+      root.classList.add('light');
+      body.classList.add('light');
+      // Forzar estilos inline para modo claro
+      root.style.colorScheme = 'light';
+      body.style.backgroundColor = '#ffffff';
+      body.style.color = '#1f2937';
+      console.log('☀️ Modo claro activado - clases aplicadas:', root.classList.toString());
     }
+    
+    // Trigger reflow para asegurar que los cambios se apliquen
+    void root.offsetHeight;
   }, [isDarkMode]);
 
   // Persistir preferencia

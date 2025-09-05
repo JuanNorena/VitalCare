@@ -32,6 +32,16 @@ html.dark body {
   color-scheme: dark;
 }
 
+/* Modo claro explícito - mayor especificidad */
+html.light body,
+body.light,
+html:not(.dark) body,
+body:not(.dark) {
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+  color-scheme: light !important;
+}
+
 /* Scrollbar personalizado */
 ::-webkit-scrollbar {
   width: 8px;
