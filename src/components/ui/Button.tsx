@@ -12,12 +12,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const baseClasses = "inline-flex items-center justify-center rounded-lg text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 sm:text-base"
     
     const variants = {
-      default: "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-blue-400",
-      destructive: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 dark:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-400",
-      outline: "border-2 border-gray-300 bg-white hover:bg-gray-50 text-gray-700 focus:ring-gray-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:focus:ring-gray-400",
-      secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600 dark:focus:ring-gray-400",
-      ghost: "hover:bg-gray-100 text-gray-700 focus:ring-gray-500 dark:text-gray-300 dark:hover:bg-gray-800 dark:focus:ring-gray-400",
-      link: "text-blue-600 underline-offset-4 hover:underline dark:text-blue-400 dark:hover:text-blue-300",
+      default: "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500",
+      destructive: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
+      outline: "border-2 border-gray-300 bg-white hover:bg-gray-50 text-gray-700 focus:ring-gray-500",
+      secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500",
+      ghost: "hover:bg-gray-100 text-gray-700 focus:ring-gray-500",
+      link: "text-blue-600 underline-offset-4 hover:underline",
     }
 
     const sizes = {

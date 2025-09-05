@@ -18,28 +18,9 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.3s ease, color 0.3s ease;
-  /* Modo claro por defecto */
   background-color: #ffffff;
   color: #1f2937;
   color-scheme: light;
-}
-
-/* Modo oscuro para el body */
-body.dark,
-html.dark body {
-  background-color: #1f2937;
-  color: #f9fafb;
-  color-scheme: dark;
-}
-
-/* Modo claro explícito - mayor especificidad */
-html.light body,
-body.light,
-html:not(.dark) body,
-body:not(.dark) {
-  background-color: #ffffff !important;
-  color: #1f2937 !important;
-  color-scheme: light !important;
 }
 
 /* Scrollbar personalizado */
@@ -60,17 +41,17 @@ body:not(.dark) {
   background: #94a3b8;
 }
 
-/* Modo oscuro para scrollbar */
-.dark ::-webkit-scrollbar-track {
-  background: #374151;
+/* Scrollbar - light theme only */
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
 }
 
-.dark ::-webkit-scrollbar-thumb {
-  background: #6b7280;
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
 }
 
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 /* Animaciones */
@@ -141,12 +122,6 @@ input[type="time"] {
   color-scheme: light;
 }
 
-.dark input[type="date"], 
-.dark input[type="datetime-local"], 
-.dark input[type="time"] {
-  color-scheme: dark;
-}
-
 /* Personalización del selector de fecha */
 input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="datetime-local"]::-webkit-calendar-picker-indicator {
@@ -157,14 +132,15 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
   border-radius: 4px;
 }
 
-.dark input[type="date"]::-webkit-calendar-picker-indicator,
-.dark input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%9ca3af' viewBox='0 0 20 20'%3e%3cpath fill-rule='evenodd' d='M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z' clip-rule='evenodd'/%3e%3c/svg%3e");
-}
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  background: transparent;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%236b7280' viewBox='0 0 20 20'%3e%3cpath fill-rule='evenodd' d='M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z' clip-rule='evenodd'/%3e%3c/svg%3e");
 
 /* Asegurar que los elementos interactivos tengan un tamaño mínimo en móvil */
 @media (max-width: 640px) {
   button, input, select, textarea {
     min-height: 44px; /* Tamaño mínimo recomendado para touch */
   }
+}
 }

@@ -77,22 +77,22 @@ export function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 py-6 sm:py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+    <div className="min-h-screen bg-white py-6 sm:py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
       <div className="max-w-2xl mx-auto">
-        <Card className="p-6 sm:p-8 shadow-2xl border-0 bg-white dark:bg-gray-800">
+        <Card className="p-6 sm:p-8 shadow-2xl border-0 bg-white">
           <div className="text-center mb-6 sm:mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-400 dark:to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
               </svg>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">VitalCare</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2 text-sm sm:text-base">Crea tu cuenta médica</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">VitalCare</h1>
+            <p className="text-gray-600 mt-2 text-sm sm:text-base">Crea tu cuenta médica</p>
           </div>
 
           {/* Selector de rol */}
           <div className="mb-6 sm:mb-8">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 sm:mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-3 sm:mb-4">
               Tipo de usuario
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
@@ -107,12 +107,12 @@ export function RegisterPage() {
                   onClick={() => setSelectedRole(role.value as UserRole)}
                   className={`p-3 sm:p-4 rounded-lg border-2 text-left transition-colors ${
                     selectedRole === role.value
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400'
-                      : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 bg-white dark:bg-gray-800'
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-gray-300 bg-white'
                   }`}
                 >
-                  <div className="font-medium text-gray-900 dark:text-gray-100 text-sm sm:text-base">{role.label}</div>
-                  <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">{role.description}</div>
+                  <div className="font-medium text-gray-900 text-sm sm:text-base">{role.label}</div>
+                  <div className="text-xs sm:text-sm text-gray-500 mt-1">{role.description}</div>
                 </button>
               ))}
             </div>
@@ -121,7 +121,7 @@ export function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                   Correo electrónico *
                 </label>
                 <Input
@@ -136,7 +136,7 @@ export function RegisterPage() {
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                   Contraseña *
                 </label>
                 <Input
@@ -151,7 +151,7 @@ export function RegisterPage() {
               </div>
 
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
                   Teléfono
                 </label>
                 <Input
@@ -165,7 +165,7 @@ export function RegisterPage() {
               </div>
 
               <div>
-                <label htmlFor="birthDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label htmlFor="birthDate" className="block text-sm font-medium text-gray-700 mb-1">
                   Fecha de nacimiento
                 </label>
                 <Input
@@ -178,7 +178,7 @@ export function RegisterPage() {
               </div>
 
               <div>
-                <label htmlFor="gender" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-1">
                   Género
                 </label>
                 <select
@@ -186,7 +186,7 @@ export function RegisterPage() {
                   name="gender"
                   value={formData.gender}
                   onChange={handleInputChange}
-                  className="w-full h-10 sm:h-11 px-3 sm:px-4 text-sm sm:text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-200"
+                  className="w-full h-10 sm:h-11 px-3 sm:px-4 text-sm sm:text-base rounded-lg border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                 >
                   <option value="MALE">Masculino</option>
                   <option value="FEMALE">Femenino</option>
@@ -195,7 +195,7 @@ export function RegisterPage() {
               </div>
 
               <div>
-                <label htmlFor="cityId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label htmlFor="cityId" className="block text-sm font-medium text-gray-700 mb-1">
                   ID de Ciudad
                 </label>
                 <Input
@@ -210,7 +210,7 @@ export function RegisterPage() {
             </div>
 
             <div>
-              <label htmlFor="address" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
                 Dirección
               </label>
               <Input
@@ -225,13 +225,13 @@ export function RegisterPage() {
 
             {/* Campos específicos por rol */}
             {selectedRole === 'patient' && (
-              <div className="pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-700">
-                <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-gray-100 mb-3 sm:mb-4">
+              <div className="pt-4 sm:pt-6 border-t border-gray-200">
+                <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">
                   Información del Paciente
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <div>
-                    <label htmlFor="bloodType" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="bloodType" className="block text-sm font-medium text-gray-700 mb-1">
                       Tipo de Sangre
                     </label>
                     <select
@@ -239,7 +239,7 @@ export function RegisterPage() {
                       name="bloodType"
                       value={formData.bloodType || ''}
                       onChange={handleInputChange}
-                      className="w-full h-10 sm:h-11 px-3 sm:px-4 text-sm sm:text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-200"
+                      className="w-full h-10 sm:h-11 px-3 sm:px-4 text-sm sm:text-base rounded-lg border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                     >
                       <option value="">Seleccionar tipo de sangre</option>
                       <option value="A+">A+</option>

@@ -55,86 +55,86 @@ export function DashboardPage() {
   };
 
   return (
-    <div className="min-h-full bg-white dark:bg-gray-900 transition-colors duration-300">
+    <div className="min-h-full bg-white transition-colors duration-300">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Header de bienvenida */}
         <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
             {getGreeting()}, {getUserRole()}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-gray-600 mt-1">
             Bienvenido a tu panel de control médico
           </p>
         </div>
 
         {/* Estadísticas rápidas */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="p-6 shadow-lg border-0 bg-white dark:bg-gray-800">
+          <Card className="p-6 shadow-lg border-0 bg-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                <p className="text-sm font-medium text-gray-600">
                   {isDoctor ? 'Consultas Pendientes' : 'Citas Próximas'}
                 </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="text-2xl font-bold text-gray-900">
                   {upcomingAppointments.length}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                 </svg>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6 shadow-lg border-0 bg-white dark:bg-gray-800">
+          <Card className="p-6 shadow-lg border-0 bg-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                <p className="text-sm font-medium text-gray-600">
                   {isDoctor ? 'Consultas Completadas' : 'Citas Completadas'}
                 </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="text-2xl font-bold text-gray-900">
                   {completedAppointments.length}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6 shadow-lg border-0 bg-white dark:bg-gray-800">
+          <Card className="p-6 shadow-lg border-0 bg-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                <p className="text-sm font-medium text-gray-600">
                   Total de Citas
                 </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                <p className="text-2xl font-bold text-gray-900">
                   {appointments?.length || 0}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6 shadow-lg border-0 bg-white dark:bg-gray-800">
+          <Card className="p-6 shadow-lg border-0 bg-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                <p className="text-sm font-medium text-gray-600">
                   Estado
                 </p>
-                <p className="text-lg font-semibold text-green-600 dark:text-green-400">
+                <p className="text-lg font-semibold text-green-600">
                   Activo
                 </p>
               </div>
-              <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-gray-600 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                 </svg>
               </div>
@@ -145,9 +145,9 @@ export function DashboardPage() {
         {/* Sección de acciones rápidas */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Próximas citas */}
-          <Card className="p-6 shadow-lg border-0 bg-white dark:bg-gray-800">
+          <Card className="p-6 shadow-lg border-0 bg-white">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-gray-900">
                 {isDoctor ? 'Próximas Consultas' : 'Próximas Citas'}
               </h3>
               <Link to="/appointments">
@@ -160,19 +160,19 @@ export function DashboardPage() {
             {upcomingAppointments.length > 0 ? (
               <div className="space-y-3">
                 {upcomingAppointments.slice(0, 3).map((appointment) => (
-                  <div key={appointment.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div key={appointment.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center gap-3">
                       <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                       <div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        <p className="text-sm font-medium text-gray-900">
                           Cita #{appointment.id.substring(0, 8)}...
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                        <p className="text-xs text-gray-500">
                           {formatDate(appointment.scheduledDate)}
                         </p>
                       </div>
                     </div>
-                    <span className="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/20 px-2 py-1 rounded-full">
+                    <span className="text-xs font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
                       {appointment.status === 'scheduled' ? 'Programada' : 'Confirmada'}
                     </span>
                   </div>
@@ -183,7 +183,7 @@ export function DashboardPage() {
                 <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                 </svg>
-                <p className="text-gray-500 dark:text-gray-400">
+                <p className="text-gray-500">
                   No tienes citas próximas
                 </p>
               </div>
@@ -191,8 +191,8 @@ export function DashboardPage() {
           </Card>
 
           {/* Acciones rápidas */}
-          <Card className="p-6 shadow-lg border-0 bg-white dark:bg-gray-800">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          <Card className="p-6 shadow-lg border-0 bg-white">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Acciones Rápidas
             </h3>
             
