@@ -12,20 +12,20 @@
 
 // Configuración de la URL base según el entorno
 const getBaseURL = (): string => {
-  // En desarrollo, usar variables de entorno o fallback a localhost
+  // En desarrollo, usar variables de entorno o proxy
   const envBaseURL = import.meta.env.VITE_API_BASE_URL;
   
   if (envBaseURL) {
     return `${envBaseURL}/api`;
   }
   
-  // Fallbacks según el entorno
+  // En desarrollo, usar proxy de Vite
   if (import.meta.env.DEV) {
-    return '/api'; // Proxy en desarrollo
+    return '/api'; // El proxy de Vite redirigirá a https://vitalcare-back.onrender.com
   }
   
   // En producción, usar la URL del backend desplegado
-  return 'https://vitalcare-back.onrender.com/api'; // URL de producción actualizada
+  return 'https://vitalcare-back.onrender.com/api';
 };
 
 const API_BASE_URL = getBaseURL();

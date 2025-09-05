@@ -8,6 +8,8 @@
 html {
   /* Tamaño de fuente base que será controlado por accesibilidad */
   font-size: 16px;
+  /* variable para escalar fuentes desde el contexto de accesibilidad */
+  --vc-font-scale: 1;
 }
 
 body {
@@ -21,6 +23,17 @@ body {
   background-color: #ffffff;
   color: #1f2937;
   color-scheme: light;
+}
+
+/* Dark theme variables (applied when .dark is set on root) */
+:root.dark {
+  --vc-bg: #0f172a; /* slate-900 */
+  --vc-text: #f8fafc; /* gray-50 */
+}
+
+/* Apply font scaling via root variable */
+html {
+  font-size: calc(16px * var(--vc-font-scale));
 }
 
 /* Scrollbar personalizado */

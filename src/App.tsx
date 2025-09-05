@@ -11,6 +11,7 @@ import { AppointmentsPage } from '@/pages/appointments/AppointmentsPage';
 import { DashboardPage } from '@/pages/dashboard/DashboardPage';
 import { EnvironmentInfo } from '@/components/EnvironmentInfo';
 import { useAuth } from '@/hooks/useAuth';
+import { AccessibilityMenu } from '@/components/accessibility/AccessibilityMenu';
 
 // Configuración del Query Client
 const queryClient = new QueryClient({
@@ -121,6 +122,7 @@ export default function App() {
           <div className="App min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
             <AppRoutes />
             <EnvironmentInfo />
+            <AccessibilityMenu />
           </div>
         </Router>
       </QueryClientProvider>

@@ -18,6 +18,8 @@ export function MainLayout({ children }: MainLayoutProps) {
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
+  {/* accessibility menu removed from layout — now rendered globally in App */}
+
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden lg:ml-0">
         {/* Top bar for mobile */}

@@ -257,13 +257,13 @@ export function RegisterPage() {
             )}
 
             {selectedRole === 'doctor' && (
-              <div className="pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-700">
-                <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-gray-100 mb-3 sm:mb-4">
+              <div className="pt-4 sm:pt-6 border-t border-gray-200">
+                <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">
                   Información del Doctor
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <div>
-                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
                       Apellidos *
                     </label>
                     <Input
@@ -277,7 +277,7 @@ export function RegisterPage() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
                       Apellidos *
                     </label>
                     <Input
@@ -291,7 +291,7 @@ export function RegisterPage() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="licenseNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="licenseNumber" className="block text-sm font-medium text-gray-700 mb-1">
                       Licencia Médica *
                     </label>
                     <Input
@@ -305,7 +305,7 @@ export function RegisterPage() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="specialty" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="specialty" className="block text-sm font-medium text-gray-700 mb-1">
                       Especialidad *
                     </label>
                     <Input
@@ -323,13 +323,13 @@ export function RegisterPage() {
             )}
 
             {selectedRole === 'staff' && (
-              <div className="pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-700">
-                <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-gray-100 mb-3 sm:mb-4">
+              <div className="pt-4 sm:pt-6 border-t border-gray-200">
+                <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">
                   Información del Personal
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <div>
-                    <label htmlFor="department" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="department" className="block text-sm font-medium text-gray-700 mb-1">
                       Departamento
                     </label>
                     <Input
@@ -342,7 +342,7 @@ export function RegisterPage() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="position" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label htmlFor="position" className="block text-sm font-medium text-gray-700 mb-1">
                       Cargo
                     </label>
                     <Input

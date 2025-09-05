@@ -4,7 +4,8 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  // Tema solo claro por defecto. Eliminado soporte para darkMode.
+  // Activar soporte para dark mode mediante la clase `dark`.
+  darkMode: 'class',
   theme: {
     extend: {},
   },
