@@ -6,9 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { authService } from '@/services/auth';
 import type { 
   User, 
-  LoginRequest, 
-  RegistrationRequest, 
-  JwtResponse 
+  LoginRequest
 } from '@/types/api';
 
 export function useAuth() {

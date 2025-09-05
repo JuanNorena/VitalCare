@@ -2,7 +2,7 @@
  * Contexto de accesibilidad para gestionar modo oscuro y tamaño de fuente
  */
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useLayoutEffect, useState, ReactNode } from 'react';
 
 interface AccessibilityContextType {
   isDarkMode: boolean;
@@ -25,35 +25,51 @@ interface AccessibilityProviderProps {
 }
 
 export function AccessibilityProvider({ children }: AccessibilityProviderProps) {
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [fontSize, setFontSize] = useState(DEFAULT_FONT_SIZE);
-
-  // Cargar configuraciones guardadas al inicializar
-  useEffect(() => {
-    const savedDarkMode = localStorage.getItem('accessibility-darkMode');
-    const savedFontSize = localStorage.getItem('accessibility-fontSize');
-
-    if (savedDarkMode) {
-      setIsDarkMode(savedDarkMode === 'true');
+  // Estado inicial sincronizado con localStorage para evitar parpadeo; default modo claro
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('accessibility-darkMode');
+      // Solo retornar true si explícitamente está guardado como 'true'
+      return saved === 'true';
+    } catch {
+      // Si localStorage no está disponible (SSR), default a modo claro
+      return false;
     }
-
-    if (savedFontSize) {
-      const parsedFontSize = parseInt(savedFontSize, 10);
-      if (parsedFontSize >= MIN_FONT_SIZE && parsedFontSize <= MAX_FONT_SIZE) {
-        setFontSize(parsedFontSize);
-      }
+  });
+  
+  const [fontSize, setFontSize] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('accessibility-fontSize');
+      const n = saved ? parseInt(saved, 10) : DEFAULT_FONT_SIZE;
+      return Number.isFinite(n) ? Math.min(Math.max(n, MIN_FONT_SIZE), MAX_FONT_SIZE) : DEFAULT_FONT_SIZE;
+    } catch {
+      return DEFAULT_FONT_SIZE;
     }
-  }, []);
+  });
 
-  // Aplicar tema oscuro
-  useEffect(() => {
+  // Aplicar tema inmediatamente (antes de pintar) para que por defecto sea claro
+  useLayoutEffect(() => {
     const root = document.documentElement;
+    const body = document.body;
+    
     if (isDarkMode) {
       root.classList.add('dark');
+      body.classList.add('dark');
+      console.log('🌙 Modo oscuro activado');
     } else {
       root.classList.remove('dark');
+      body.classList.remove('dark');
+      console.log('☀️ Modo claro activado');
     }
-    localStorage.setItem('accessibility-darkMode', isDarkMode.toString());
+  }, [isDarkMode]);
+
+  // Persistir preferencia
+  useEffect(() => {
+    try {
+      localStorage.setItem('accessibility-darkMode', isDarkMode.toString());
+    } catch {
+      console.warn('No se pudo guardar la preferencia de tema');
+    }
   }, [isDarkMode]);
 
   // Aplicar tamaño de fuente

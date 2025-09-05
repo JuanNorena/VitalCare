@@ -4,86 +4,80 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { appointmentService } from '@/services/appointments';
-import type { 
-  Appointment, 
-  CreateAppointmentRequest 
-} from '@/types/api';
+import type { Appointment } from '@/types/api';
 
-export function useAppointments() {
+// Hooks de lectura (top-level) — evitan advertencias del plugin de Hooks
+export const usePatientAppointments = (patientId: string) => {
+  return useQuery<Appointment[]>({
+    queryKey: ['appointments', 'patient', patientId],
+    queryFn: () => appointmentService.getAppointmentsByPatient(patientId),
+    enabled: !!patientId,
+  });
+};
+
+export const useDoctorAppointments = (doctorId: string) => {
+  return useQuery<Appointment[]>({
+    queryKey: ['appointments', 'doctor', doctorId],
+    queryFn: () => appointmentService.getAppointmentsByDoctor(doctorId),
+    enabled: !!doctorId,
+  });
+};
+
+// Hooks de escritura (mutations) — también top-level
+export const useCreateAppointment = () => {
   const queryClient = useQueryClient();
-
-  // Hook para obtener citas por paciente
-  const usePatientAppointments = (patientId: string) => {
-    return useQuery<Appointment[]>({
-      queryKey: ['appointments', 'patient', patientId],
-      queryFn: () => appointmentService.getAppointmentsByPatient(patientId),
-      enabled: !!patientId,
-    });
-  };
-
-  // Hook para obtener citas por doctor
-  const useDoctorAppointments = (doctorId: string) => {
-    return useQuery<Appointment[]>({
-      queryKey: ['appointments', 'doctor', doctorId],
-      queryFn: () => appointmentService.getAppointmentsByDoctor(doctorId),
-      enabled: !!doctorId,
-    });
-  };
-
-  // Mutation para crear cita
-  const createAppointmentMutation = useMutation({
+  return useMutation({
     mutationFn: appointmentService.createAppointment,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appointments'] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['appointments'] }),
   });
+};
 
-  // Mutation para cancelar cita
-  const cancelAppointmentMutation = useMutation({
+export const useCancelAppointment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
     mutationFn: appointmentService.cancelAppointment,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appointments'] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['appointments'] }),
   });
+};
 
-  // Mutation para reprogramar cita
-  const rescheduleAppointmentMutation = useMutation({
+export const useRescheduleAppointment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<Appointment> }) =>
       appointmentService.rescheduleAppointment(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appointments'] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['appointments'] }),
   });
+};
 
-  // Mutation para confirmar asistencia
-  const confirmAttendanceMutation = useMutation({
+export const useConfirmAttendance = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
     mutationFn: appointmentService.confirmAttendance,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appointments'] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['appointments'] }),
   });
+};
+
+// API agrupada para compatibilidad con código existente
+export function useAppointments() {
+  const create = useCreateAppointment();
+  const cancel = useCancelAppointment();
+  const reschedule = useRescheduleAppointment();
+  const confirm = useConfirmAttendance();
 
   return {
-    // Hooks secundarios
     usePatientAppointments,
     useDoctorAppointments,
-
-    // Acciones
-    createAppointment: createAppointmentMutation.mutateAsync,
-    cancelAppointment: cancelAppointmentMutation.mutateAsync,
-    rescheduleAppointment: rescheduleAppointmentMutation.mutateAsync,
-    confirmAttendance: confirmAttendanceMutation.mutateAsync,
-
-    // Estados de carga
-    isCreating: createAppointmentMutation.isPending,
-    isCancelling: cancelAppointmentMutation.isPending,
-    isRescheduling: rescheduleAppointmentMutation.isPending,
-    isConfirming: confirmAttendanceMutation.isPending,
-
-    // Errores
-    createError: createAppointmentMutation.error,
-    cancelError: cancelAppointmentMutation.error,
-    rescheduleError: rescheduleAppointmentMutation.error,
-    confirmError: confirmAttendanceMutation.error,
+    createAppointment: create.mutateAsync,
+    cancelAppointment: cancel.mutateAsync,
+    rescheduleAppointment: reschedule.mutateAsync,
+    confirmAttendance: confirm.mutateAsync,
+    isCreating: create.isPending,
+    isCancelling: cancel.isPending,
+    isRescheduling: reschedule.isPending,
+    isConfirming: confirm.isPending,
+    createError: create.error,
+    cancelError: cancel.error,
+    rescheduleError: reschedule.error,
+    confirmError: confirm.error,
   };
 }

@@ -1,5 +1,13 @@
 /**
  * Cliente HTTP para comunicación con el backend Java
+ * 
+ * Backend en Render.com con IPs estáticas de salida:
+ * - 44.226.145.213
+ * - 54.187.200.255
+ * - 34.213.214.55
+ * - 35.164.95.156
+ * - 44.230.95.183
+ * - 44.229.200.200
  */
 
 // Configuración de la URL base según el entorno
