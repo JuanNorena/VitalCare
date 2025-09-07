@@ -17,11 +17,22 @@ export const authService = {
     return uuidRegex.test(str);
   },
 
-  // Función auxiliar para validar fecha
+  // Función auxiliar para validar fecha ISO (YYYY-MM-DD)
   isValidDate: (dateStr: string): boolean => {
     if (!dateStr) return false;
     const date = new Date(dateStr);
     return date instanceof Date && !isNaN(date.getTime()) && /^\d{4}-\d{2}-\d{2}$/.test(dateStr);
+  },
+
+  // Función auxiliar para convertir string UUID a formato aceptado por backend
+  formatUUID: (uuidStr: string): string => {
+    return uuidStr.trim();
+  },
+
+  // Función auxiliar para validar email
+  isValidEmail: (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   },
 
   // Login de usuario (POST /api/auth/login)
@@ -42,126 +53,170 @@ export const authService = {
 
   // Registro específico de paciente (POST /api/register/patient)
   registerPatient: async (data: RegistrationRequest): Promise<User> => {
-    // Validar campos básicos requeridos
-    if (!data.email) {
-      throw new Error('Email es requerido');
+    console.log('=== VALIDACIÓN REGISTRO PACIENTE ===');
+    console.log('Datos recibidos:', data);
+
+    // 1. VALIDAR CAMPOS BÁSICOS REQUERIDOS
+    if (!data.email || !authService.isValidEmail(data.email)) {
+      throw new Error('Email válido es requerido');
     }
-    if (!data.password) {
-      throw new Error('Contraseña es requerida');
+    if (!data.password || data.password.length < 6) {
+      throw new Error('Contraseña debe tener al menos 6 caracteres');
     }
 
+    // 2. VALIDAR CAMPOS ESPECÍFICOS DE PACIENTE
+    
     // Validar UUID de ciudad si se proporciona
-    if (data.cityId && !authService.isValidUUID(data.cityId)) {
-      throw new Error('Debe seleccionar una ciudad válida');
+    if (data.cityId) {
+      if (!authService.isValidUUID(data.cityId)) {
+        throw new Error('Debe seleccionar una ciudad válida');
+      }
     }
 
     // Validar fecha de nacimiento si se proporciona
-    if (data.birthDate && !authService.isValidDate(data.birthDate)) {
-      throw new Error('Fecha de nacimiento debe tener formato YYYY-MM-DD');
+    if (data.birthDate) {
+      if (!authService.isValidDate(data.birthDate)) {
+        throw new Error('Fecha de nacimiento debe tener formato YYYY-MM-DD');
+      }
     }
 
-    // Validar y transformar datos específicos para paciente
-    const transformedData = {
+    // Validar género si se proporciona
+    if (data.gender && !['MALE', 'FEMALE', 'OTHER'].includes(data.gender)) {
+      throw new Error('Género debe ser MALE, FEMALE o OTHER');
+    }
+
+    // Validar tipo de sangre si se proporciona
+    const validBloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+    if (data.bloodType && !validBloodTypes.includes(data.bloodType)) {
+      throw new Error('Tipo de sangre debe ser uno de: ' + validBloodTypes.join(', '));
+    }
+
+    // 3. TRANSFORMAR DATOS SEGÚN BACKEND RegistrationRequest
+    const transformedData: any = {
+      // Campos básicos (requeridos)
       email: data.email.trim(),
       password: data.password,
-      // Campos específicos de paciente
+      
+      // Campos específicos de paciente (opcionales pero validados)
+      ...(data.gender && { gender: data.gender }),
+      ...(data.birthDate && { birthDate: data.birthDate }), // Backend espera LocalDate
+      ...(data.bloodType && { bloodType: data.bloodType }),
       ...(data.phone && { phone: data.phone.trim() }),
       ...(data.address && { address: data.address.trim() }),
-      ...(data.birthDate && { birthDate: data.birthDate }),
-      ...(data.gender && { gender: data.gender }),
-      ...(data.cityId && { cityId: data.cityId }),
-      ...(data.bloodType && { bloodType: data.bloodType }),
+      ...(data.cityId && { cityId: authService.formatUUID(data.cityId) }), // Backend espera UUID
     };
     
-    console.log('Enviando datos de registro paciente:', transformedData);
+    console.log('Datos transformados para backend:', transformedData);
+    console.log('=== ENVIANDO A /register/patient ===');
+    
     return apiClient.post<User>('/register/patient', transformedData);
   },
 
   // Registro específico de doctor (POST /api/register/doctor)
   registerDoctor: async (data: RegistrationRequest): Promise<User> => {
-    // Validar campos básicos requeridos
-    if (!data.email) {
-      throw new Error('Email es requerido');
+    console.log('=== VALIDACIÓN REGISTRO DOCTOR ===');
+    console.log('Datos recibidos:', data);
+
+    // 1. VALIDAR CAMPOS BÁSICOS REQUERIDOS
+    if (!data.email || !authService.isValidEmail(data.email)) {
+      throw new Error('Email válido es requerido');
     }
-    if (!data.password) {
-      throw new Error('Contraseña es requerida');
+    if (!data.password || data.password.length < 6) {
+      throw new Error('Contraseña debe tener al menos 6 caracteres');
     }
     
-    // Validar campos requeridos para doctor
-    if (!data.lastName) {
+    // 2. VALIDAR CAMPOS ESPECÍFICOS DE DOCTOR (REQUERIDOS)
+    if (!data.lastName || data.lastName.trim().length === 0) {
       throw new Error('Apellidos son requeridos para doctores');
     }
-    if (!data.licenseNumber) {
+    if (!data.licenseNumber || data.licenseNumber.trim().length === 0) {
       throw new Error('Número de licencia médica es requerido para doctores');
     }
-    if (!data.specialty) {
+    if (!data.specialty || data.specialty.trim().length === 0) {
       throw new Error('Especialidad es requerida para doctores');
     }
 
-    // Validar UUID de ciudad si se proporciona
+    // 3. VALIDAR CAMPOS OPCIONALES
     if (data.cityId && !authService.isValidUUID(data.cityId)) {
       throw new Error('Debe seleccionar una ciudad válida');
     }
-
-    // Validar fecha de nacimiento si se proporciona
     if (data.birthDate && !authService.isValidDate(data.birthDate)) {
       throw new Error('Fecha de nacimiento debe tener formato YYYY-MM-DD');
     }
+    if (data.gender && !['MALE', 'FEMALE', 'OTHER'].includes(data.gender)) {
+      throw new Error('Género debe ser MALE, FEMALE o OTHER');
+    }
 
-    const transformedData = {
+    // 4. TRANSFORMAR DATOS SEGÚN BACKEND RegistrationRequest
+    const transformedData: any = {
+      // Campos básicos (requeridos)
       email: data.email.trim(),
       password: data.password,
-      // Campos básicos opcionales
-      ...(data.phone && { phone: data.phone.trim() }),
-      ...(data.address && { address: data.address.trim() }),
-      ...(data.birthDate && { birthDate: data.birthDate }),
-      ...(data.gender && { gender: data.gender }),
-      ...(data.cityId && { cityId: data.cityId }),
+      
       // Campos específicos de doctor (requeridos)
       lastName: data.lastName.trim(),
       licenseNumber: data.licenseNumber.trim(),
       specialty: data.specialty.trim(),
+      
+      // Campos opcionales
+      ...(data.phone && { phone: data.phone.trim() }),
+      ...(data.address && { address: data.address.trim() }),
+      ...(data.birthDate && { birthDate: data.birthDate }),
+      ...(data.gender && { gender: data.gender }),
+      ...(data.cityId && { cityId: authService.formatUUID(data.cityId) }),
     };
     
-    console.log('Enviando datos de registro doctor:', transformedData);
+    console.log('Datos transformados para backend:', transformedData);
+    console.log('=== ENVIANDO A /register/doctor ===');
+    
     return apiClient.post<User>('/register/doctor', transformedData);
   },
 
   // Registro específico de staff (POST /api/register/staff)
   registerStaff: async (data: RegistrationRequest): Promise<User> => {
-    // Validar campos básicos requeridos
-    if (!data.email) {
-      throw new Error('Email es requerido');
+    console.log('=== VALIDACIÓN REGISTRO STAFF ===');
+    console.log('Datos recibidos:', data);
+
+    // 1. VALIDAR CAMPOS BÁSICOS REQUERIDOS
+    if (!data.email || !authService.isValidEmail(data.email)) {
+      throw new Error('Email válido es requerido');
     }
-    if (!data.password) {
-      throw new Error('Contraseña es requerida');
+    if (!data.password || data.password.length < 6) {
+      throw new Error('Contraseña debe tener al menos 6 caracteres');
     }
 
-    // Validar UUID de ciudad si se proporciona
+    // 2. VALIDAR CAMPOS OPCIONALES
     if (data.cityId && !authService.isValidUUID(data.cityId)) {
       throw new Error('Debe seleccionar una ciudad válida');
     }
-
-    // Validar fecha de nacimiento si se proporciona
     if (data.birthDate && !authService.isValidDate(data.birthDate)) {
       throw new Error('Fecha de nacimiento debe tener formato YYYY-MM-DD');
     }
+    if (data.gender && !['MALE', 'FEMALE', 'OTHER'].includes(data.gender)) {
+      throw new Error('Género debe ser MALE, FEMALE o OTHER');
+    }
 
-    const transformedData = {
+    // 3. TRANSFORMAR DATOS SEGÚN BACKEND RegistrationRequest
+    const transformedData: any = {
+      // Campos básicos (requeridos)
       email: data.email.trim(),
       password: data.password,
-      // Campos básicos opcionales
+      
+      // Campos opcionales
       ...(data.phone && { phone: data.phone.trim() }),
       ...(data.address && { address: data.address.trim() }),
       ...(data.birthDate && { birthDate: data.birthDate }),
       ...(data.gender && { gender: data.gender }),
-      ...(data.cityId && { cityId: data.cityId }),
+      ...(data.cityId && { cityId: authService.formatUUID(data.cityId) }),
+      
       // Campos específicos de staff (opcionales)
       ...(data.department && { department: data.department.trim() }),
       ...(data.position && { position: data.position.trim() }),
     };
     
-    console.log('Enviando datos de registro staff:', transformedData);
+    console.log('Datos transformados para backend:', transformedData);
+    console.log('=== ENVIANDO A /register/staff ===');
+    
     return apiClient.post<User>('/register/staff', transformedData);
   },
 

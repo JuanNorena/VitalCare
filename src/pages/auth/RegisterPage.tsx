@@ -69,10 +69,84 @@ export function RegisterPage() {
     }));
   };
 
+  // Función para validar formulario antes de enviar
+  const validateForm = (): string | null => {
+    // Validaciones básicas para todos los roles
+    if (!formData.email) {
+      return 'Email es requerido';
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      return 'Email debe tener un formato válido';
+    }
+    if (!formData.password) {
+      return 'Contraseña es requerida';
+    }
+    if (formData.password.length < 6) {
+      return 'Contraseña debe tener al menos 6 caracteres';
+    }
+
+    // Validaciones específicas por rol
+    switch (selectedRole) {
+      case 'doctor':
+        if (!formData.lastName?.trim()) {
+          return 'Apellidos son requeridos para doctores';
+        }
+        if (!formData.licenseNumber?.trim()) {
+          return 'Número de licencia médica es requerido para doctores';
+        }
+        if (!formData.specialty?.trim()) {
+          return 'Especialidad es requerida para doctores';
+        }
+        break;
+      
+      case 'patient':
+        // Para pacientes, validar tipo de sangre si se proporciona
+        if (formData.bloodType) {
+          const validBloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+          if (!validBloodTypes.includes(formData.bloodType)) {
+            return 'Tipo de sangre debe ser válido';
+          }
+        }
+        break;
+      
+      case 'staff':
+        // Para staff no hay campos obligatorios adicionales
+        break;
+    }
+
+    // Validaciones opcionales
+    if (formData.birthDate) {
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (!dateRegex.test(formData.birthDate)) {
+        return 'Fecha de nacimiento debe tener formato YYYY-MM-DD';
+      }
+      const date = new Date(formData.birthDate);
+      if (isNaN(date.getTime())) {
+        return 'Fecha de nacimiento debe ser válida';
+      }
+    }
+
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('=== INICIANDO PROCESO DE REGISTRO ===');
+    console.log('Rol seleccionado:', selectedRole);
+    console.log('Datos del formulario:', formData);
+    
+    // 1. VALIDAR FORMULARIO DEL LADO DEL CLIENTE
+    const validationError = validateForm();
+    if (validationError) {
+      console.error('Error de validación:', validationError);
+      showError('Error de validación', validationError);
+      return;
+    }
+    
     try {
+      console.log('✅ Validaciones del cliente pasadas, enviando al servicio...');
+      
       let registerFunction;
       
       switch (selectedRole) {
@@ -86,10 +160,14 @@ export function RegisterPage() {
           registerFunction = registerStaff;
           break;
         default:
+          showError('Error', 'Debe seleccionar un tipo de usuario válido');
           return;
       }
 
-      await registerFunction(formData);
+      console.log(`Ejecutando registro para ${selectedRole}...`);
+      const result = await registerFunction(formData);
+      console.log('Registro exitoso:', result);
+      
       showSuccess(
         '¡Registro exitoso!',
         'Tu cuenta ha sido creada correctamente. Ya puedes iniciar sesión.'
@@ -99,10 +177,14 @@ export function RegisterPage() {
       });
     } catch (error) {
       console.error('Error al registrarse:', error);
-      showError(
-        'Error en el registro',
-        'Ocurrió un problema al crear tu cuenta. Por favor intenta nuevamente.'
-      );
+      
+      let errorMessage = 'Ocurrió un problema al crear tu cuenta. Por favor intenta nuevamente.';
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      showError('Error en el registro', errorMessage);
     }
   };
 
@@ -181,7 +263,7 @@ export function RegisterPage() {
                   required
                   value={formData.password}
                   onChange={handleInputChange}
-                  placeholder="Mínimo 8 caracteres"
+                  placeholder="Mínimo 6 caracteres"
                 />
               </div>
 
@@ -246,7 +328,7 @@ export function RegisterPage() {
                   </option>
                   {cities.map((city) => (
                     <option key={city.id} value={city.id}>
-                      {city.name} - {city.departmentName}
+                      {city.name}
                     </option>
                   ))}
                 </select>
