@@ -11,7 +11,7 @@ export interface User {
   role: string; // Nombre del rol
 }
 
-// Petición de login (según AuthenticationController)
+// Petición de login (según UserDTO del backend para login)
 export interface LoginRequest {
   email: string;
   password: string;
@@ -24,12 +24,12 @@ export interface RegistrationRequest {
   password: string;
   
   // Campos específicos para pacientes (PatientProfile)
-  gender?: 'MALE' | 'FEMALE' | 'OTHER';
+  gender?: 'MALE' | 'FEMALE' | 'OTHER'; // Debe coincidir con enum Gender del backend
   birthDate?: string; // LocalDate as ISO string (YYYY-MM-DD)
   bloodType?: string;
   phone?: string;
   address?: string;
-  cityId?: string; // UUID as string
+  cityId?: string; // UUID as string - debe ser UUID válido
   
   // Campos específicos para doctores (DoctorProfile)
   licenseNumber?: string;
@@ -52,17 +52,18 @@ export interface Appointment {
   id: string;
   patientId: string;
   doctorId: string;
-  siteId: string; // El backend usa siteId, no serviceId
+  siteId: string; // El backend usa siteId
   scheduledDate: string; // LocalDateTime as ISO string
   status: string;
 }
 
-// Petición para crear cita
+// Petición para crear cita (según AppointmentDTO del backend)
 export interface CreateAppointmentRequest {
   patientId: string;
   doctorId: string;
   siteId: string;
   scheduledDate: string; // LocalDateTime as ISO string
+  status?: string; // Opcional, se puede setear por defecto en backend
 }
 
 // Datos para crear nueva cita (más completo)

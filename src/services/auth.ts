@@ -29,17 +29,45 @@ export const authService = {
 
   // Registro específico de paciente (POST /api/register/patient)
   registerPatient: async (data: RegistrationRequest): Promise<User> => {
-    return apiClient.post<User>('/register/patient', data);
+    // Transformar datos para compatibilidad con backend Java
+    const transformedData = {
+      ...data,
+      // Convertir cityId de string a UUID si existe
+      cityId: data.cityId ? data.cityId : null,
+      // Asegurar formato correcto de fecha
+      birthDate: data.birthDate || null,
+      // Asegurar que gender sea el enum correcto
+      gender: data.gender || null
+    };
+    
+    console.log('Enviando datos de registro paciente:', transformedData);
+    return apiClient.post<User>('/register/patient', transformedData);
   },
 
   // Registro específico de doctor (POST /api/register/doctor)
   registerDoctor: async (data: RegistrationRequest): Promise<User> => {
-    return apiClient.post<User>('/register/doctor', data);
+    const transformedData = {
+      ...data,
+      cityId: data.cityId ? data.cityId : null,
+      birthDate: data.birthDate || null,
+      gender: data.gender || null
+    };
+    
+    console.log('Enviando datos de registro doctor:', transformedData);
+    return apiClient.post<User>('/register/doctor', transformedData);
   },
 
   // Registro específico de staff (POST /api/register/staff)
   registerStaff: async (data: RegistrationRequest): Promise<User> => {
-    return apiClient.post<User>('/register/staff', data);
+    const transformedData = {
+      ...data,
+      cityId: data.cityId ? data.cityId : null,
+      birthDate: data.birthDate || null,
+      gender: data.gender || null
+    };
+    
+    console.log('Enviando datos de registro staff:', transformedData);
+    return apiClient.post<User>('/register/staff', transformedData);
   },
 
   // Refrescar token (POST /api/auth/refresh)

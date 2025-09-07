@@ -42,13 +42,24 @@ const getAuthHeaders = (): HeadersInit => {
 // Función para manejar errores de la API
 const handleApiError = async (response: Response): Promise<never> => {
   let errorMessage = 'Error desconocido';
+  let errorDetails = {};
   
   try {
     const errorData = await response.json();
     errorMessage = errorData.message || errorData.error || errorMessage;
+    errorDetails = errorData;
   } catch {
     errorMessage = `HTTP ${response.status}: ${response.statusText}`;
   }
+  
+  // Log detallado para debugging
+  console.error('API Error:', {
+    status: response.status,
+    statusText: response.statusText,
+    url: response.url,
+    errorDetails,
+    headers: Object.fromEntries(response.headers.entries())
+  });
   
   throw new Error(errorMessage);
 };
@@ -69,10 +80,23 @@ export const apiClient = {
   },
 
   post: async <T>(endpoint: string, data?: any): Promise<T> => {
+    console.log('API POST Request:', {
+      endpoint: `${API_BASE_URL}${endpoint}`,
+      data,
+      headers: getAuthHeaders()
+    });
+    
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: data ? JSON.stringify(data) : undefined,
+    });
+
+    console.log('API POST Response:', {
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok,
+      url: response.url
     });
 
     if (!response.ok) {

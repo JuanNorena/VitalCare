@@ -12,7 +12,20 @@ import type {
 export const appointmentService = {
   // Crear nueva cita (POST /api/appointments/create)
   createAppointment: async (data: CreateAppointmentRequest): Promise<Appointment> => {
-    return apiClient.post<Appointment>('/appointments/create', data);
+    const transformedData = {
+      ...data,
+      // Asegurar que los UUIDs sean válidos strings
+      patientId: data.patientId,
+      doctorId: data.doctorId,
+      siteId: data.siteId,
+      // Asegurar formato ISO para fecha
+      scheduledDate: data.scheduledDate,
+      // Status por defecto si no se proporciona
+      status: data.status || 'SCHEDULED'
+    };
+    
+    console.log('Enviando datos de nueva cita:', transformedData);
+    return apiClient.post<Appointment>('/appointments/create', transformedData);
   },
 
   // Obtener citas por paciente (GET /api/appointments/patient/{patientId})
