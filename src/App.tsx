@@ -12,6 +12,7 @@ import { DashboardPage } from '@/pages/dashboard/DashboardPage';
 import { EnvironmentInfo } from '@/components/EnvironmentInfo';
 import { useAuth } from '@/hooks/useAuth';
 import { AccessibilityMenu } from '@/components/accessibility/AccessibilityMenu';
+import { ToastProvider } from '@/contexts/ToastContext';
 
 // Configuración del Query Client
 const queryClient = new QueryClient({
@@ -117,7 +118,8 @@ function AppRoutes() {
 // Componente principal de la aplicación
 export default function App() {
   return (
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <ToastProvider>
         <Router>
           <div className="App min-h-screen bg-[var(--vc-bg)] text-[var(--vc-text)] transition-colors duration-300">
             <AppRoutes />
@@ -125,6 +127,7 @@ export default function App() {
             <AccessibilityMenu />
           </div>
         </Router>
-      </QueryClientProvider>
+      </ToastProvider>
+    </QueryClientProvider>
   );
 }

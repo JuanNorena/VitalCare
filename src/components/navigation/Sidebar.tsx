@@ -6,6 +6,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/utils/cn';
+import { useToast } from '@/contexts/ToastContext';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ interface SidebarProps {
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const location = useLocation();
   const { user, logout } = useAuth();
+  const { showError, showSuccess } = useToast();
 
   const isPatient = user?.role?.toLowerCase().includes('patient');
   const isDoctor = user?.role?.toLowerCase().includes('doctor');
@@ -23,9 +25,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const handleLogout = async () => {
     try {
       await logout();
+      showSuccess('Sesión cerrada', 'Has cerrado sesión correctamente');
       onClose();
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
+      showError('Error al cerrar sesión', 'Ocurrió un problema al cerrar tu sesión');
     }
   };
 

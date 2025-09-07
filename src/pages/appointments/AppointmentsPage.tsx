@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { CreateAppointmentModal } from '@/components/appointments/CreateAppointmentModal';
 import type { CreateAppointmentRequest } from '@/types/api';
+import { useToast } from '@/contexts/ToastContext';
 
 export function AppointmentsPage() {
   const { user } = useAuth();
@@ -22,6 +23,7 @@ export function AppointmentsPage() {
     isCancelling,
     isConfirming
   } = useAppointments();
+  const { showError, showSuccess } = useToast();
 
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -40,8 +42,10 @@ export function AppointmentsPage() {
     if (window.confirm('¿Estás seguro de que quieres cancelar esta cita?')) {
       try {
         await cancelAppointment(appointmentId);
+        showSuccess('Cita cancelada', 'La cita ha sido cancelada exitosamente');
       } catch (error) {
         console.error('Error al cancelar cita:', error);
+        showError('Error al cancelar cita', 'No se pudo cancelar la cita. Inténtalo nuevamente.');
       }
     }
   };
@@ -49,8 +53,10 @@ export function AppointmentsPage() {
   const handleConfirmAttendance = async (appointmentId: string) => {
     try {
       await confirmAttendance(appointmentId);
+      showSuccess('Asistencia confirmada', 'La asistencia a la cita ha sido confirmada exitosamente');
     } catch (error) {
       console.error('Error al confirmar asistencia:', error);
+      showError('Error al confirmar asistencia', 'No se pudo confirmar la asistencia. Inténtalo nuevamente.');
     }
   };
 
