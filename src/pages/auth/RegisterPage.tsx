@@ -2,7 +2,7 @@
  * Página de registro de usuarios
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/Button';
@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import type { RegistrationRequest } from '@/types/api';
 import { useToast } from '@/contexts/ToastContext';
+import { citiesService, type City } from '@/services/cities';
 
 type UserRole = 'patient' | 'doctor' | 'staff';
 
@@ -24,6 +25,8 @@ export function RegisterPage() {
   const { showError, showSuccess } = useToast();
   
   const [selectedRole, setSelectedRole] = useState<UserRole>('patient');
+  const [cities, setCities] = useState<City[]>([]);
+  const [loadingCities, setLoadingCities] = useState(true);
   const [formData, setFormData] = useState<RegistrationRequest>({
     email: '',
     password: '',
@@ -40,6 +43,23 @@ export function RegisterPage() {
     department: '',
     position: '',
   });
+
+  // Cargar ciudades al inicializar el componente
+  useEffect(() => {
+    const loadCities = async () => {
+      try {
+        const citiesData = await citiesService.getAllCities();
+        setCities(citiesData);
+      } catch (error) {
+        console.error('Error al cargar ciudades:', error);
+        showError('Error', 'No se pudieron cargar las ciudades disponibles');
+      } finally {
+        setLoadingCities(false);
+      }
+    };
+
+    loadCities();
+  }, [showError]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -211,16 +231,25 @@ export function RegisterPage() {
 
               <div>
                 <label htmlFor="cityId" className="block text-sm font-medium text-[var(--vc-text)] mb-1">
-                  ID de Ciudad
+                  Ciudad
                 </label>
-                <Input
+                <select
                   id="cityId"
                   name="cityId"
-                  type="text"
                   value={formData.cityId || ''}
                   onChange={handleInputChange}
-                  placeholder="ID de la ciudad"
-                />
+                  disabled={loadingCities}
+                  className="w-full h-10 sm:h-11 px-3 sm:px-4 text-sm sm:text-base rounded-lg border border-[var(--vc-border)] bg-[var(--vc-input-bg)] text-[var(--vc-text)] focus:outline-none focus:ring-2 focus:ring-[var(--vc-button-primary)] focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <option value="">
+                    {loadingCities ? 'Cargando ciudades...' : 'Seleccionar ciudad'}
+                  </option>
+                  {cities.map((city) => (
+                    <option key={city.id} value={city.id}>
+                      {city.name} - {city.departmentName}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 

@@ -11,6 +11,19 @@ import type {
 } from '@/types/api';
 
 export const authService = {
+  // Función auxiliar para validar UUID
+  isValidUUID: (str: string): boolean => {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(str);
+  },
+
+  // Función auxiliar para validar fecha
+  isValidDate: (dateStr: string): boolean => {
+    if (!dateStr) return false;
+    const date = new Date(dateStr);
+    return date instanceof Date && !isNaN(date.getTime()) && /^\d{4}-\d{2}-\d{2}$/.test(dateStr);
+  },
+
   // Login de usuario (POST /api/auth/login)
   login: async (data: LoginRequest): Promise<JwtResponse> => {
     return apiClient.post<JwtResponse>('/auth/login', {
@@ -29,13 +42,31 @@ export const authService = {
 
   // Registro específico de paciente (POST /api/register/patient)
   registerPatient: async (data: RegistrationRequest): Promise<User> => {
+    // Validar campos básicos requeridos
+    if (!data.email) {
+      throw new Error('Email es requerido');
+    }
+    if (!data.password) {
+      throw new Error('Contraseña es requerida');
+    }
+
+    // Validar UUID de ciudad si se proporciona
+    if (data.cityId && !authService.isValidUUID(data.cityId)) {
+      throw new Error('Debe seleccionar una ciudad válida');
+    }
+
+    // Validar fecha de nacimiento si se proporciona
+    if (data.birthDate && !authService.isValidDate(data.birthDate)) {
+      throw new Error('Fecha de nacimiento debe tener formato YYYY-MM-DD');
+    }
+
     // Validar y transformar datos específicos para paciente
     const transformedData = {
-      email: data.email,
+      email: data.email.trim(),
       password: data.password,
       // Campos específicos de paciente
-      ...(data.phone && { phone: data.phone }),
-      ...(data.address && { address: data.address }),
+      ...(data.phone && { phone: data.phone.trim() }),
+      ...(data.address && { address: data.address.trim() }),
       ...(data.birthDate && { birthDate: data.birthDate }),
       ...(data.gender && { gender: data.gender }),
       ...(data.cityId && { cityId: data.cityId }),
@@ -48,6 +79,14 @@ export const authService = {
 
   // Registro específico de doctor (POST /api/register/doctor)
   registerDoctor: async (data: RegistrationRequest): Promise<User> => {
+    // Validar campos básicos requeridos
+    if (!data.email) {
+      throw new Error('Email es requerido');
+    }
+    if (!data.password) {
+      throw new Error('Contraseña es requerida');
+    }
+    
     // Validar campos requeridos para doctor
     if (!data.lastName) {
       throw new Error('Apellidos son requeridos para doctores');
@@ -59,19 +98,29 @@ export const authService = {
       throw new Error('Especialidad es requerida para doctores');
     }
 
+    // Validar UUID de ciudad si se proporciona
+    if (data.cityId && !authService.isValidUUID(data.cityId)) {
+      throw new Error('Debe seleccionar una ciudad válida');
+    }
+
+    // Validar fecha de nacimiento si se proporciona
+    if (data.birthDate && !authService.isValidDate(data.birthDate)) {
+      throw new Error('Fecha de nacimiento debe tener formato YYYY-MM-DD');
+    }
+
     const transformedData = {
-      email: data.email,
+      email: data.email.trim(),
       password: data.password,
       // Campos básicos opcionales
-      ...(data.phone && { phone: data.phone }),
-      ...(data.address && { address: data.address }),
+      ...(data.phone && { phone: data.phone.trim() }),
+      ...(data.address && { address: data.address.trim() }),
       ...(data.birthDate && { birthDate: data.birthDate }),
       ...(data.gender && { gender: data.gender }),
       ...(data.cityId && { cityId: data.cityId }),
       // Campos específicos de doctor (requeridos)
-      lastName: data.lastName,
-      licenseNumber: data.licenseNumber,
-      specialty: data.specialty,
+      lastName: data.lastName.trim(),
+      licenseNumber: data.licenseNumber.trim(),
+      specialty: data.specialty.trim(),
     };
     
     console.log('Enviando datos de registro doctor:', transformedData);
@@ -80,18 +129,36 @@ export const authService = {
 
   // Registro específico de staff (POST /api/register/staff)
   registerStaff: async (data: RegistrationRequest): Promise<User> => {
+    // Validar campos básicos requeridos
+    if (!data.email) {
+      throw new Error('Email es requerido');
+    }
+    if (!data.password) {
+      throw new Error('Contraseña es requerida');
+    }
+
+    // Validar UUID de ciudad si se proporciona
+    if (data.cityId && !authService.isValidUUID(data.cityId)) {
+      throw new Error('Debe seleccionar una ciudad válida');
+    }
+
+    // Validar fecha de nacimiento si se proporciona
+    if (data.birthDate && !authService.isValidDate(data.birthDate)) {
+      throw new Error('Fecha de nacimiento debe tener formato YYYY-MM-DD');
+    }
+
     const transformedData = {
-      email: data.email,
+      email: data.email.trim(),
       password: data.password,
       // Campos básicos opcionales
-      ...(data.phone && { phone: data.phone }),
-      ...(data.address && { address: data.address }),
+      ...(data.phone && { phone: data.phone.trim() }),
+      ...(data.address && { address: data.address.trim() }),
       ...(data.birthDate && { birthDate: data.birthDate }),
       ...(data.gender && { gender: data.gender }),
       ...(data.cityId && { cityId: data.cityId }),
       // Campos específicos de staff (opcionales)
-      ...(data.department && { department: data.department }),
-      ...(data.position && { position: data.position }),
+      ...(data.department && { department: data.department.trim() }),
+      ...(data.position && { position: data.position.trim() }),
     };
     
     console.log('Enviando datos de registro staff:', transformedData);

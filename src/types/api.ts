@@ -19,26 +19,26 @@ export interface LoginRequest {
 
 // Petición de registro (según RegistrationRequest del backend)
 export interface RegistrationRequest {
-  // Campos básicos de usuario (User)
+  // Campos básicos de usuario (User) - REQUERIDOS
   email: string;
   password: string;
   
   // Campos específicos para pacientes (PatientProfile)
   gender?: 'MALE' | 'FEMALE' | 'OTHER'; // Debe coincidir con enum Gender del backend
-  birthDate?: string; // LocalDate as ISO string (YYYY-MM-DD)
-  bloodType?: string;
+  birthDate?: string; // LocalDate as ISO string (YYYY-MM-DD) - DEBE SER FORMATO VÁLIDO
+  bloodType?: string; // Tipos: A+, A-, B+, B-, AB+, AB-, O+, O-
   phone?: string;
   address?: string;
-  cityId?: string; // UUID as string - debe ser UUID válido
+  cityId?: string; // UUID as string - DEBE SER UUID VÁLIDO del backend
   
   // Campos específicos para doctores (DoctorProfile)
-  licenseNumber?: string;
-  specialty?: string;
-  lastName?: string;
+  licenseNumber?: string; // REQUERIDO para doctores
+  specialty?: string; // REQUERIDO para doctores
+  lastName?: string; // REQUERIDO para doctores
   
   // Campos específicos para staff (StaffProfile)
-  department?: string;
-  position?: string;
+  department?: string; // Opcional para staff
+  position?: string; // Opcional para staff
 }
 
 // Respuesta JWT del backend
