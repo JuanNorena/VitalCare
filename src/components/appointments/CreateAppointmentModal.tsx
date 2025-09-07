@@ -106,12 +106,12 @@ export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentMod
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-[var(--vc-card-bg)] dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
         <Card className="border-0 shadow-none">
           <div className="p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">
+              <h2 className="text-xl font-semibold text-[var(--vc-text)] dark:text-white">
                 Nueva Cita Médica
               </h2>
               <Button
@@ -130,7 +130,7 @@ export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentMod
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Doctor ID (por ahora campo manual) */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[var(--vc-text)] dark:text-gray-300 mb-2">
                   ID del Doctor *
                 </label>
                 <Input
@@ -147,7 +147,7 @@ export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentMod
 
               {/* Fecha y hora */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[var(--vc-text)] dark:text-gray-300 mb-2">
                   Fecha y Hora *
                 </label>
                 <Input
@@ -164,7 +164,7 @@ export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentMod
 
               {/* Motivo */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[var(--vc-text)] dark:text-gray-300 mb-2">
                   Motivo de la Consulta *
                 </label>
                 <textarea
@@ -172,7 +172,7 @@ export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentMod
                   onChange={(e) => handleChange('reason', e.target.value)}
                   placeholder="Describe el motivo de tu consulta..."
                   rows={3}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 border-gray-300 ${
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-[var(--vc-input-bg)] dark:bg-gray-700 text-[var(--vc-text)] dark:text-white border-[var(--vc-border)] dark:border-gray-600 ${
                     errors.reason ? 'border-red-500' : ''
                   }`}
                 />
@@ -183,7 +183,7 @@ export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentMod
 
               {/* Notas adicionales */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-[var(--vc-text)] dark:text-gray-300 mb-2">
                   Notas Adicionales
                 </label>
                 <textarea
@@ -191,14 +191,14 @@ export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentMod
                   onChange={(e) => handleChange('notes', e.target.value)}
                   placeholder="Información adicional (opcional)..."
                   rows={2}
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 border-gray-300"
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-[var(--vc-input-bg)] dark:bg-gray-700 text-[var(--vc-text)] dark:text-white border-[var(--vc-border)] dark:border-gray-600"
                 />
               </div>
 
               {/* Error de submit */}
               {errors.submit && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                  <p className="text-red-600 text-sm">{errors.submit}</p>
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                  <p className="text-red-600 dark:text-red-400 text-sm">{errors.submit}</p>
                 </div>
               )}
 

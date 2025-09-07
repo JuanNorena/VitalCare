@@ -77,22 +77,23 @@ export function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white py-6 sm:py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+    <div className="min-h-screen bg-[var(--vc-bg)] py-6 sm:py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
       <div className="max-w-2xl mx-auto">
-        <Card className="p-6 sm:p-8 shadow-2xl border-0 bg-white">
+        <Card className="p-6 sm:p-8 shadow-2xl border-0 bg-[var(--vc-card-bg)]">
           <div className="text-center mb-6 sm:mb-8">
             <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
               </svg>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">VitalCare</h1>
-            <p className="text-gray-600 mt-2 text-sm sm:text-base">Crea tu cuenta médica</p>
+            {/* Título: forzamos color claro correcto (sin override blanco en modo claro) */}
+            <h1 className="text-2xl sm:text-3xl font-bold text-[var(--vc-text)]">VitalCare</h1>
+            <p className="text-[var(--vc-text)] dark:text-gray-400 mt-2 text-sm sm:text-base">Crea tu cuenta médica</p>
           </div>
 
           {/* Selector de rol */}
           <div className="mb-6 sm:mb-8">
-            <label className="block text-sm font-medium text-gray-700 mb-3 sm:mb-4">
+            <label className="block text-sm font-medium text-[var(--vc-text)] mb-3 sm:mb-4">
               Tipo de usuario
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
@@ -105,14 +106,18 @@ export function RegisterPage() {
                   key={role.value}
                   type="button"
                   onClick={() => setSelectedRole(role.value as UserRole)}
-                  className={`p-3 sm:p-4 rounded-lg border-2 text-left transition-colors ${
+                  className={`group relative p-3 sm:p-4 rounded-lg border text-left transition-all focus:outline-none focus:ring-2 focus:ring-[var(--vc-button-primary)] focus:ring-offset-1 ${
                     selectedRole === role.value
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300 bg-white'
+                      ? 'border-[var(--vc-accent)] bg-[var(--vc-accent)]/10 dark:bg-[var(--vc-accent)]/20 dark:border-[var(--vc-accent)] shadow-sm'
+                      : 'border-[var(--vc-border)] bg-[var(--vc-hover)] hover:border-[var(--vc-accent)] hover:shadow-sm dark:bg-[var(--vc-hover)] dark:hover:border-[var(--vc-accent)]'
                   }`}
+                  aria-pressed={selectedRole === role.value}
                 >
-                  <div className="font-medium text-gray-900 text-sm sm:text-base">{role.label}</div>
-                  <div className="text-xs sm:text-sm text-gray-500 mt-1">{role.description}</div>
+                  <div className={`font-medium text-sm sm:text-base ${selectedRole === role.value ? 'text-[var(--vc-text)]' : 'text-[var(--vc-text)]'}`}>{role.label}</div>
+                  <div className={`text-xs sm:text-sm mt-1 ${selectedRole === role.value ? 'text-[var(--vc-text)]/70' : 'text-[var(--vc-text)]/60'}`}>{role.description}</div>
+                  {selectedRole === role.value && (
+                    <span className="pointer-events-none absolute inset-0 rounded-lg ring-2 ring-[var(--vc-accent)]/50 dark:ring-[var(--vc-accent)]/40" aria-hidden />
+                  )}
                 </button>
               ))}
             </div>
@@ -121,7 +126,7 @@ export function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="email" className="block text-sm font-medium text-[var(--vc-text)] mb-1">
                   Correo electrónico *
                 </label>
                 <Input
@@ -136,7 +141,7 @@ export function RegisterPage() {
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="password" className="block text-sm font-medium text-[var(--vc-text)] mb-1">
                   Contraseña *
                 </label>
                 <Input
@@ -151,7 +156,7 @@ export function RegisterPage() {
               </div>
 
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="phone" className="block text-sm font-medium text-[var(--vc-text)] mb-1">
                   Teléfono
                 </label>
                 <Input
@@ -165,7 +170,7 @@ export function RegisterPage() {
               </div>
 
               <div>
-                <label htmlFor="birthDate" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="birthDate" className="block text-sm font-medium text-[var(--vc-text)] mb-1">
                   Fecha de nacimiento
                 </label>
                 <Input
@@ -178,7 +183,7 @@ export function RegisterPage() {
               </div>
 
               <div>
-                <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="gender" className="block text-sm font-medium text-[var(--vc-text)] mb-1">
                   Género
                 </label>
                 <select
@@ -186,7 +191,7 @@ export function RegisterPage() {
                   name="gender"
                   value={formData.gender}
                   onChange={handleInputChange}
-                  className="w-full h-10 sm:h-11 px-3 sm:px-4 text-sm sm:text-base rounded-lg border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  className="w-full h-10 sm:h-11 px-3 sm:px-4 text-sm sm:text-base rounded-lg border border-[var(--vc-border)] bg-[var(--vc-input-bg)] text-[var(--vc-text)] focus:outline-none focus:ring-2 focus:ring-[var(--vc-button-primary)] focus:border-transparent transition-all duration-200"
                 >
                   <option value="MALE">Masculino</option>
                   <option value="FEMALE">Femenino</option>
@@ -195,7 +200,7 @@ export function RegisterPage() {
               </div>
 
               <div>
-                <label htmlFor="cityId" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="cityId" className="block text-sm font-medium text-[var(--vc-text)] mb-1">
                   ID de Ciudad
                 </label>
                 <Input
@@ -210,7 +215,7 @@ export function RegisterPage() {
             </div>
 
             <div>
-              <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="address" className="block text-sm font-medium text-[var(--vc-text)] mb-1">
                 Dirección
               </label>
               <Input
@@ -225,13 +230,13 @@ export function RegisterPage() {
 
             {/* Campos específicos por rol */}
             {selectedRole === 'patient' && (
-              <div className="pt-4 sm:pt-6 border-t border-gray-200">
-                <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">
+              <div className="pt-4 sm:pt-6 border-t border-[var(--vc-border)]">
+                <h3 className="text-base sm:text-lg font-medium text-[var(--vc-text)] mb-3 sm:mb-4">
                   Información del Paciente
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <div>
-                    <label htmlFor="bloodType" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="bloodType" className="block text-sm font-medium text-[var(--vc-text)] mb-1">
                       Tipo de Sangre
                     </label>
                     <select
@@ -239,7 +244,7 @@ export function RegisterPage() {
                       name="bloodType"
                       value={formData.bloodType || ''}
                       onChange={handleInputChange}
-                      className="w-full h-10 sm:h-11 px-3 sm:px-4 text-sm sm:text-base rounded-lg border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      className="w-full h-10 sm:h-11 px-3 sm:px-4 text-sm sm:text-base rounded-lg border border-[var(--vc-border)] bg-[var(--vc-input-bg)] text-[var(--vc-text)] focus:outline-none focus:ring-2 focus:ring-[var(--vc-button-primary)] focus:border-transparent transition-all duration-200"
                     >
                       <option value="">Seleccionar tipo de sangre</option>
                       <option value="A+">A+</option>
@@ -257,13 +262,13 @@ export function RegisterPage() {
             )}
 
             {selectedRole === 'doctor' && (
-              <div className="pt-4 sm:pt-6 border-t border-gray-200">
-                <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">
+              <div className="pt-4 sm:pt-6 border-t border-[var(--vc-border)]">
+                <h3 className="text-base sm:text-lg font-medium text-[var(--vc-text)] mb-3 sm:mb-4">
                   Información del Doctor
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <div>
-                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="lastName" className="block text-sm font-medium text-[var(--vc-text)] mb-1">
                       Apellidos *
                     </label>
                     <Input
@@ -277,21 +282,7 @@ export function RegisterPage() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-                      Apellidos *
-                    </label>
-                    <Input
-                      id="lastName"
-                      name="lastName"
-                      type="text"
-                      required
-                      value={formData.lastName || ''}
-                      onChange={handleInputChange}
-                      placeholder="Apellidos"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="licenseNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="licenseNumber" className="block text-sm font-medium text-[var(--vc-text)] mb-1">
                       Licencia Médica *
                     </label>
                     <Input
@@ -305,7 +296,7 @@ export function RegisterPage() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="specialty" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="specialty" className="block text-sm font-medium text-[var(--vc-text)] mb-1">
                       Especialidad *
                     </label>
                     <Input
@@ -323,13 +314,13 @@ export function RegisterPage() {
             )}
 
             {selectedRole === 'staff' && (
-              <div className="pt-4 sm:pt-6 border-t border-gray-200">
-                <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">
+              <div className="pt-4 sm:pt-6 border-t border-[var(--vc-border)]">
+                <h3 className="text-base sm:text-lg font-medium text-[var(--vc-text)] mb-3 sm:mb-4">
                   Información del Personal
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <div>
-                    <label htmlFor="department" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="department" className="block text-sm font-medium text-[var(--vc-text)] mb-1">
                       Departamento
                     </label>
                     <Input
@@ -342,7 +333,7 @@ export function RegisterPage() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="position" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="position" className="block text-sm font-medium text-[var(--vc-text)] mb-1">
                       Cargo
                     </label>
                     <Input
@@ -368,11 +359,11 @@ export function RegisterPage() {
             </div>
 
             <div className="text-center pt-4 sm:pt-6">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-[var(--vc-text)]">
                 ¿Ya tienes cuenta?{' '}
                 <Link
                   to="/login"
-                  className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition-colors"
+                  className="font-medium text-[var(--vc-accent)] hover:text-[var(--vc-button-primary)] transition-colors"
                 >
                   Iniciar sesión
                 </Link>

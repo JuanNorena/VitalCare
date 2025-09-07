@@ -97,26 +97,26 @@ export function AppointmentsPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-[var(--vc-bg)] px-4">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900">No autorizado</h2>
-          <p className="text-gray-600 mt-2">Por favor inicia sesión</p>
+          <h2 className="text-xl font-semibold text-[var(--vc-text)]">No autorizado</h2>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">Por favor inicia sesión</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-full bg-white transition-colors duration-300">
+    <div className="min-h-full bg-[var(--vc-bg)] transition-colors duration-300">
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              <h1 className="text-2xl sm:text-3xl font-bold text-[var(--vc-text)]">
                 {isDoctor ? 'Consultas Médicas' : 'Mis Citas Médicas'}
               </h1>
-              <p className="text-gray-600 mt-1">
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
                 {isDoctor ? 'Gestiona las citas de tus pacientes' : 'Administra tus citas médicas'}
               </p>
             </div>
@@ -133,14 +133,14 @@ export function AppointmentsPage() {
 
         {/* Formulario de crear cita (solo para pacientes) */}
         {showCreateForm && isPatient && (
-          <Card className="p-4 sm:p-6 mb-6 sm:mb-8 shadow-lg border-0 bg-white">
+          <Card className="p-4 sm:p-6 mb-6 sm:mb-8 shadow-lg border-0 bg-[var(--vc-card-bg)] dark:bg-gray-800">
             <div className="flex items-center gap-3 mb-3 sm:mb-4">
               <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
                 <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
                 </svg>
               </div>
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+              <h3 className="text-base sm:text-lg font-semibold text-[var(--vc-text)] dark:text-white">
                 Programar Nueva Cita
               </h3>
             </div>
@@ -162,18 +162,18 @@ export function AppointmentsPage() {
         {/* Lista de citas */}
         {isLoading ? (
           <div className="text-center py-8">
-            <div className="text-gray-600">Cargando citas...</div>
+            <div className="text-[var(--vc-text)] dark:text-gray-400">Cargando citas...</div>
           </div>
         ) : appointments && appointments.length > 0 ? (
           <div className="grid gap-4 sm:gap-6">
             {appointments.map((appointment) => (
-              <Card key={appointment.id} className="p-4 sm:p-6 shadow-lg border-0 bg-white hover:shadow-xl transition-all duration-200">
+              <Card key={appointment.id} className="p-4 sm:p-6 shadow-lg border-0 bg-[var(--vc-card-bg)] dark:bg-gray-800 hover:shadow-xl transition-all duration-200">
                 <div className="flex flex-col lg:flex-row justify-between items-start gap-4 lg:gap-0">
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
+                        <h3 className="text-base sm:text-lg font-semibold text-[var(--vc-text)] dark:text-white truncate">
                           Cita #{appointment.id.substring(0, 8)}...
                         </h3>
                       </div>
@@ -182,27 +182,27 @@ export function AppointmentsPage() {
                       </span>
                     </div>
                     
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-sm sm:text-base text-gray-600">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-sm sm:text-base text-[var(--vc-text)] dark:text-gray-300">
                       <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-4 h-4 text-[var(--vc-text)] dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                         </svg>
                         <span><strong>Fecha:</strong> {formatDate(appointment.scheduledDate)}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-4 h-4 text-[var(--vc-text)] dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                         </svg>
                         <span className="break-all"><strong>Paciente:</strong> {appointment.patientId.substring(0, 8)}...</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-4 h-4 text-[var(--vc-text)] dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                           <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <span className="break-all"><strong>Doctor:</strong> {appointment.doctorId.substring(0, 8)}...</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-4 h-4 text-[var(--vc-text)] dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                         </svg>
                         <span className="break-all"><strong>Sede:</strong> {appointment.siteId.substring(0, 8)}...</span>
@@ -240,14 +240,14 @@ export function AppointmentsPage() {
             ))}
           </div>
         ) : (
-          <Card className="p-6 sm:p-8 text-center shadow-lg border-0 bg-white">
-            <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+          <Card className="p-6 sm:p-8 text-center shadow-lg border-0 bg-[var(--vc-card-bg)] dark:bg-gray-800">
+            <div className="w-16 h-16 mx-auto mb-4 bg-[var(--vc-bg)] dark:bg-gray-700 rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-[var(--vc-text)] dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
               </svg>
             </div>
-            <div className="text-gray-500">
-              <p className="text-base sm:text-lg font-medium text-gray-900 mb-2">
+            <div className="text-[var(--vc-text)] dark:text-gray-400">
+              <p className="text-base sm:text-lg font-medium text-[var(--vc-text)] dark:text-white mb-2">
                 No tienes citas programadas
               </p>
               {isPatient && (
@@ -301,7 +301,7 @@ function CreateAppointmentForm({ onSubmit, isLoading, currentUserId }: CreateApp
     <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         <div>
-          <label htmlFor="doctorId" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="doctorId" className="block text-sm font-medium text-[var(--vc-text)] dark:text-gray-300 mb-1">
             ID del Doctor *
           </label>
           <input
@@ -312,12 +312,12 @@ function CreateAppointmentForm({ onSubmit, isLoading, currentUserId }: CreateApp
             value={formData.doctorId}
             onChange={handleInputChange}
             placeholder="Ingresa el ID del doctor"
-            className="w-full h-10 sm:h-11 px-3 sm:px-4 text-sm sm:text-base rounded-lg border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            className="w-full h-10 sm:h-11 px-3 sm:px-4 text-sm sm:text-base rounded-lg border border-[var(--vc-border)] bg-[var(--vc-input-bg)] text-[var(--vc-text)] focus:outline-none focus:ring-2 focus:ring-[var(--vc-button-primary)] focus:border-transparent transition-all duration-200"
           />
         </div>
 
         <div>
-          <label htmlFor="siteId" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="siteId" className="block text-sm font-medium text-[var(--vc-text)] dark:text-gray-300 mb-1">
             ID de la Sede *
           </label>
           <input
@@ -328,13 +328,13 @@ function CreateAppointmentForm({ onSubmit, isLoading, currentUserId }: CreateApp
             value={formData.siteId}
             onChange={handleInputChange}
             placeholder="Ingresa el ID de la sede"
-            className="w-full h-10 sm:h-11 px-3 sm:px-4 text-sm sm:text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-200"
+            className="w-full h-10 sm:h-11 px-3 sm:px-4 text-sm sm:text-base rounded-lg border border-[var(--vc-border)] bg-[var(--vc-input-bg)] text-[var(--vc-text)] focus:outline-none focus:ring-2 focus:ring-[var(--vc-button-primary)] focus:border-transparent transition-all duration-200"
           />
         </div>
       </div>
 
       <div>
-        <label htmlFor="scheduledDate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+  <label htmlFor="scheduledDate" className="block text-sm font-medium text-[var(--vc-text)] dark:text-gray-300 mb-1">
           Fecha y Hora *
         </label>
         <input
@@ -344,7 +344,7 @@ function CreateAppointmentForm({ onSubmit, isLoading, currentUserId }: CreateApp
           required
           value={formData.scheduledDate}
           onChange={handleInputChange}
-          className="w-full h-10 sm:h-11 px-3 sm:px-4 text-sm sm:text-base rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-200"
+          className="w-full h-10 sm:h-11 px-3 sm:px-4 text-sm sm:text-base rounded-lg border border-[var(--vc-border)] bg-[var(--vc-input-bg)] text-[var(--vc-text)] focus:outline-none focus:ring-2 focus:ring-[var(--vc-button-primary)] focus:border-transparent transition-all duration-200"
         />
       </div>
 

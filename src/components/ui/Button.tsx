@@ -12,12 +12,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const baseClasses = "inline-flex items-center justify-center rounded-lg text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 sm:text-base"
     
     const variants = {
-      default: "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500",
+      default: "bg-[var(--vc-button-primary)] text-white hover:bg-blue-700 focus:ring-blue-500",
       destructive: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
-      outline: "border-2 border-gray-300 bg-white hover:bg-gray-50 text-gray-700 focus:ring-gray-500",
-      secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500",
-      ghost: "hover:bg-gray-100 text-gray-700 focus:ring-gray-500",
-      link: "text-blue-600 underline-offset-4 hover:underline",
+      outline: "border-2 border-[var(--vc-border)] bg-[var(--vc-bg)] hover:bg-[var(--vc-hover)] text-[var(--vc-text)] focus:ring-blue-500",
+      secondary: "bg-[var(--vc-bg-secondary)] text-[var(--vc-text)] hover:bg-[var(--vc-hover)] focus:ring-gray-500",
+      ghost: "hover:bg-[var(--vc-hover)] text-[var(--vc-text)] focus:ring-gray-500",
+      link: "text-[var(--vc-button-primary)] underline-offset-4 hover:underline",
     }
 
     const sizes = {

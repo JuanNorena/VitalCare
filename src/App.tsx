@@ -93,7 +93,7 @@ function AppRoutes() {
         } 
       />
 
-      {/* Ruta de appointments (aliás para dashboard) */}
+      {/* Ruta de appointments */}
       <Route 
         path="/appointments" 
         element={
@@ -119,7 +119,7 @@ export default function App() {
   return (
       <QueryClientProvider client={queryClient}>
         <Router>
-          <div className="App min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+          <div className="App min-h-screen bg-[var(--vc-bg)] text-[var(--vc-text)] transition-colors duration-300">
             <AppRoutes />
             <EnvironmentInfo />
             <AccessibilityMenu />

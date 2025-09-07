@@ -39,21 +39,21 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white px-4 sm:px-6 lg:px-8 transition-colors duration-300">
-      <Card className="w-full max-w-sm sm:max-w-md p-6 sm:p-8 shadow-2xl border-0 bg-white">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--vc-bg)] px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+      <Card className="w-full max-w-sm sm:max-w-md p-6 sm:p-8 shadow-2xl border-0 bg-[var(--vc-card-bg)]">
         <div className="text-center mb-6 sm:mb-8">
           <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h12a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8z" clipRule="evenodd" />
             </svg>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">VitalCare</h1>
-          <p className="text-gray-600 mt-2 text-sm sm:text-base">Accede a tu cuenta médica</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[var(--vc-text)]">VitalCare</h1>
+          <p className="text-[var(--vc-text)] mt-2 text-sm sm:text-base">Accede a tu cuenta médica</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="email" className="block text-sm font-medium text-[var(--vc-text)] mb-1">
               Correo electrónico
             </label>
             <Input
@@ -69,7 +69,7 @@ export function LoginPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-[var(--vc-text)] mb-1">
               Contraseña
             </label>
             <Input
@@ -85,8 +85,8 @@ export function LoginPage() {
           </div>
 
           {error && (
-            <div className="rounded-md bg-red-50 p-3 sm:p-4">
-              <div className="text-sm text-red-700">
+            <div className="rounded-md bg-[var(--vc-error-bg)] border border-red-200 dark:border-red-800 p-3 sm:p-4">
+              <div className="text-sm text-[var(--vc-error-text)]">
                 Error al iniciar sesión. Por favor verifica tus credenciales.
               </div>
             </div>
@@ -104,11 +104,11 @@ export function LoginPage() {
           </div>
 
           <div className="text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-[var(--vc-text)]">
               ¿No tienes cuenta?{' '}
               <Link
                 to="/register"
-                className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
+                className="font-medium text-[var(--vc-accent)] hover:text-[var(--vc-button-primary)] transition-colors"
               >
                 Registrarse
               </Link>

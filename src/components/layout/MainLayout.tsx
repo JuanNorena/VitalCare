@@ -14,7 +14,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-white">
+    <div className="flex h-screen bg-[var(--vc-bg)]">
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
@@ -23,7 +23,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden lg:ml-0">
         {/* Top bar for mobile */}
-        <header className="lg:hidden bg-white border-b border-gray-200 px-4 py-3">
+        <header className="lg:hidden bg-[var(--vc-bg)] border-b border-[var(--vc-border)] px-4 py-3">
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
@@ -42,7 +42,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                   <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h12a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8z" clipRule="evenodd" />
                 </svg>
               </div>
-              <span className="font-bold text-gray-900 dark:text-white">VitalCare</span>
+              <span className="font-bold text-[var(--vc-text)]">VitalCare</span>
             </div>
           </div>
         </header>

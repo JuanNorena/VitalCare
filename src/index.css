@@ -1,16 +1,46 @@
 @import "tailwindcss";
 
-/* Estilos globales */
-* {
-  box-sizing: border-box;
+/* =========================================================
+   THEME TOKENS (Light defaults + Dark overrides)
+   ========================================================= */
+:root {
+  --vc-font-scale: 1; /* escalado dinámico */
+  --vc-bg: #ffffff;
+  --vc-text: #1f2937; /* gray-800 */
+  --vc-bg-secondary: #f8fafc;
+  --vc-card-bg: #ffffff;
+  --vc-input-bg: #ffffff;
+  --vc-border: #e2e8f0; /* gray-200 */
+  --vc-hover: #f1f5f9; /* gray-100 */
+  --vc-button-primary: #2563eb; /* blue-600 */
+  --vc-button-secondary: #6b7280; /* gray-500 */
+  --vc-accent: #1d4ed8; /* blue-700 */
+  --vc-accent-contrast: #ffffff;
+  --vc-focus-ring: #3b82f6; /* blue-500 */
+  --vc-error-bg: #fef2f2; /* red-50 */
+  --vc-error-text: #dc2626; /* red-600 */
 }
 
-html {
-  /* Tamaño de fuente base que será controlado por accesibilidad */
-  font-size: 16px;
-  /* variable para escalar fuentes desde el contexto de accesibilidad */
-  --vc-font-scale: 1;
+:root.dark {
+  --vc-bg: #0f172a; /* slate-900 */
+  --vc-text: #f8fafc; /* gray-50 */
+  --vc-bg-secondary: #1e293b; /* slate-800 */
+  --vc-card-bg: #1e293b;
+  --vc-input-bg: #334155; /* slate-700 */
+  --vc-border: #334155; /* slate-700 */
+  --vc-hover: #334155; /* slate-700 */
+  --vc-button-primary: #3b82f6; /* blue-500 */
+  --vc-button-secondary: #64748b; /* slate-500 */
+  --vc-accent: #1e40af; /* blue-800 */
+  --vc-accent-contrast: #f8fafc;
+  --vc-focus-ring: #60a5fa; /* blue-400 */
+  --vc-error-bg: #7f1d1d; /* red-900 */
+  --vc-error-text: #fca5a5; /* red-300 */
 }
+
+* { box-sizing: border-box; }
+
+html { font-size: calc(16px * var(--vc-font-scale)); }
 
 body {
   margin: 0;
@@ -19,141 +49,67 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  background-color: #ffffff;
-  color: #1f2937;
+  background: var(--vc-bg);
+  color: var(--vc-text);
+  transition: background-color .3s ease, color .3s ease, border-color .3s ease;
   color-scheme: light;
 }
+body.dark { color-scheme: dark; }
 
-/* Dark theme variables (applied when .dark is set on root) */
-:root.dark {
-  --vc-bg: #0f172a; /* slate-900 */
-  --vc-text: #f8fafc; /* gray-50 */
-}
+/* Scrollbar */
+::-webkit-scrollbar { width:8px; }
+::-webkit-scrollbar-track { background: var(--vc-bg-secondary); }
+::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:4px; }
+::-webkit-scrollbar-thumb:hover { background:#94a3b8; }
+:root.dark ::-webkit-scrollbar-track { background:#1e293b; }
+:root.dark ::-webkit-scrollbar-thumb { background:#475569; }
+:root.dark ::-webkit-scrollbar-thumb:hover { background:#64748b; }
 
-/* Apply font scaling via root variable */
-html {
-  font-size: calc(16px * var(--vc-font-scale));
-}
+/* Animación spin */
+.animate-spin { animation: spin 1s linear infinite; }
+@keyframes spin { from { transform:rotate(0deg);} to { transform:rotate(360deg);} }
 
-/* Scrollbar personalizado */
-::-webkit-scrollbar {
-  width: 8px;
-}
+/* Focus utilities */
+.focus-visible:focus-visible { outline:2px solid var(--vc-focus-ring); outline-offset:2px; }
 
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* Scrollbar - light theme only */
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* Animaciones */
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Focus visible para accesibilidad */
-.focus-visible:focus-visible {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
-}
-
-/* Responsive text utilities */
-.text-responsive-sm {
-  font-size: 0.875rem; /* 14px */
-}
-
-@media (min-width: 640px) {
-  .text-responsive-sm {
-    font-size: 1rem; /* 16px */
-  }
-}
-
-.text-responsive-base {
-  font-size: 1rem; /* 16px */
-}
-
-@media (min-width: 640px) {
-  .text-responsive-base {
-    font-size: 1.125rem; /* 18px */
-  }
-}
-
-.text-responsive-lg {
-  font-size: 1.125rem; /* 18px */
-}
-
-@media (min-width: 640px) {
-  .text-responsive-lg {
-    font-size: 1.25rem; /* 20px */
-  }
-}
-
-/* Utilities para transiciones suaves */
-.transition-theme {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-}
-
-/* Mejoras para formularios */
+/* Form base */
 input, textarea, select {
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background: var(--vc-input-bg);
+  color: var(--vc-text);
+  border:1px solid var(--vc-border);
+  transition: background-color .2s ease, color .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+input:focus, textarea:focus, select:focus {
+  outline:none; border-color:transparent; box-shadow:0 0 0 2px var(--vc-focus-ring);
 }
 
-/* Estilos modernos para inputs de fecha */
-input[type="date"], 
-input[type="datetime-local"], 
-input[type="time"] {
-  color-scheme: light;
-}
+/* Date inputs */
+input[type="date"], input[type="datetime-local"], input[type="time"] { color-scheme: light; }
+:root.dark input[type="date"], :root.dark input[type="datetime-local"], :root.dark input[type="time"] { color-scheme: dark; }
 
-/* Personalización del selector de fecha */
 input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="datetime-local"]::-webkit-calendar-picker-indicator {
   background: transparent;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%236b7280' viewBox='0 0 20 20'%3e%3cpath fill-rule='evenodd' d='M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z' clip-rule='evenodd'/%3e%3c/svg%3e");
   cursor: pointer;
   padding: 4px;
   border-radius: 4px;
+  filter: grayscale(30%);
+}
+:root.dark input[type="date"]::-webkit-calendar-picker-indicator,
+:root.dark input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
 }
 
-input[type="date"]::-webkit-calendar-picker-indicator,
-input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-  background: transparent;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='%236b7280' viewBox='0 0 20 20'%3e%3cpath fill-rule='evenodd' d='M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z' clip-rule='evenodd'/%3e%3c/svg%3e");
+/* Touch targets */
+@media (max-width:640px){ button, input, select, textarea { min-height:44px; } }
 
-/* Asegurar que los elementos interactivos tengan un tamaño mínimo en móvil */
-@media (max-width: 640px) {
-  button, input, select, textarea {
-    min-height: 44px; /* Tamaño mínimo recomendado para touch */
-  }
-}
-}
+/* Transition helper */
+.transition-theme { transition: background-color .3s, color .3s, border-color .3s; }
+
+/* Responsive text utilities (con escalado raíz) */
+.text-responsive-sm { font-size:0.875rem; }
+@media (min-width:640px){ .text-responsive-sm { font-size:1rem; } }
+.text-responsive-base { font-size:1rem; }
+@media (min-width:640px){ .text-responsive-base { font-size:1.125rem; } }
+.text-responsive-lg { font-size:1.125rem; }
+@media (min-width:640px){ .text-responsive-lg { font-size:1.25rem; } }

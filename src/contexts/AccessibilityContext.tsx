@@ -39,10 +39,11 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
     return defaultState.fontScale;
   });
 
-  // Sync class on root and css var
+  // Sync solo la clase; variables ya definidas en index.css
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', dark);
-    try { localStorage.setItem(ACCESS_KEY_DARK, dark ? '1' : '0'); } catch (e) {}
+    const root = document.documentElement;
+    if (dark) root.classList.add('dark'); else root.classList.remove('dark');
+    try { localStorage.setItem(ACCESS_KEY_DARK, dark ? '1' : '0'); } catch {}
   }, [dark]);
 
   useEffect(() => {
