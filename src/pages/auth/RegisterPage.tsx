@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import type { RegistrationRequest } from '@/types/api';
+import { useToast } from '@/contexts/ToastContext';
 
 type UserRole = 'patient' | 'doctor' | 'staff';
 
@@ -20,6 +21,7 @@ export function RegisterPage() {
     registerStaff, 
     isRegisterPending 
   } = useAuth();
+  const { showError, showSuccess } = useToast();
   
   const [selectedRole, setSelectedRole] = useState<UserRole>('patient');
   const [formData, setFormData] = useState<RegistrationRequest>({
@@ -68,11 +70,19 @@ export function RegisterPage() {
       }
 
       await registerFunction(formData);
+      showSuccess(
+        '¡Registro exitoso!',
+        'Tu cuenta ha sido creada correctamente. Ya puedes iniciar sesión.'
+      );
       navigate('/login', { 
         state: { message: 'Registro exitoso. Por favor inicia sesión.' } 
       });
     } catch (error) {
       console.error('Error al registrarse:', error);
+      showError(
+        'Error en el registro',
+        'Ocurrió un problema al crear tu cuenta. Por favor intenta nuevamente.'
+      );
     }
   };
 

@@ -9,10 +9,12 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import type { LoginRequest } from '@/types/api';
+import { useToast } from '@/contexts/ToastContext';
 
 export function LoginPage() {
   const navigate = useNavigate();
   const { login, isLoginPending, error } = useAuth();
+  const { showError, showSuccess } = useToast();
   
   const [formData, setFormData] = useState<LoginRequest>({
     email: '',
@@ -32,9 +34,14 @@ export function LoginPage() {
     
     try {
       await login(formData);
+      showSuccess('¡Bienvenido!', 'Has iniciado sesión correctamente');
       navigate('/dashboard');
     } catch (error) {
       console.error('Error al iniciar sesión:', error);
+      showError(
+        'Error al iniciar sesión',
+        'Por favor verifica tus credenciales e intenta nuevamente'
+      );
     }
   };
 
