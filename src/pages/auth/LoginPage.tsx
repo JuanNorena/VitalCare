@@ -13,7 +13,7 @@ import { useToast } from '@/contexts/ToastContext';
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const { login, isLoginPending, error } = useAuth();
+  const { login, isLoginPending, error, user } = useAuth();
   const { showError, showSuccess } = useToast();
   
   const [formData, setFormData] = useState<LoginRequest>({
@@ -29,13 +29,35 @@ export function LoginPage() {
     }));
   };
 
+  const getRedirectPath = (userRole?: string) => {
+    if (!userRole) return '/dashboard';
+    
+    const role = userRole.toLowerCase();
+    
+    if (role.includes('doctor')) {
+      return '/dashboard'; // Dashboard con todas las citas para doctores
+    } else if (role.includes('patient')) {
+      return '/appointments'; // Vista para agendar citas para pacientes
+    } else if (role.includes('staff')) {
+      return '/dashboard'; // Dashboard para empleados
+    }
+    
+    return '/dashboard'; // Ruta por defecto
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
       await login(formData);
-      showSuccess('¡Bienvenido!', 'Has iniciado sesión correctamente');
-      navigate('/dashboard');
+      
+      // Esperar un momento para que se actualice la información del usuario
+      setTimeout(() => {
+        const redirectPath = getRedirectPath(user?.role);
+        showSuccess('¡Bienvenido!', 'Has iniciado sesión correctamente');
+        navigate(redirectPath);
+      }, 500);
+      
     } catch (error) {
       console.error('Error al iniciar sesión:', error);
       showError(

@@ -29,11 +29,11 @@ export function Toast({ id, title, description, type, duration = 5000, onClose }
     switch (type) {
       case 'success':
         return {
-          bg: 'bg-green-50 dark:bg-green-900/20',
-          border: 'border-green-200 dark:border-green-800',
-          icon: 'text-green-600 dark:text-green-400',
-          title: 'text-green-800 dark:text-green-200',
-          description: 'text-green-700 dark:text-green-300',
+          bg: 'bg-green-600',
+          border: 'border-green-700',
+          icon: 'text-white',
+          title: 'text-white',
+          description: 'text-white',
         };
       case 'error':
         return {
