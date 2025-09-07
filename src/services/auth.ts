@@ -29,15 +29,17 @@ export const authService = {
 
   // Registro específico de paciente (POST /api/register/patient)
   registerPatient: async (data: RegistrationRequest): Promise<User> => {
-    // Transformar datos para compatibilidad con backend Java
+    // Validar y transformar datos específicos para paciente
     const transformedData = {
-      ...data,
-      // Convertir cityId de string a UUID si existe
-      cityId: data.cityId ? data.cityId : null,
-      // Asegurar formato correcto de fecha
-      birthDate: data.birthDate || null,
-      // Asegurar que gender sea el enum correcto
-      gender: data.gender || null
+      email: data.email,
+      password: data.password,
+      // Campos específicos de paciente
+      ...(data.phone && { phone: data.phone }),
+      ...(data.address && { address: data.address }),
+      ...(data.birthDate && { birthDate: data.birthDate }),
+      ...(data.gender && { gender: data.gender }),
+      ...(data.cityId && { cityId: data.cityId }),
+      ...(data.bloodType && { bloodType: data.bloodType }),
     };
     
     console.log('Enviando datos de registro paciente:', transformedData);
@@ -46,11 +48,30 @@ export const authService = {
 
   // Registro específico de doctor (POST /api/register/doctor)
   registerDoctor: async (data: RegistrationRequest): Promise<User> => {
+    // Validar campos requeridos para doctor
+    if (!data.lastName) {
+      throw new Error('Apellidos son requeridos para doctores');
+    }
+    if (!data.licenseNumber) {
+      throw new Error('Número de licencia médica es requerido para doctores');
+    }
+    if (!data.specialty) {
+      throw new Error('Especialidad es requerida para doctores');
+    }
+
     const transformedData = {
-      ...data,
-      cityId: data.cityId ? data.cityId : null,
-      birthDate: data.birthDate || null,
-      gender: data.gender || null
+      email: data.email,
+      password: data.password,
+      // Campos básicos opcionales
+      ...(data.phone && { phone: data.phone }),
+      ...(data.address && { address: data.address }),
+      ...(data.birthDate && { birthDate: data.birthDate }),
+      ...(data.gender && { gender: data.gender }),
+      ...(data.cityId && { cityId: data.cityId }),
+      // Campos específicos de doctor (requeridos)
+      lastName: data.lastName,
+      licenseNumber: data.licenseNumber,
+      specialty: data.specialty,
     };
     
     console.log('Enviando datos de registro doctor:', transformedData);
@@ -60,10 +81,17 @@ export const authService = {
   // Registro específico de staff (POST /api/register/staff)
   registerStaff: async (data: RegistrationRequest): Promise<User> => {
     const transformedData = {
-      ...data,
-      cityId: data.cityId ? data.cityId : null,
-      birthDate: data.birthDate || null,
-      gender: data.gender || null
+      email: data.email,
+      password: data.password,
+      // Campos básicos opcionales
+      ...(data.phone && { phone: data.phone }),
+      ...(data.address && { address: data.address }),
+      ...(data.birthDate && { birthDate: data.birthDate }),
+      ...(data.gender && { gender: data.gender }),
+      ...(data.cityId && { cityId: data.cityId }),
+      // Campos específicos de staff (opcionales)
+      ...(data.department && { department: data.department }),
+      ...(data.position && { position: data.position }),
     };
     
     console.log('Enviando datos de registro staff:', transformedData);
