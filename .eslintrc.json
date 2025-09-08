@@ -1,10 +1,129 @@
+/**
+ * Configuración de ESLint para VitalCare Frontend.
+ *
+ * Este archivo define las reglas y configuraciones de ESLint para mantener
+ * la calidad del código, consistencia y mejores prácticas en el proyecto.
+ * Utiliza la configuración recomendada de Vite para React con personalizaciones
+ * específicas para TypeScript y el proyecto VitalCare.
+ *
+ * @description
+ * Configuración ESLint que incluye:
+ * - Configuración base de Vite para React
+ * - Reglas personalizadas para TypeScript
+ * - Manejo específico de variables no utilizadas
+ * - Desactivación de reglas conflictivas con TypeScript
+ * - Advertencias para uso de 'any' en TypeScript
+ *
+ * Las reglas están organizadas por categorías:
+ * - Variables no utilizadas: Error con patrón de ignorado
+ * - Props de React: Desactivadas (TypeScript las maneja)
+ * - Uso de 'any': Advertencia para promover tipado fuerte
+ *
+ * @example
+ * ```json
+ * {
+ *   "extends": ["@vitejs/eslint-config-react"],
+ *   "rules": {
+ *     "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+ *     "react/prop-types": "off",
+ *     "@typescript-eslint/no-explicit-any": "warn"
+ *   }
+ * }
+ * ```
+ *
+ * @see {@link https://eslint.org/docs/user-guide/configuring} Documentación oficial de ESLint
+ * @see {@link https://github.com/vitejs/vite/tree/main/packages/eslint-config-react} Configuración Vite React
+ */
+
 {
+  /**
+   * Configuraciones base que se extienden.
+   * Utiliza la configuración recomendada de Vite para proyectos React,
+   * que incluye reglas optimizadas para desarrollo con Vite.
+   */
   "extends": [
+    /**
+     * Configuración oficial de ESLint para proyectos Vite + React.
+     * Incluye reglas para:
+     * - Mejores prácticas de React
+     * - Optimizaciones para Vite
+     * - Reglas de accesibilidad
+     * - Prevención de errores comunes
+     */
     "@vitejs/eslint-config-react"
   ],
+
+  /**
+   * Reglas personalizadas específicas para el proyecto VitalCare.
+   * Estas reglas sobrescriben o complementan las reglas base.
+   */
   "rules": {
-    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    /**
+     * Regla para variables no utilizadas en TypeScript.
+     * Marca como error las variables no utilizadas, pero permite
+     * ignorar parámetros que comiencen con '_' (convención común).
+     *
+     * @example
+     * ```typescript
+     * // ❌ Error: variable no utilizada
+     * const unused = 'no usado';
+     *
+     * // ✅ Permitido: parámetro ignorado
+     * function handler(_event) {
+     *   // _event se ignora intencionalmente
+     * }
+     * ```
+     */
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        /**
+         * Patrón para ignorar parámetros no utilizados.
+         * Los parámetros que comiencen con '_' se consideran intencionalmente ignorados.
+         */
+        "argsIgnorePattern": "^_"
+      }
+    ],
+
+    /**
+     * Regla de prop-types de React.
+     * Desactivada porque TypeScript maneja la validación de props
+     * de manera más robusta y precisa que PropTypes.
+     *
+     * @example
+     * ```typescript
+     * // Con TypeScript (recomendado)
+     * interface ButtonProps {
+     *   onClick: () => void;
+     *   children: React.ReactNode;
+     * }
+     *
+     * // Con PropTypes (no necesario con TS)
+     * Button.propTypes = {
+     *   onClick: PropTypes.func.isRequired,
+     *   children: PropTypes.node.isRequired
+     * };
+     * ```
+     */
     "react/prop-types": "off",
+
+    /**
+     * Regla para el uso del tipo 'any' en TypeScript.
+     * Muestra una advertencia cuando se usa 'any', promoviendo
+     * el uso de tipos específicos para mejor type safety.
+     *
+     * @example
+     * ```typescript
+     * // ⚠️ Advertencia: uso de 'any'
+     * const data: any = fetchData();
+     *
+     * // ✅ Recomendado: tipo específico
+     * const data: UserData = fetchData();
+     *
+     * // ✅ Aceptable en casos necesarios con comentario
+     * const data: any = fetchData(); // TODO: Definir tipo específico
+     * ```
+     */
     "@typescript-eslint/no-explicit-any": "warn"
   }
 }

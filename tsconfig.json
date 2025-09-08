@@ -1,31 +1,281 @@
+/**
+ * Configuración de TypeScript para VitalCare Frontend.
+ *
+ * Este archivo define la configuración completa del compilador TypeScript
+ * para el proyecto VitalCare. Está optimizado para desarrollo con Vite,
+ * React y aplicaciones modernas del lado del cliente.
+ *
+ * @description
+ * Configuración TypeScript que incluye:
+ * - Target ES2020 para compatibilidad moderna
+ * - Modo bundler optimizado para Vite
+ * - Rutas de alias para imports limpios (@/*)
+ * - Modo estricto para mayor type safety
+ * - Configuración específica para React con JSX
+ * - Optimizaciones de performance y desarrollo
+ *
+ * Las opciones están organizadas por categorías:
+ * - Compilación: Target, módulos, librerías
+ * - Bundler: Configuración específica para Vite
+ * - Linting: Reglas estrictas de calidad de código
+ * - Paths: Mapeo de rutas para imports
+ *
+ * @example
+ * ```json
+ * {
+ *   "compilerOptions": {
+ *     "target": "ES2020",
+ *     "module": "ESNext",
+ *     "jsx": "react-jsx",
+ *     "strict": true,
+ *     "baseUrl": ".",
+ *     "paths": { "@/*": ["./src/*"] }
+ *   },
+ *   "include": ["src"]
+ * }
+ * ```
+ *
+ * @see {@link https://www.typescriptlang.org/docs/handbook/compiler-options.html} Documentación oficial de opciones TypeScript
+ * @see {@link https://vitejs.dev/guide/features.html#typescript} Integración TypeScript con Vite
+ */
+
 {
+  /**
+   * Opciones del compilador TypeScript.
+   * Define cómo TypeScript compila el código y qué características están disponibles.
+   */
   "compilerOptions": {
+    /**
+     * Versión de JavaScript objetivo para la compilación.
+     * ES2020 proporciona características modernas como optional chaining,
+     * nullish coalescing y otros features útiles para desarrollo React.
+     *
+     * @example
+     * ```typescript
+     * // ES2020 features disponibles
+     * const user = data?.user ?? 'default';
+     * const result = await fetchData();
+     * ```
+     */
     "target": "ES2020",
+
+    /**
+     * Define cómo se manejan los campos de clase en las clases.
+     * Verdadero para usar la semántica estándar de campos de clase,
+     * que es más intuitiva y moderna.
+     */
     "useDefineForClassFields": true,
+
+    /**
+     * Librerías de tipos disponibles globalmente.
+     * Incluye ES2020 para features modernas, DOM para APIs del navegador,
+     * y DOM.Iterable para iteradores en el DOM.
+     */
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
+
+    /**
+     * Sistema de módulos a utilizar.
+     * ESNext permite usar los últimos features de módulos ES,
+     * optimizado para bundlers modernos como Vite.
+     */
     "module": "ESNext",
+
+    /**
+     * Omite la verificación de tipos en archivos de declaración.
+     * Mejora el performance de compilación al no verificar
+     * tipos en node_modules y librerías externas.
+     */
     "skipLibCheck": true,
 
-    /* Bundler mode */
+    /* ===========================================
+       CONFIGURACIÓN PARA BUNDLER (Vite)
+       =========================================== */
+
+    /**
+     * Estrategia de resolución de módulos.
+     * 'bundler' está optimizado para bundlers modernos como Vite,
+     * Rollup y esbuild, proporcionando mejor tree-shaking.
+     */
     "moduleResolution": "bundler",
+
+    /**
+     * Permite importar archivos TypeScript con extensión .ts/.tsx.
+     * Útil para desarrollo y debugging, aunque en producción
+     * las extensiones se resuelven automáticamente.
+     *
+     * @example
+     * ```typescript
+     * import { Button } from './Button.tsx'; // Permitido
+     * import { Button } from './Button';     // También válido
+     * ```
+     */
     "allowImportingTsExtensions": true,
+
+    /**
+     * Permite importar archivos JSON como módulos.
+     * Útil para configuración y datos estáticos.
+     *
+     * @example
+     * ```typescript
+     * import config from './config.json';
+     * console.log(config.apiUrl);
+     * ```
+     */
     "resolveJsonModule": true,
+
+    /**
+     * Asegura que cada archivo sea tratado como módulo separado.
+     * Previene problemas de importación y mejora la detección de errores.
+     */
     "isolatedModules": true,
+
+    /**
+     * No emite archivos JavaScript de salida.
+     * Vite maneja la compilación y emisión de archivos,
+     * por lo que TypeScript solo hace verificación de tipos.
+     */
     "noEmit": true,
+
+    /**
+     * Modo JSX para React.
+     * 'react-jsx' usa la nueva transformación JSX que no requiere
+     * importar React en cada archivo que usa JSX.
+     *
+     * @example
+     * ```tsx
+     * // Con react-jsx, no necesitas:
+     * import React from 'react';
+     *
+     * function Component() {
+     *   return <div>Hello</div>; // ✅ Válido
+     * }
+     * ```
+     */
     "jsx": "react-jsx",
 
-    /* Linting */
+    /* ===========================================
+       CONFIGURACIÓN DE LINTING
+       =========================================== */
+
+    /**
+     * Habilita el modo estricto de TypeScript.
+     * Activa todas las verificaciones estrictas de tipos para
+     * mayor seguridad y prevención de errores.
+     *
+     * Incluye:
+     * - noImplicitAny: No permite tipos 'any' implícitos
+     * - strictNullChecks: Verificación estricta de null/undefined
+     * - strictFunctionTypes: Tipos de función estrictos
+     * - Y más verificaciones estrictas
+     */
     "strict": true,
+
+    /**
+     * Error en variables locales no utilizadas.
+     * Ayuda a mantener el código limpio y detectar variables
+     * declaradas pero nunca utilizadas.
+     *
+     * @example
+     * ```typescript
+     * // ❌ Error: variable no utilizada
+     * const unused = 'nunca se usa';
+     *
+     * // ✅ Correcto: variable utilizada
+     * const used = 'se usa después';
+     * console.log(used);
+     * ```
+     */
     "noUnusedLocals": true,
+
+    /**
+     * Error en parámetros de función no utilizados.
+     * Similar a noUnusedLocals pero para parámetros de función.
+     * Se puede usar '_' para ignorar parámetros intencionalmente.
+     *
+     * @example
+     * ```typescript
+     * // ❌ Error: parámetro no utilizado
+     * function handler(event) { } // 'event' no se usa
+     *
+     * // ✅ Correcto: parámetro ignorado
+     * function handler(_event) { } // '_' indica ignorado
+     * ```
+     */
     "noUnusedParameters": true,
+
+    /**
+     * Error en casos faltantes en switch statements.
+     * Previene bugs donde se olvida manejar casos en switch.
+     *
+     * @example
+     * ```typescript
+     * // ❌ Error: falta break o return
+     * switch (value) {
+     *   case 'a': result = 1;
+     *   case 'b': result = 2; // Se ejecuta después de 'a'
+     * }
+     *
+     * // ✅ Correcto: con break
+     * switch (value) {
+     *   case 'a': result = 1; break;
+     *   case 'b': result = 2; break;
+     * }
+     * ```
+     */
     "noFallthroughCasesInSwitch": true,
 
-    /* Path mapping */
+    /* ===========================================
+       MAPEO DE RUTAS (Path Mapping)
+       =========================================== */
+
+    /**
+     * Directorio base para resolver rutas relativas.
+     * '.' significa el directorio donde está este archivo tsconfig.json.
+     */
     "baseUrl": ".",
+
+    /**
+     * Mapeo de rutas para imports limpios.
+     * Permite usar '@/*' en lugar de rutas relativas largas.
+     *
+     * @example
+     * ```typescript
+     * // Sin path mapping
+     * import { Button } from '../../../components/ui/Button';
+     *
+     * // Con path mapping
+     * import { Button } from '@/components/ui/Button';
+     * ```
+     */
     "paths": {
+      /**
+       * Alias para el directorio src.
+       * '@/*' se resuelve a './src/*' desde la raíz del proyecto.
+       */
       "@/*": ["./src/*"]
     }
   },
+
+  /**
+   * Archivos y directorios incluidos en la compilación.
+   * Solo el directorio 'src' se incluye para compilación,
+   * excluyendo node_modules, dist, etc.
+   */
   "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+
+  /**
+   * Referencias a otros archivos tsconfig.
+   * Incluye tsconfig.node.json para configuración específica
+   * de archivos de configuración de Node.js (vite.config.ts, etc.).
+   */
+  "references": [
+    {
+      /**
+       * Referencia al archivo tsconfig.node.json.
+       * Este archivo contiene configuración específica para
+       * archivos de configuración que corren en Node.js.
+       */
+      "path": "./tsconfig.node.json"
+    }
+  ]
 }
