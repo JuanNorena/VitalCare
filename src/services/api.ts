@@ -31,13 +31,16 @@ const getBaseURL = (): string => {
 const API_BASE_URL = getBaseURL();
 
 // Configuración de headers con autenticación
-const getAuthHeaders = (): HeadersInit => {
+const getAuthHeaders = (): Record<string, string> => {
   const token = localStorage.getItem('accessToken');
+  console.log('Access Token:', token); // Verifica el token
   return {
     'Content-Type': 'application/json',
-    ...(token && { 'Authorization': `Bearer ${token}` })
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
   };
 };
+
+
 
 // Función para manejar errores de la API
 const handleApiError = async (response: Response): Promise<never> => {
