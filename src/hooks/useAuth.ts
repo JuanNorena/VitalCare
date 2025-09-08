@@ -1,14 +1,13 @@
 /**
  * Hook para manejo de autenticación
  */
-
+import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { authService } from '@/services/auth';
 import type { 
   User, 
   LoginRequest
 } from '@/types/api';
-import {useNavigate} from "react-router-dom";
 
 export function useAuth() {
   const queryClient = useQueryClient();
@@ -66,13 +65,17 @@ export function useAuth() {
   const logoutMutation = useMutation({
     mutationFn: authService.logout,
     onSuccess: () => {
-      // Limpiar todas las queries
+      // Forzar estado de usuario a null
+      queryClient.setQueryData(['current-user'], null);
+
+      // Limpiar otras queries si es necesario
       queryClient.clear();
 
       // Redirigir al login
-      navigate('/login');
+      navigate('/login', { replace: true });
     },
   });
+
 
   return {
     // Estado

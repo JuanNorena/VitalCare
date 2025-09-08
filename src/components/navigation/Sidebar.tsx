@@ -13,6 +13,7 @@ import { queryClient } from '@/App';
 
 
 
+
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -21,27 +22,27 @@ interface SidebarProps {
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const location = useLocation();
   const { user, logout } = useAuth();
-  const { showError, showSuccess } = useToast();
+  const navigate = useNavigate(); // Hook para redirección
+  const { showSuccess, showError } = useToast();
 
+  console.log('Current user in Sidebar:', user);
   const isPatient = user?.role?.toLowerCase().includes('patient');
   const isDoctor = user?.role?.toLowerCase().includes('doctor');
   const isStaff = user?.role?.toLowerCase().includes('staff');
 
+  
+
 
   const handleLogout = async () => {
-    const navigate = useNavigate(); // Hook para redirección
-    const { showSuccess, showError } = useToast();
-
     try {
-      await authService.logout(); // Llama a la función logout del servicio
-      queryClient.clear(); // Limpia las queries de React Query
+      await authService.logout();
+      await logout(undefined, undefined); // del hook useAuth
       showSuccess('Sesión cerrada', 'Has cerrado sesión correctamente');
-      navigate('/login'); // Redirige al login
     } catch (error) {
-      console.error('Error al cerrar sesión:', error);
       showError('Error al cerrar sesión', 'Ocurrió un problema al cerrar tu sesión');
     }
   };
+
 
   const navigationItems = [
     {
@@ -72,7 +73,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
         </svg>
       ),
-      show: isPatient,
+      show: isPatient || isDoctor,
     },
     {
       name: 'Pacientes',
