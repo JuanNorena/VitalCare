@@ -16,38 +16,34 @@ export function useAuth() {
   const { data: user, isLoading, error } = useQuery<User | null>({
     queryKey: ['current-user'],
     queryFn: async () => {
-      const token = localStorage.getItem('accessToken');
-      if (!token) return null;
-
-      try {
-        return await authService.getCurrentUser();
-      } catch (error) {
-        // Si el token es inválido, limpiamos el localStorage
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        return null;
-      }
+      return await authService.getCurrentUser();
     },
+    enabled: !!localStorage.getItem('accessToken'), // Solo ejecuta si hay token
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutos
   });
+
 
   // Mutation para login
   const loginMutation = useMutation({
     mutationFn: async (data: LoginRequest) => {
       const result = await authService.login(data);
-      
+
       // Guardar tokens en localStorage
+      console.log('Storing tokens:', result);
       localStorage.setItem('accessToken', result.accessToken);
       localStorage.setItem('refreshToken', result.refreshToken);
-      
+
+      // Obtener datos completos del usuario actual
+      const user = await authService.getCurrentUser();
+
+      // Actualizar la query de 'current-user' con los datos recién obtenidos
+      queryClient.setQueryData(['current-user'], user);
+
       return result;
     },
-    onSuccess: async () => {
-      // Invalidar y recargar datos del usuario
-      await queryClient.invalidateQueries({ queryKey: ['current-user'] });
-    },
   });
+
 
   // Mutation para registro de paciente
   const registerPatientMutation = useMutation({
