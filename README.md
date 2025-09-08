@@ -404,10 +404,39 @@ VITE_ENVIRONMENT=production
 
 La aplicación está configurada para desplegarse en:
 
-- **Vercel**: Configuración automática con `vercel.json`
-- **Netlify**: Detección automática de Vite
+- **Render**: Despliegue automático con configuración optimizada
 - **GitHub Pages**: Con GitHub Actions
 - **Servidor tradicional**: Copiando carpeta `dist/`
+
+#### 🌐 Despliegue en Render
+
+Para desplegar en Render:
+
+1. **Conectar repositorio**
+   - Ve a [Render Dashboard](https://dashboard.render.com)
+   - Conecta tu repositorio de GitHub
+
+2. **Configurar servicio web**
+   ```yaml
+   # render.yaml (opcional)
+   services:
+     - type: web
+       name: vitalcare-frontend
+       env: static
+       buildCommand: npm run build
+       staticPublishPath: dist
+   ```
+
+3. **Variables de entorno**
+   ```
+   VITE_API_BASE_URL=https://vitalcare-back.onrender.com
+   VITE_ENVIRONMENT=production
+   ```
+
+4. **Configuración de build**
+   - **Build Command**: `npm run build`
+   - **Publish Directory**: `dist`
+   - **Node Version**: `18.0.0` o superior
 
 ### 📊 Optimizaciones de Build
 
@@ -481,7 +510,7 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](../LICENSE) 
 
 ## 🙏 Agradecimientos
 
-- **React Team** por el increíble framework
+- **React Team** por el increíble framework  
 - **Tailwind CSS** por el sistema de diseño utilitario
 - **TanStack** por React Query
 - **Comunidad Open Source** por las herramientas y bibliotecas
