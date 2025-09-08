@@ -35,7 +35,7 @@ export function AppointmentsPage() {
   const patientAppointments = usePatientAppointments(isPatient && user ? user.id : '');
   const doctorAppointments = useDoctorAppointments(isDoctor && user ? user.id : '');
   
-  const appointments = isPatient ? patientAppointments.data : doctorAppointments.data;
+  const appointments = isPatient ? patientAppointments.data || [] : doctorAppointments.data || [];
   const isLoading = isPatient ? patientAppointments.isLoading : doctorAppointments.isLoading;
 
   const handleCancelAppointment = async (appointmentId: string) => {
@@ -180,11 +180,11 @@ export function AppointmentsPage() {
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                         <h3 className="text-base sm:text-lg font-semibold text-[var(--vc-text)] dark:text-white truncate">
-                          Cita #{appointment.id.substring(0, 8)}...
+                          Cita #{appointment.id ? `${appointment.id.substring(0, 8)}...` : 'N/A'}
                         </h3>
                       </div>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium inline-block ${getStatusColor(appointment.status)}`}>
-                        {getStatusText(appointment.status)}
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium inline-block ${getStatusColor(appointment.status || 'COMPLETED')}`}>
+                        {getStatusText(appointment.status || 'COMPLETED')}
                       </span>
                     </div>
                     
@@ -211,7 +211,7 @@ export function AppointmentsPage() {
                         <svg className="w-4 h-4 text-[var(--vc-text)] dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                         </svg>
-                        <span className="break-all"><strong>Sede:</strong> {appointment.siteId.substring(0, 8)}...</span>
+                        <span className="break-all"><strong>Sede:</strong> {appointment.siteId ? `${appointment.siteId.substring(0, 8)}...` : 'N/A'}</span>
                       </div>
                     </div>
                   </div>
@@ -221,8 +221,8 @@ export function AppointmentsPage() {
                       <>
                         {isDoctor && (
                           <Button
-                            onClick={() => handleConfirmAttendance(appointment.id)}
-                            disabled={isConfirming}
+                            onClick={() => appointment.id && handleConfirmAttendance(appointment.id)}
+                            disabled={isConfirming || !appointment.id}
                             size="sm"
                             className="flex-1 lg:flex-initial text-xs sm:text-sm"
                           >
@@ -230,8 +230,8 @@ export function AppointmentsPage() {
                           </Button>
                         )}
                         <Button
-                          onClick={() => handleCancelAppointment(appointment.id)}
-                          disabled={isCancelling}
+                          onClick={() => appointment.id && handleCancelAppointment(appointment.id)}
+                          disabled={isCancelling || !appointment.id}
                           variant="outline"
                           size="sm"
                           className="flex-1 lg:flex-initial text-xs sm:text-sm"

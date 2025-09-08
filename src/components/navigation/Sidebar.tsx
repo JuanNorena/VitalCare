@@ -7,9 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/utils/cn';
 import { useToast } from '@/contexts/ToastContext';
-import { useNavigate } from 'react-router-dom';
 import {authService} from "@/services/auth.ts";
-import { queryClient } from '@/App';
 
 
 
@@ -22,7 +20,6 @@ interface SidebarProps {
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const location = useLocation();
   const { user, logout } = useAuth();
-  const navigate = useNavigate(); // Hook para redirección
   const { showSuccess, showError } = useToast();
 
   console.log('Current user in Sidebar:', user);
@@ -45,6 +42,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
 
   const navigationItems = [
+    // DASHBOARD - Todos los roles
     {
       name: 'Dashboard',
       href: '/dashboard',
@@ -53,8 +51,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
         </svg>
       ),
-      show: true,
+      show: true, // Todos los usuarios pueden ver el dashboard
+      description: 'Vista general del sistema'
     },
+
+    // PARA PACIENTES - Sus citas y solicitar nueva cita
     {
       name: 'Mis Citas',
       href: '/appointments',
@@ -63,37 +64,34 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
         </svg>
       ),
-      show: isPatient || isDoctor,
+      show: isPatient,
+      description: 'Ver todas mis citas médicas'
     },
+
+    // PARA DOCTORES Y STAFF - Ver todas las citas
     {
-      name: 'Nueva Cita',
-      href: '/new-appointment',
-      icon: (
-        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-        </svg>
-      ),
-      show: isPatient || isDoctor,
-    },
-    {
-      name: 'Pacientes',
-      href: '/patients',
-      icon: (
-        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
-        </svg>
-      ),
-      show: isDoctor || isStaff,
-    },
-    {
-      name: 'Citas Médicas',
+      name: 'Gestión de Citas',
       href: '/appointments',
       icon: (
         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
           <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
         </svg>
       ),
-      show: isStaff,
+      show: isDoctor || isStaff,
+      description: 'Ver y gestionar todas las citas del sistema'
+    },
+
+    // CREAR NUEVA CITA - Todos los usuarios (pero se comporta diferente según el rol)
+    {
+      name: 'Nueva Cita',
+      href: '/create-appointment',
+      icon: (
+        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+        </svg>
+      ),
+      show: true, // Todos pueden crear citas
+      description: isPatient ? 'Solicitar una nueva cita médica' : 'Agendar nueva cita para pacientes'
     },
   ];
 
@@ -167,14 +165,23 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                   to={item.href}
                   onClick={onClose}
                   className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200",
+                    "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 group",
                     isActive
-                      ? "bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-700"
-                      : "text-[var(--vc-text)] hover:bg-[var(--vc-hover)]"
+                      ? "bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700"
+                      : "text-[var(--vc-text)] hover:bg-[var(--vc-hover)] hover:text-[var(--vc-accent)]"
                   )}
+                  title={item.description}
                 >
-                  {item.icon}
-                  {item.name}
+                  <span className={cn(
+                    "transition-colors duration-200",
+                    isActive ? "text-blue-600 dark:text-blue-400" : "text-[var(--vc-text)]/70 group-hover:text-[var(--vc-accent)]"
+                  )}>
+                    {item.icon}
+                  </span>
+                  <span className="flex-1">{item.name}</span>
+                  {isActive && (
+                    <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full"></div>
+                  )}
                 </Link>
               );
             })}

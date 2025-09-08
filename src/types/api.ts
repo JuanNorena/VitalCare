@@ -47,35 +47,50 @@ export interface JwtResponse {
   refreshToken: string;
 }
 
-// Cita médica (según AppointmentDTO del backend)
+// ========================================
+// TIPOS DE CITAS MÉDICAS - CONFORME AL BACKEND
+// ========================================
+
+/**
+ * AppointmentDTO exacto del backend
+ * Basado en: co.edu.uniquindio.vitalcareback.Dto.scheduling.AppointmentDTO
+ * CAMPOS DISPONIBLES EN EL BACKEND:
+ * - id: UUID 
+ * - patientId: UUID
+ * - doctorId: UUID  
+ * - siteId: UUID (opcional)
+ * - scheduledDate: LocalDateTime
+ * - status: String
+ */
 export interface Appointment {
-  id: string;
-  patientId: string;
-  doctorId: string;
-  siteId: string; // El backend usa siteId
-  scheduledDate: string; // LocalDateTime as ISO string
-  status: string;
+  id?: string;              // UUID (opcional al crear, requerido en respuestas)
+  patientId: string;        // UUID (requerido)
+  doctorId: string;         // UUID (requerido) 
+  siteId?: string;          // UUID (opcional)
+  scheduledDate: string;    // LocalDateTime como ISO string (requerido)
+  status?: 'SCHEDULED' | 'RESCHEDULED' | 'CANCELLED' | 'COMPLETED' | 'NO_SHOW'; // String en backend
 }
 
-// Petición para crear cita (según AppointmentDTO del backend)
-export interface CreateAppointmentRequest {
-  patientId: string;
-  doctorId: string;
-  siteId: string;
-  scheduledDate: string; // LocalDateTime as ISO string
-  status?: string; // Opcional, se puede setear por defecto en backend
-}
+/**
+ * Estados de cita según AppointmentStatus enum del backend
+ */
+export type AppointmentStatus = 
+  | 'SCHEDULED'    // Estado inicial
+  | 'RESCHEDULED'  // Reprogramada
+  | 'CANCELLED'    // Cancelada
+  | 'COMPLETED'    // Completada (confirmada asistencia)
+  | 'NO_SHOW';     // No se presentó
 
-// Datos para crear nueva cita (más completo)
-export interface AppointmentCreate {
-  patientId: string;
-  doctorId: string;
-  siteId?: string; // Opcional con valor por defecto
-  scheduledDate: string;
-  reason: string;
-  notes?: string;
-  status: string;
-}
+/**
+ * Alias para compatibilidad con el backend
+ * Usa la misma interfaz que Appointment
+ */
+export type CreateAppointmentRequest = Appointment;
+
+/**
+ * Alias para compatibilidad con componentes existentes
+ */
+export type AppointmentCreate = Appointment;
 
 // Respuesta general de la API
 export interface ApiResponse<T = any> {

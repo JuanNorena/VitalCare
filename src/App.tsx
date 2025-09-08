@@ -8,6 +8,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { RegisterPage } from '@/pages/auth/RegisterPage';
 import { AppointmentsPage } from '@/pages/appointments/AppointmentsPage';
+import { CreateAppointmentPage } from '@/pages/appointments/CreateAppointmentPage';
 import { DashboardPage } from '@/pages/dashboard/DashboardPage';
 import { EnvironmentInfo } from '@/components/EnvironmentInfo';
 import { useAuth } from '@/hooks/useAuth';
@@ -101,6 +102,18 @@ function AppRoutes() {
           <ProtectedRoute>
             <MainLayout>
               <AppointmentsPage />
+            </MainLayout>
+          </ProtectedRoute>
+        } 
+      />
+
+      {/* Ruta para crear cita */}
+      <Route 
+        path="/create-appointment" 
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <CreateAppointmentPage />
             </MainLayout>
           </ProtectedRoute>
         } 

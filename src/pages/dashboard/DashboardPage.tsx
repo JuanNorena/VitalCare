@@ -2,15 +2,18 @@
  * Página de dashboard principal
  */
 
+import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useAppointments } from '@/hooks/useAppointments';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Link } from 'react-router-dom';
+import { CreateAppointmentModal } from '@/components/appointments/CreateAppointmentModal';
 
 export function DashboardPage() {
   const { user } = useAuth();
   const { usePatientAppointments, useDoctorAppointments } = useAppointments();
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const isPatient = user?.role?.toLowerCase().includes('patient');
   const isDoctor = user?.role?.toLowerCase().includes('doctor');
@@ -165,7 +168,7 @@ export function DashboardPage() {
                       <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                       <div>
                         <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                          Cita #{appointment.id.substring(0, 8)}...
+                          Cita #{appointment.id ? appointment.id.substring(0, 8) : 'N/A'}...
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
                           {formatDate(appointment.scheduledDate)}
@@ -173,7 +176,7 @@ export function DashboardPage() {
                       </div>
                     </div>
                     <span className="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded-full">
-                      {appointment.status === 'scheduled' ? 'Programada' : 'Confirmada'}
+                      {appointment.status === 'SCHEDULED' ? 'Programada' : 'Confirmada'}
                     </span>
                   </div>
                 ))}
@@ -198,12 +201,36 @@ export function DashboardPage() {
             
             <div className="space-y-3">
               {isPatient && (
-                <Link to="/appointments">
+                <>
+                  <Link to="/create-appointment">
+                    <Button className="w-full justify-start gap-3" variant="outline">
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                      </svg>
+                      Programar Nueva Cita
+                    </Button>
+                  </Link>
+                  
+                  <Button 
+                    className="w-full justify-start gap-3" 
+                    variant="outline"
+                    onClick={() => setShowCreateModal(true)}
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                    </svg>
+                    Cita Rápida (Modal)
+                  </Button>
+                </>
+              )}
+              
+              {!isPatient && (
+                <Link to="/create-appointment">
                   <Button className="w-full justify-start gap-3" variant="outline">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
                     </svg>
-                    Programar Nueva Cita
+                    Agendar Nueva Cita
                   </Button>
                 </Link>
               )}
@@ -238,6 +265,12 @@ export function DashboardPage() {
           </Card>
         </div>
       </main>
+
+      {/* Modal para crear nueva cita */}
+      <CreateAppointmentModal 
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+      />
     </div>
   );
 }

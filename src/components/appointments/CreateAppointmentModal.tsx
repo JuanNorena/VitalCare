@@ -7,9 +7,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { createAppointment } from '@/services/appointments';
+import { appointmentService } from '@/services/appointments';
 import { useAuth } from '@/hooks/useAuth';
 import type { AppointmentCreate } from '@/types/api';
+import { useToast } from '@/contexts/ToastContext';
 
 interface CreateAppointmentModalProps {
   isOpen: boolean;
@@ -19,28 +20,26 @@ interface CreateAppointmentModalProps {
 export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentModalProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { showSuccess } = useToast();
   
   const [formData, setFormData] = useState({
     patientId: user?.id || '',
     doctorId: '',
-    scheduledDate: '',
-    reason: '',
-    notes: ''
+    scheduledDate: ''
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const createMutation = useMutation({
-    mutationFn: createAppointment,
+    mutationFn: appointmentService.createAppointment,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      showSuccess('Cita creada exitosamente', 'Tu cita ha sido programada correctamente');
       onClose();
       setFormData({
         patientId: user?.id || '',
         doctorId: '',
-        scheduledDate: '',
-        reason: '',
-        notes: ''
+        scheduledDate: ''
       });
       setErrors({});
     },
@@ -56,16 +55,12 @@ export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentMod
     // Validaciones básicas
     const newErrors: Record<string, string> = {};
     
-    if (!formData.doctorId) {
-      newErrors.doctorId = 'Selecciona un doctor';
+    if (!formData.doctorId.trim()) {
+      newErrors.doctorId = 'Ingresa el ID del doctor';
     }
     
     if (!formData.scheduledDate) {
       newErrors.scheduledDate = 'Selecciona fecha y hora';
-    }
-    
-    if (!formData.reason.trim()) {
-      newErrors.reason = 'Describe el motivo de la consulta';
     }
 
     // Validar que la fecha sea futura
@@ -82,14 +77,20 @@ export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentMod
       return;
     }
 
-    // Formatear datos para el backend
+    // Formatear datos para el backend (backend espera LocalDateTime sin zona, p.e. "YYYY-MM-DDTHH:mm:ss")
+    const normalizeScheduledDate = (v: string) => {
+      if (!v) return v;
+      // datetime-local produces "YYYY-MM-DDTHH:mm" (no segundos) in most browsers
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(v)) return `${v}:00`;
+      // If an ISO with Z is provided, strip Z to produce a LocalDateTime-like string
+      if (v.endsWith('Z')) return v.replace(/Z$/, '');
+      return v;
+    };
+
     const appointmentData: AppointmentCreate = {
       patientId: formData.patientId,
       doctorId: formData.doctorId,
-      scheduledDate: formData.scheduledDate,
-      reason: formData.reason,
-      notes: formData.notes || undefined,
-      status: 'scheduled'
+      scheduledDate: normalizeScheduledDate(formData.scheduledDate)
     };
 
     createMutation.mutate(appointmentData);
@@ -106,12 +107,13 @@ export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentMod
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-[var(--vc-card-bg)] dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+      {/* modal uses theme background: white in light mode, dark gray in dark mode; text color inherited */}
+      <div className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
         <Card className="border-0 shadow-none">
           <div className="p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-[var(--vc-text)] dark:text-white">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                 Nueva Cita Médica
               </h2>
               <Button
@@ -128,26 +130,28 @@ export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentMod
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Doctor ID (por ahora campo manual) */}
+              {/* Doctor ID */}
               <div>
-                <label className="block text-sm font-medium text-[var(--vc-text)] dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-900 dark:text-gray-300 mb-2">
                   ID del Doctor *
                 </label>
                 <Input
                   type="text"
+                  placeholder="Ingresa el ID del doctor"
                   value={formData.doctorId}
                   onChange={(e) => handleChange('doctorId', e.target.value)}
-                  placeholder="Ingresa el ID del doctor"
                   className={errors.doctorId ? 'border-red-500' : ''}
                 />
                 {errors.doctorId && (
-                  <p className="text-red-500 text-xs mt-1">{errors.doctorId}</p>
+                  <div className="mt-1 px-3 py-1 bg-red-500 text-white text-sm rounded">
+                    {errors.doctorId}
+                  </div>
                 )}
               </div>
 
               {/* Fecha y hora */}
               <div>
-                <label className="block text-sm font-medium text-[var(--vc-text)] dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-900 dark:text-gray-300 mb-2">
                   Fecha y Hora *
                 </label>
                 <Input
@@ -155,50 +159,19 @@ export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentMod
                   value={formData.scheduledDate}
                   onChange={(e) => handleChange('scheduledDate', e.target.value)}
                   min={new Date().toISOString().slice(0, 16)}
-                  className={errors.scheduledDate ? 'border-red-500' : ''}
+                  className={`bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 ${errors.scheduledDate ? 'border-red-500' : ''}`}
                 />
                 {errors.scheduledDate && (
-                  <p className="text-red-500 text-xs mt-1">{errors.scheduledDate}</p>
+                  <div className="mt-1 px-3 py-1 bg-red-500 text-white text-sm rounded">
+                    {errors.scheduledDate}
+                  </div>
                 )}
-              </div>
-
-              {/* Motivo */}
-              <div>
-                <label className="block text-sm font-medium text-[var(--vc-text)] dark:text-gray-300 mb-2">
-                  Motivo de la Consulta *
-                </label>
-                <textarea
-                  value={formData.reason}
-                  onChange={(e) => handleChange('reason', e.target.value)}
-                  placeholder="Describe el motivo de tu consulta..."
-                  rows={3}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-[var(--vc-input-bg)] dark:bg-gray-700 text-[var(--vc-text)] dark:text-white border-[var(--vc-border)] dark:border-gray-600 ${
-                    errors.reason ? 'border-red-500' : ''
-                  }`}
-                />
-                {errors.reason && (
-                  <p className="text-red-500 text-xs mt-1">{errors.reason}</p>
-                )}
-              </div>
-
-              {/* Notas adicionales */}
-              <div>
-                <label className="block text-sm font-medium text-[var(--vc-text)] dark:text-gray-300 mb-2">
-                  Notas Adicionales
-                </label>
-                <textarea
-                  value={formData.notes}
-                  onChange={(e) => handleChange('notes', e.target.value)}
-                  placeholder="Información adicional (opcional)..."
-                  rows={2}
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-[var(--vc-input-bg)] dark:bg-gray-700 text-[var(--vc-text)] dark:text-white border-[var(--vc-border)] dark:border-gray-600"
-                />
               </div>
 
               {/* Error de submit */}
               {errors.submit && (
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
-                  <p className="text-red-600 dark:text-red-400 text-sm">{errors.submit}</p>
+                <div className="px-4 py-3 bg-red-500 text-white text-sm rounded-lg">
+                  {errors.submit}
                 </div>
               )}
 

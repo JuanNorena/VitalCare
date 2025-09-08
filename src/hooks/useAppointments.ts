@@ -5,6 +5,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { appointmentService } from '@/services/appointments';
 import type { Appointment } from '@/types/api';
+import type { RescheduleAppointmentRequest } from '@/services/appointments';
 
 // Hooks de lectura (top-level) — evitan advertencias del plugin de Hooks
 export const usePatientAppointments = (patientId: string) => {
@@ -43,7 +44,7 @@ export const useCancelAppointment = () => {
 export const useRescheduleAppointment = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Appointment> }) =>
+    mutationFn: ({ id, data }: { id: string; data: RescheduleAppointmentRequest }) =>
       appointmentService.rescheduleAppointment(id, data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['appointments'] }),
   });
