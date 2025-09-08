@@ -50,8 +50,8 @@ import { apiClient } from './api';
 export interface AppointmentDTO {
   /** ID único de la cita (UUID, opcional al crear) */
   id?: string;
-  /** ID del paciente (UUID, requerido) */
-  patientId: string;
+  /** ID del paciente (UUID, requerido cuando no se usa patientEmail) */
+  patientId?: string;
   /** ID del doctor (UUID, requerido) */
   doctorId: string;
   /** ID del sitio/hospital (UUID, opcional) */
@@ -60,6 +60,8 @@ export interface AppointmentDTO {
   scheduledDate: string;
   /** Estado actual de la cita */
   status?: AppointmentStatus;
+  /** Email del paciente (requerido cuando no se usa patientId) */
+  patientEmail?: string;
 }
 
 /**
@@ -95,18 +97,32 @@ export interface RescheduleAppointmentRequest {
  */
 export const appointmentService = {
   /**
-   * Crea una nueva cita médica.
+   * Crea una nueva cita médica usando el ID del paciente.
    * @param {AppointmentDTO} appointmentData - Datos de la cita a crear.
    * @returns {Promise<AppointmentDTO>} La cita creada con su ID asignado.
    * @throws {Error} Si faltan campos requeridos o hay error en la creación.
+   * 
+   * @description
+   * Endpoint: POST /api/appointments/create
+   * Backend Controller: AppointmentController.createAppointment()
+   * 
+   * @example
+   * ```typescript
+   * const appointment = await appointmentService.createAppointment({
+   *   patientId: 'uuid-del-paciente',
+   *   doctorId: 'uuid-del-doctor',
+   *   scheduledDate: '2024-01-15T10:30:00',
+   *   siteId: 'uuid-del-sitio' // opcional
+   * });
+   * ```
    */
   createAppointment: async (appointmentData: AppointmentDTO): Promise<AppointmentDTO> => {
     console.log('=== CREAR CITA ===');
     console.log('Datos enviados:', appointmentData);
 
     // Validación de campos requeridos
-    if (!appointmentData.patientId) {
-      throw new Error('patientId es requerido');
+    if (!appointmentData.patientId && !appointmentData.patientEmail) {
+      throw new Error('patientId o patientEmail es requerido');
     }
     if (!appointmentData.doctorId) {
       throw new Error('doctorId es requerido');
@@ -117,6 +133,49 @@ export const appointmentService = {
 
     const result = await apiClient.post<AppointmentDTO>('/appointments/create', appointmentData);
     console.log('Cita creada:', result);
+    return result;
+  },
+
+  /**
+   * Crea una nueva cita médica usando el email del paciente.
+   * @param {AppointmentDTO} appointmentData - Datos de la cita incluyendo patientEmail.
+   * @returns {Promise<AppointmentDTO>} La cita creada con su ID asignado.
+   * @throws {Error} Si faltan campos requeridos o hay error en la creación.
+   * 
+   * @description
+   * Endpoint: POST /api/appointments/create-by-email
+   * Backend Controller: AppointmentController.createAppointmentByEmail()
+   * 
+   * Este método permite crear citas cuando no se conoce el patientId pero sí 
+   * el email del paciente. Es útil para sistemas de registro externo.
+   * 
+   * @example
+   * ```typescript
+   * const appointment = await appointmentService.createAppointmentByEmail({
+   *   patientEmail: 'paciente@correo.com',
+   *   doctorId: 'uuid-del-doctor',
+   *   scheduledDate: '2024-01-15T10:30:00',
+   *   siteId: 'uuid-del-sitio' // opcional
+   * });
+   * ```
+   */
+  createAppointmentByEmail: async (appointmentData: AppointmentDTO): Promise<AppointmentDTO> => {
+    console.log('=== CREAR CITA POR EMAIL ===');
+    console.log('Datos enviados:', appointmentData);
+
+    // Validación de campos requeridos para creación por email
+    if (!appointmentData.patientEmail) {
+      throw new Error('patientEmail es requerido para crear cita por email');
+    }
+    if (!appointmentData.doctorId) {
+      throw new Error('doctorId es requerido');
+    }
+    if (!appointmentData.scheduledDate) {
+      throw new Error('scheduledDate es requerido');
+    }
+
+    const result = await apiClient.post<AppointmentDTO>('/appointments/create-by-email', appointmentData);
+    console.log('Cita creada por email:', result);
     return result;
   },
 
@@ -133,9 +192,15 @@ export const appointmentService = {
       throw new Error('patientId es requerido');
     }
 
-    const result = await apiClient.get<AppointmentDTO[]>(`/appointments/patient/${patientId}`);
-    console.log(`Citas del paciente obtenidas: ${result.length}`);
-    return result;
+    try {
+      const result = await apiClient.get<AppointmentDTO[]>(`/appointments/patient/${patientId}`);
+      console.log(`✅ Citas del paciente obtenidas: ${result.length}`);
+      console.log('📋 Datos de citas:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error al obtener citas del paciente:', error);
+      throw error;
+    }
   },
 
   /**
@@ -151,9 +216,15 @@ export const appointmentService = {
       throw new Error('doctorId es requerido');
     }
 
-    const result = await apiClient.get<AppointmentDTO[]>(`/appointments/doctor/${doctorId}`);
-    console.log(`Citas del doctor obtenidas: ${result.length}`);
-    return result;
+    try {
+      const result = await apiClient.get<AppointmentDTO[]>(`/appointments/doctor/${doctorId}`);
+      console.log(`✅ Citas del doctor obtenidas: ${result.length}`);
+      console.log('📋 Datos de citas:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error al obtener citas del doctor:', error);
+      throw error;
+    }
   },
 
   /**

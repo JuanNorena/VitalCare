@@ -44,7 +44,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { appointmentService } from '@/services/appointments';
-import type { Appointment } from '@/types/api';
+import type { AppointmentDTO } from '@/services/appointments';
 import type { RescheduleAppointmentRequest } from '@/services/appointments';
 
 // Hooks de lectura (top-level) — evitan advertencias del plugin de Hooks
@@ -52,7 +52,7 @@ import type { RescheduleAppointmentRequest } from '@/services/appointments';
  * Hook para consultar citas de un paciente específico.
  *
  * @param {string} patientId - ID del paciente cuyas citas se quieren consultar.
- * @returns {UseQueryResult<Appointment[]>} Resultado de la consulta con datos, loading, error.
+ * @returns {UseQueryResult<AppointmentDTO[]>} Resultado de la consulta con datos, loading, error.
  *
  * @description
  * Utiliza React Query para cachear las citas del paciente.
@@ -68,7 +68,7 @@ import type { RescheduleAppointmentRequest } from '@/services/appointments';
  * ```
  */
 export const usePatientAppointments = (patientId: string) => {
-  return useQuery<Appointment[]>({
+  return useQuery<AppointmentDTO[]>({
     queryKey: ['appointments', 'patient', patientId],
     queryFn: () => appointmentService.getAppointmentsByPatient(patientId),
     enabled: !!patientId,
@@ -79,7 +79,7 @@ export const usePatientAppointments = (patientId: string) => {
  * Hook para consultar citas de un doctor específico.
  *
  * @param {string} doctorId - ID del doctor cuyas citas se quieren consultar.
- * @returns {UseQueryResult<Appointment[]>} Resultado de la consulta con datos, loading, error.
+ * @returns {UseQueryResult<AppointmentDTO[]>} Resultado de la consulta con datos, loading, error.
  *
  * @description
  * Utiliza React Query para cachear las citas del doctor.
@@ -93,7 +93,7 @@ export const usePatientAppointments = (patientId: string) => {
  * ```
  */
 export const useDoctorAppointments = (doctorId: string) => {
-  return useQuery<Appointment[]>({
+  return useQuery<AppointmentDTO[]>({
     queryKey: ['appointments', 'doctor', doctorId],
     queryFn: () => appointmentService.getAppointmentsByDoctor(doctorId),
     enabled: !!doctorId,
@@ -109,6 +109,8 @@ export const useDoctorAppointments = (doctorId: string) => {
  * @description
  * Mutation que crea una nueva cita y actualiza el cache automáticamente.
  * Invalida todas las consultas de appointments tras la creación exitosa.
+ * Automáticamente detecta si usar createAppointment o createAppointmentByEmail
+ * basándose en la presencia de patientEmail en los datos.
  *
  * @example
  * ```typescript
@@ -127,7 +129,16 @@ export const useDoctorAppointments = (doctorId: string) => {
 export const useCreateAppointment = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: appointmentService.createAppointment,
+    mutationFn: (appointmentData: any) => {
+      // Detectar automáticamente qué endpoint usar
+      if (appointmentData.patientEmail?.trim()) {
+        console.log('[useCreateAppointment] Usando createAppointmentByEmail...');
+        return appointmentService.createAppointmentByEmail(appointmentData);
+      } else {
+        console.log('[useCreateAppointment] Usando createAppointment...');
+        return appointmentService.createAppointment(appointmentData);
+      }
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['appointments'] }),
   });
 };

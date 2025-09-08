@@ -58,11 +58,16 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useAppointments } from '@/hooks/useAppointments';
+import { 
+  usePatientAppointments,
+  useDoctorAppointments,
+  useCancelAppointment,
+  useConfirmAttendance 
+} from '@/hooks/useAppointments';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { CreateAppointmentModal } from '@/components/appointments/CreateAppointmentModal';
-import type { CreateAppointmentRequest } from '@/types/api';
+import type { AppointmentDTO } from '@/services/appointments';
 import { useToast } from '@/contexts/ToastContext';
 
 /**
@@ -73,23 +78,7 @@ import { useToast } from '@/contexts/ToastContext';
  */
 export function AppointmentsPage() {
   const { user } = useAuth();
-  const {
-    usePatientAppointments,
-    useDoctorAppointments,
-    createAppointment,
-    cancelAppointment,
-    confirmAttendance,
-    isCreating,
-    isCancelling,
-    isConfirming
-  } = useAppointments();
   const { showError, showSuccess } = useToast();
-
-  /**
-   * Controla la visibilidad del formulario inline de creación.
-   * @type {boolean}
-   */
-  const [showCreateForm, setShowCreateForm] = useState(false);
 
   /**
    * Controla la visibilidad del modal de creación de citas.
@@ -121,17 +110,51 @@ export function AppointmentsPage() {
    */
   const doctorAppointments = useDoctorAppointments(isDoctor && user ? user.id : '');
 
+  // Debug logging
+  console.log('[AppointmentsPage] Usuario:', user);
+  console.log('[AppointmentsPage] Es paciente:', isPatient);
+  console.log('[AppointmentsPage] Es doctor:', isDoctor);
+  console.log('[AppointmentsPage] User ID:', user?.id);
+  console.log('[AppointmentsPage] Patient appointments query:', patientAppointments);
+  console.log('[AppointmentsPage] Doctor appointments query:', doctorAppointments);
+
+  /**
+   * Mutations individuales para operaciones de citas.
+   */
+  const cancelMutation = useCancelAppointment();
+  const confirmMutation = useConfirmAttendance();
+
   /**
    * Lista de citas del usuario actual (paciente o doctor).
-   * @type {Appointment[]}
+   * @type {AppointmentDTO[]}
    */
-  const appointments = isPatient ? patientAppointments.data || [] : doctorAppointments.data || [];
+  const appointments: AppointmentDTO[] = isPatient ? patientAppointments.data || [] : doctorAppointments.data || [];
 
   /**
    * Estado de carga de las citas.
    * @type {boolean}
    */
   const isLoading = isPatient ? patientAppointments.isLoading : doctorAppointments.isLoading;
+
+  /**
+   * Estado de error de las citas.
+   * @type {Error | null}
+   */
+  const error = isPatient ? patientAppointments.error : doctorAppointments.error;
+
+  // Debug logging adicional
+  console.log('[AppointmentsPage] Appointments data:', appointments);
+  console.log('[AppointmentsPage] IsLoading:', isLoading);
+  console.log('[AppointmentsPage] Error:', error);
+  console.log('[AppointmentsPage] Raw query data - Patient:', patientAppointments.data);
+  console.log('[AppointmentsPage] Raw query data - Doctor:', doctorAppointments.data);
+
+  /**
+   * Estados de loading para las mutations (no se usan actualmente).
+   */
+  // const isCreating = createMutation.isPending;
+  const isCancelling = cancelMutation.isPending;
+  const isConfirming = confirmMutation.isPending;
 
   /**
    * Maneja la cancelación de una cita médica.
@@ -150,7 +173,7 @@ export function AppointmentsPage() {
   const handleCancelAppointment = async (appointmentId: string) => {
     if (window.confirm('¿Estás seguro de que quieres cancelar esta cita?')) {
       try {
-        await cancelAppointment(appointmentId);
+        await cancelMutation.mutateAsync(appointmentId);
         showSuccess('Cita cancelada', 'La cita ha sido cancelada exitosamente');
       } catch (error) {
         console.error('Error al cancelar cita:', error);
@@ -174,7 +197,7 @@ export function AppointmentsPage() {
    */
   const handleConfirmAttendance = async (appointmentId: string) => {
     try {
-      await confirmAttendance(appointmentId);
+      await confirmMutation.mutateAsync(appointmentId);
       showSuccess('Asistencia confirmada', 'La asistencia a la cita ha sido confirmada exitosamente');
     } catch (error) {
       console.error('Error al confirmar asistencia:', error);
@@ -279,42 +302,32 @@ export function AppointmentsPage() {
           </div>
         </div>
 
-        {/* Formulario de crear cita (solo para pacientes) */}
-        {showCreateForm && isPatient && (
-          <Card className="p-4 sm:p-6 mb-6 sm:mb-8 shadow-lg border-0 bg-[var(--vc-card-bg)] dark:bg-gray-800">
-            <div className="flex items-center gap-3 mb-3 sm:mb-4">
-              <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
-                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <h3 className="text-base sm:text-lg font-semibold text-[var(--vc-text)] dark:text-white">
-                Programar Nueva Cita
-              </h3>
-            </div>
-            <CreateAppointmentForm 
-              onSubmit={async (data) => {
-                try {
-                  await createAppointment(data);
-                  setShowCreateForm(false);
-                } catch (error) {
-                  console.error('Error al crear cita:', error);
-                }
-              }}
-              isLoading={isCreating}
-              currentUserId={user.id}
-            />
-          </Card>
-        )}
+        {/* Formulario de crear cita eliminado - Solo usar modal */}
 
         {/* Lista de citas */}
         {isLoading ? (
           <div className="text-center py-8">
             <div className="text-[var(--vc-text)] dark:text-gray-400">Cargando citas...</div>
           </div>
+        ) : error ? (
+          <Card className="p-6 sm:p-8 text-center shadow-lg border-0 bg-[var(--vc-card-bg)] dark:bg-gray-800">
+            <div className="w-16 h-16 mx-auto mb-4 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-red-600 dark:text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="text-[var(--vc-text)] dark:text-gray-400">
+              <p className="text-base sm:text-lg font-medium text-red-600 dark:text-red-400 mb-2">
+                Error al cargar las citas
+              </p>
+              <p className="text-sm sm:text-base">
+                {error?.message || 'Ocurrió un error inesperado. Por favor, inténtalo de nuevo.'}
+              </p>
+            </div>
+          </Card>
         ) : appointments && appointments.length > 0 ? (
           <div className="grid gap-4 sm:gap-6">
-            {appointments.map((appointment) => (
+            {appointments.map((appointment: any) => (
               <Card key={appointment.id} className="p-4 sm:p-6 shadow-lg border-0 bg-[var(--vc-card-bg)] dark:bg-gray-800 hover:shadow-xl transition-all duration-200">
                 <div className="flex flex-col lg:flex-row justify-between items-start gap-4 lg:gap-0">
                   <div className="flex-1 min-w-0">
@@ -341,7 +354,13 @@ export function AppointmentsPage() {
                         <svg className="w-4 h-4 text-[var(--vc-text)] dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                         </svg>
-                        <span className="break-all"><strong>Paciente:</strong> {appointment.patientId.substring(0, 8)}...</span>
+                        <span className="break-all">
+                          <strong>Paciente:</strong> {
+                            appointment.patientId 
+                              ? `${appointment.patientId.substring(0, 8)}...` 
+                              : appointment.patientEmail || 'N/A'
+                          }
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <svg className="w-4 h-4 text-[var(--vc-text)] dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
@@ -414,138 +433,5 @@ export function AppointmentsPage() {
         onClose={() => setShowCreateModal(false)}
       />
     </div>
-  );
-}
-
-// Componente de formulario para crear cita
-/**
- * Interfaz de propiedades para el componente CreateAppointmentForm.
- */
-interface CreateAppointmentFormProps {
-  /** Función callback que se ejecuta al enviar el formulario */
-  onSubmit: (data: CreateAppointmentRequest) => Promise<void>;
-  /** Indica si el formulario está procesando una solicitud */
-  isLoading: boolean;
-  /** ID del usuario actual que está creando la cita */
-  currentUserId: string;
-}
-
-/**
- * Componente de formulario para crear una nueva cita médica.
- * Formulario inline integrado en la página de citas para creación rápida.
- *
- * @component
- * @param {CreateAppointmentFormProps} props - Propiedades del componente.
- * @returns {JSX.Element} Formulario de creación de cita médica.
- *
- * @description
- * Este componente proporciona un formulario simplificado para crear citas médicas.
- * Está diseñado para ser usado inline en la página de citas, ofreciendo una
- * experiencia de creación rápida sin necesidad de modal separado.
- *
- * Campos del formulario:
- * - doctorId: ID del doctor (requerido)
- * - siteId: ID de la sede médica (requerido)
- * - scheduledDate: Fecha y hora de la cita (requerido)
- * - patientId: Se establece automáticamente con el ID del usuario actual
- *
- * Características:
- * - Validación de campos requeridos
- * - Estados de carga durante el envío
- * - Diseño responsivo con grid adaptable
- * - Tema adaptable (claro/oscuro)
- * - Transiciones suaves en focus
- *
- * @example
- * ```tsx
- * <CreateAppointmentForm
- *   onSubmit={handleCreateAppointment}
- *   isLoading={false}
- *   currentUserId="user-123"
- * />
- * ```
- */
-function CreateAppointmentForm({ onSubmit, isLoading, currentUserId }: CreateAppointmentFormProps) {
-  const [formData, setFormData] = useState<CreateAppointmentRequest>({
-    patientId: currentUserId,
-    doctorId: '',
-    siteId: '',
-    scheduledDate: '',
-  });
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await onSubmit(formData);
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-        <div>
-          <label htmlFor="doctorId" className="block text-sm font-medium text-[var(--vc-text)] dark:text-gray-300 mb-1">
-            ID del Doctor *
-          </label>
-          <input
-            id="doctorId"
-            name="doctorId"
-            type="text"
-            required
-            value={formData.doctorId}
-            onChange={handleInputChange}
-            placeholder="Ingresa el ID del doctor"
-            className="w-full h-10 sm:h-11 px-3 sm:px-4 text-sm sm:text-base rounded-lg border border-[var(--vc-border)] bg-[var(--vc-input-bg)] text-[var(--vc-text)] focus:outline-none focus:ring-2 focus:ring-[var(--vc-button-primary)] focus:border-transparent transition-all duration-200"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="siteId" className="block text-sm font-medium text-[var(--vc-text)] dark:text-gray-300 mb-1">
-            ID de la Sede *
-          </label>
-          <input
-            id="siteId"
-            name="siteId"
-            type="text"
-            required
-            value={formData.siteId}
-            onChange={handleInputChange}
-            placeholder="Ingresa el ID de la sede"
-            className="w-full h-10 sm:h-11 px-3 sm:px-4 text-sm sm:text-base rounded-lg border border-[var(--vc-border)] bg-[var(--vc-input-bg)] text-[var(--vc-text)] focus:outline-none focus:ring-2 focus:ring-[var(--vc-button-primary)] focus:border-transparent transition-all duration-200"
-          />
-        </div>
-      </div>
-
-      <div>
-  <label htmlFor="scheduledDate" className="block text-sm font-medium text-[var(--vc-text)] dark:text-gray-300 mb-1">
-          Fecha y Hora *
-        </label>
-        <input
-          id="scheduledDate"
-          name="scheduledDate"
-          type="datetime-local"
-          required
-          value={formData.scheduledDate}
-          onChange={handleInputChange}
-          className="w-full h-10 sm:h-11 px-3 sm:px-4 text-sm sm:text-base rounded-lg border border-[var(--vc-border)] bg-[var(--vc-input-bg)] text-[var(--vc-text)] focus:outline-none focus:ring-2 focus:ring-[var(--vc-button-primary)] focus:border-transparent transition-all duration-200"
-        />
-      </div>
-
-      <div className="flex justify-end pt-2 sm:pt-4">
-        <Button 
-          type="submit" 
-          disabled={isLoading}
-          className="w-full sm:w-auto text-sm sm:text-base"
-        >
-          {isLoading ? 'Creando...' : 'Programar Cita'}
-        </Button>
-      </div>
-    </form>
   );
 }

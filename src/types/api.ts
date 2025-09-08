@@ -138,8 +138,8 @@ export interface JwtResponse {
 export interface Appointment {
   /** ID único de la cita (UUID, opcional al crear) */
   id?: string;
-  /** ID del paciente (UUID, requerido) */
-  patientId: string;
+  /** ID del paciente (UUID, requerido cuando no se usa patientEmail) */
+  patientId?: string;
   /** ID del doctor (UUID, requerido) */
   doctorId: string;
   /** ID del sitio/hospital (UUID, opcional) */
@@ -148,6 +148,8 @@ export interface Appointment {
   scheduledDate: string;
   /** Estado actual de la cita */
   status?: AppointmentStatus;
+  /** Email del paciente (requerido cuando no se usa patientId) */
+  patientEmail?: string;
 }
 
 /**

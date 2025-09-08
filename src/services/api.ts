@@ -67,15 +67,18 @@ const getBaseURL = (): string => {
   const envBaseURL = import.meta.env.VITE_API_BASE_URL;
   
   if (envBaseURL) {
+    console.log('🔧 [API] Usando URL de variable de entorno:', `${envBaseURL}/api`);
     return `${envBaseURL}/api`;
   }
   
   // En desarrollo, usar proxy de Vite
   if (import.meta.env.DEV) {
+    console.log('🔧 [API] Modo desarrollo - usando proxy Vite:', '/api');
     return '/api'; // El proxy de Vite redirigirá a https://vitalcare-back.onrender.com
   }
   
   // En producción, usar la URL del backend desplegado
+  console.log('🔧 [API] Modo producción - usando URL directa:', 'https://vitalcare-back.onrender.com/api');
   return 'https://vitalcare-back.onrender.com/api';
 };
 
@@ -188,16 +191,34 @@ export const apiClient = {
    * ```
    */
   get: async <T>(endpoint: string): Promise<T> => {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const url = `${API_BASE_URL}${endpoint}`;
+    const headers = getAuthHeaders();
+    
+    console.log('🌐 [API GET] Realizando petición:', {
+      url,
+      headers,
+      endpoint
+    });
+
+    const response = await fetch(url, {
       method: 'GET',
-      headers: getAuthHeaders(),
+      headers,
+    });
+
+    console.log('📡 [API GET] Respuesta recibida:', {
+      status: response.status,
+      statusText: response.statusText,
+      url: response.url,
+      ok: response.ok
     });
 
     if (!response.ok) {
       await handleApiError(response);
     }
 
-    return response.json();
+    const data = await response.json();
+    console.log('📋 [API GET] Datos parseados:', data);
+    return data;
   },
 
   /**

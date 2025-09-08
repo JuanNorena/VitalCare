@@ -8,6 +8,7 @@
  * @description
  * Funcionalidades principales:
  * - Creación de citas médicas con formulario completo
+ * - Selección de doctores con dropdown dinámico
  * - Manejo de roles: pacientes pueden solicitar citas, doctores/staff pueden agendar
  * - Validaciones en tiempo real con mensajes de error específicos
  * - Normalización automática de fechas para compatibilidad con backend
@@ -15,6 +16,7 @@
  * - Navegación automática después de crear cita exitosamente
  * - Interfaz responsive con diseño moderno
  * - Soporte completo para modo oscuro
+ * - Creación por email cuando no se conoce el patientId
  *
  * La página se adapta dinámicamente según el rol del usuario:
  * - Pacientes: Solo pueden solicitar citas para sí mismos
@@ -36,6 +38,7 @@
  * @see {@link useAppointments} para el hook que maneja la lógica de citas.
  * @see {@link useAuth} para el hook de autenticación.
  * @see {@link useToast} para el sistema de notificaciones.
+ * @see {@link doctorService} para el servicio de doctores.
  */
 
 import { useState, useEffect } from 'react';
@@ -47,6 +50,8 @@ import { Input } from '@/components/ui/Input';
 import { useNavigate } from 'react-router-dom';
 import type { CreateAppointmentRequest } from '@/types/api';
 import { useToast } from '@/contexts/ToastContext';
+import { doctorService } from '@/services/doctors';
+import type { DoctorProfileDTO } from '@/services/doctors';
 
 /**
  * Componente de página CreateAppointmentPage para crear nuevas citas médicas.
@@ -95,13 +100,15 @@ export function CreateAppointmentPage() {
   /**
    * Estado del formulario que mantiene los datos de la nueva cita.
    * Se inicializa con valores por defecto basados en el usuario actual.
+   * Para pacientes, se usa automáticamente su email.
    * @type {CreateAppointmentRequest}
    */
   const [formData, setFormData] = useState<CreateAppointmentRequest>({
-    patientId: user?.id || '',
     doctorId: '',
     siteId: '',
-    scheduledDate: ''
+    scheduledDate: '',
+    // Solo usar email para crear citas
+    patientEmail: user?.email || ''
   });
 
   /**
@@ -112,6 +119,19 @@ export function CreateAppointmentPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   /**
+   * Estado para almacenar la lista de doctores disponibles.
+   * Se carga automáticamente al montar el componente.
+   * @type {DoctorProfileDTO[]}
+   */
+  const [doctors, setDoctors] = useState<DoctorProfileDTO[]>([]);
+
+  /**
+   * Estado para controlar el loading de la carga de doctores.
+   * @type {boolean}
+   */
+  const [isLoadingDoctors, setIsLoadingDoctors] = useState<boolean>(false);
+
+  /**
    * Determina si el usuario actual es un paciente basado en su rol.
    * Esto afecta qué campos se muestran y cómo se comporta el formulario.
    * @type {boolean}
@@ -119,26 +139,51 @@ export function CreateAppointmentPage() {
   const isPatient = user?.role?.toLowerCase().includes('patient');
 
   /**
-   * Efecto que configura automáticamente el patientId basado en el rol del usuario.
-   * Para pacientes, usa su propio ID. Para doctores/staff, deja el campo vacío
+   * Efecto que configura automáticamente el email del paciente basado en el usuario autenticado.
+   * Para pacientes, usa su propio email. Para doctores/staff, deja el campo vacío
    * para que sea ingresado manualmente.
    */
   useEffect(() => {
-    if (isPatient && user?.id) {
-      setFormData(prev => ({ ...prev, patientId: user.id }));
+    if (isPatient && user?.email) {
+      setFormData(prev => ({ ...prev, patientEmail: user.email }));
     } else {
-      setFormData(prev => ({ ...prev, patientId: '' }));
+      setFormData(prev => ({ ...prev, patientEmail: '' }));
     }
-  }, [isPatient, user?.id]);
+  }, [isPatient, user?.email]);
+
+  /**
+   * Efecto para cargar la lista de doctores disponibles al montar el componente.
+   * Se ejecuta una sola vez al cargar la página para poblar el dropdown de doctores.
+   */
+  useEffect(() => {
+    const loadDoctors = async () => {
+      try {
+        setIsLoadingDoctors(true);
+        console.log('🔍 [CreateAppointmentPage] Cargando doctores disponibles...');
+        
+        const doctorsList = await doctorService.getAllDoctors();
+        setDoctors(doctorsList);
+        
+        console.log('✅ [CreateAppointmentPage] Doctores cargados:', doctorsList.length);
+      } catch (error) {
+        console.error('❌ [CreateAppointmentPage] Error al cargar doctores:', error);
+        showError('Error al cargar la lista de doctores');
+      } finally {
+        setIsLoadingDoctors(false);
+      }
+    };
+
+    loadDoctors();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * Manejador de cambios en los inputs del formulario.
    * Actualiza el estado del formulario y limpia errores específicos cuando el usuario
    * comienza a escribir en un campo que tenía error.
    *
-   * @param {React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>} e - Evento de cambio.
+   * @param {React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>} e - Evento de cambio.
    */
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -162,12 +207,28 @@ export function CreateAppointmentPage() {
     const newErrors: Record<string, string> = {};
 
     // Validaciones según el rol
-    if (!isPatient && !formData.patientId.trim()) {
-      newErrors.patientId = 'ID del paciente es requerido';
+    if (!isPatient) {
+      // Para doctores/staff: deben proporcionar email del paciente
+      if (!formData.patientEmail?.trim()) {
+        newErrors.patientEmail = 'Email del paciente es requerido';
+      }
+      
+      // Validar formato de email si se proporciona
+      if (formData.patientEmail?.trim()) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.patientEmail)) {
+          newErrors.patientEmail = 'Formato de email inválido';
+        }
+      }
+    } else {
+      // Para pacientes: validar que el email esté presente
+      if (!formData.patientEmail?.trim()) {
+        newErrors.patientEmail = 'Tu email es requerido';
+      }
     }
 
     if (!formData.doctorId.trim()) {
-      newErrors.doctorId = 'ID del doctor es requerido';
+      newErrors.doctorId = 'Debe seleccionar un doctor';
     }
 
     if (!formData.scheduledDate) {
@@ -230,6 +291,8 @@ export function CreateAppointmentPage() {
         ...(formData.siteId ? { siteId: formData.siteId } : {})
       };
 
+      // El hook useCreateAppointment ahora detecta automáticamente qué endpoint usar
+      console.log('🔄 [CreateAppointmentPage] Creando cita con datos:', appointmentData);
       await createAppointment(appointmentData);
 
       showSuccess(
@@ -287,46 +350,78 @@ export function CreateAppointmentPage() {
         <Card className="p-6 sm:p-8 shadow-lg border-0 bg-[var(--vc-card-bg)]">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* ID del Paciente - Solo visible para doctores y staff */}
+              {/* Campo de email del paciente - Solo visible para doctores y staff */}
               {!isPatient && (
                 <div className="md:col-span-2">
-                  <label htmlFor="patientId" className="block text-sm font-medium text-gray-900 dark:text-gray-300 mb-2">
-                    ID del Paciente *
+                  <label htmlFor="patientEmail" className="block text-sm font-medium text-gray-900 dark:text-gray-300 mb-2">
+                    Email del Paciente *
                   </label>
                   <Input
-                    id="patientId"
-                    name="patientId"
-                    type="text"
-                    value={formData.patientId}
+                    id="patientEmail"
+                    name="patientEmail"
+                    type="email"
+                    value={formData.patientEmail || ''}
                     onChange={handleInputChange}
-                    placeholder="Ingresa el ID del paciente"
-                    className={`bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 ${errors.patientId ? 'border-red-500' : ''}`}
+                    placeholder="Ingresa el email del paciente"
+                    className={`bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 ${errors.patientEmail ? 'border-red-500' : ''}`}
                   />
-                  {errors.patientId && (
+                  {errors.patientEmail && (
                     <div className="mt-1 px-3 py-1 bg-red-500 text-white text-sm rounded">
-                      {errors.patientId}
+                      {errors.patientEmail}
                     </div>
                   )}
                 </div>
               )}
 
-              {/* ID del Doctor */}
+              {/* Para pacientes - mostrar email como solo lectura */}
+              {isPatient && (
+                <div className="md:col-span-2">
+                  <label htmlFor="patientEmailReadonly" className="block text-sm font-medium text-gray-900 dark:text-gray-300 mb-2">
+                    Tu Email
+                  </label>
+                  <Input
+                    id="patientEmailReadonly"
+                    type="email"
+                    value={formData.patientEmail || ''}
+                    readOnly
+                    className="bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 cursor-not-allowed"
+                  />
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Se usará tu email registrado para la cita médica
+                  </p>
+                </div>
+              )}
+
+              {/* Selector de Doctor */}
               <div>
                 <label htmlFor="doctorId" className="block text-sm font-medium text-gray-900 dark:text-gray-300 mb-2">
-                  ID del Doctor *
+                  Doctor *
                 </label>
-                <Input
+                <select
                   id="doctorId"
                   name="doctorId"
-                  type="text"
-                  placeholder="Ingresa el ID del doctor"
                   value={formData.doctorId}
                   onChange={handleInputChange}
-                  className={`bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 ${errors.doctorId ? 'border-red-500' : ''}`}
-                />
+                  disabled={isLoadingDoctors}
+                  className={`w-full px-3 py-2 border rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${errors.doctorId ? 'border-red-500' : ''}`}
+                >
+                  <option value="">
+                    {isLoadingDoctors ? 'Cargando doctores...' : 'Selecciona un doctor'}
+                  </option>
+                  {doctors.map((doctor) => (
+                    <option key={doctor.id} value={doctor.id}>
+                      Dr. {doctor.lastName} - {doctor.specialty}
+                    </option>
+                  ))}
+                </select>
                 {errors.doctorId && (
                   <div className="mt-1 px-3 py-1 bg-red-500 text-white text-sm rounded">
                     {errors.doctorId}
+                  </div>
+                )}
+                {isLoadingDoctors && (
+                  <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    🔄 Cargando lista de doctores...
                   </div>
                 )}
               </div>
