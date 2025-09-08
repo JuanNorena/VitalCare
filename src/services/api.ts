@@ -85,12 +85,13 @@ export const apiClient = {
       data,
       headers: getAuthHeaders()
     });
-    
+
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: data ? JSON.stringify(data) : undefined,
-    });
+    }) as Response;
+
 
     console.log('API POST Response:', {
       status: response.status,

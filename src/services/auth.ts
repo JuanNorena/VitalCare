@@ -37,10 +37,16 @@ export const authService = {
 
   // Login de usuario (POST /api/auth/login)
   login: async (data: LoginRequest): Promise<JwtResponse> => {
-    return apiClient.post<JwtResponse>('/auth/login', {
+    const response = await apiClient.post<JwtResponse>('/auth/login', {
       email: data.email,
-      password: data.password
+      password: data.password,
     });
+
+    // guardar tokens
+    localStorage.setItem('accessToken', response.accessToken);
+    localStorage.setItem('refreshToken', response.refreshToken);
+
+    return response;
   },
 
   // Registro genérico de usuario (POST /api/auth/register) 
