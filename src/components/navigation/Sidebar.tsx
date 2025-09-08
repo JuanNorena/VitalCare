@@ -8,6 +8,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/utils/cn';
 import { useToast } from '@/contexts/ToastContext';
 import { useNavigate } from 'react-router-dom';
+import {authService} from "@/services/auth.ts";
+import { queryClient } from '@/App';
+
+
 
 interface SidebarProps {
   isOpen: boolean;
@@ -26,14 +30,13 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   const handleLogout = async () => {
     const navigate = useNavigate(); // Hook para redirección
+    const { showSuccess, showError } = useToast();
 
     try {
-      await logout;
+      await authService.logout(); // Llama a la función logout del servicio
+      queryClient.clear(); // Limpia las queries de React Query
       showSuccess('Sesión cerrada', 'Has cerrado sesión correctamente');
-      onClose();
-
-      // Redirigir al login
-      navigate('/login');
+      navigate('/login'); // Redirige al login
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
       showError('Error al cerrar sesión', 'Ocurrió un problema al cerrar tu sesión');

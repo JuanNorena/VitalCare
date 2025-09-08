@@ -15,7 +15,7 @@ import { AccessibilityMenu } from '@/components/accessibility/AccessibilityMenu'
 import { ToastProvider } from '@/contexts/ToastContext';
 
 // Configuración del Query Client
-const queryClient = new QueryClient({
+export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
