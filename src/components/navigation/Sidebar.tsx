@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/utils/cn';
 import { useToast } from '@/contexts/ToastContext';
+import { useNavigate } from 'react-router-dom';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -22,11 +23,17 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const isDoctor = user?.role?.toLowerCase().includes('doctor');
   const isStaff = user?.role?.toLowerCase().includes('staff');
 
+
   const handleLogout = async () => {
+    const navigate = useNavigate(); // Hook para redirección
+
     try {
-      await logout();
+      await logout;
       showSuccess('Sesión cerrada', 'Has cerrado sesión correctamente');
       onClose();
+
+      // Redirigir al login
+      navigate('/login');
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
       showError('Error al cerrar sesión', 'Ocurrió un problema al cerrar tu sesión');

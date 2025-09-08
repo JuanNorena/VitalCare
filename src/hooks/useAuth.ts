@@ -8,9 +8,11 @@ import type {
   User, 
   LoginRequest
 } from '@/types/api';
+import {useNavigate} from "react-router-dom";
 
 export function useAuth() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   // Query para obtener el usuario actual
   const { data: user, isLoading, error } = useQuery<User | null>({
@@ -66,6 +68,9 @@ export function useAuth() {
     onSuccess: () => {
       // Limpiar todas las queries
       queryClient.clear();
+
+      // Redirigir al login
+      navigate('/login');
     },
   });
 
