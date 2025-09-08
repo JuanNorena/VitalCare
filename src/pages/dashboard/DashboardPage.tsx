@@ -1,5 +1,55 @@
 /**
- * Página de dashboard principal
+ * Página de Dashboard Principal de VitalCare.
+ *
+ * Esta página sirve como panel de control central para todos los usuarios del sistema médico.
+ * Muestra estadísticas personalizadas, citas próximas y acciones rápidas basadas en el rol del usuario.
+ * Implementa un diseño responsivo con tema adaptable (claro/oscuro).
+ *
+ * @example
+ * ```tsx
+ * // La página se renderiza automáticamente en la ruta /
+ * // después de la autenticación del usuario
+ * // No requiere instanciación manual
+ * ```
+ *
+ * @description
+ * Funcionalidades principales por rol:
+ *
+ * Para Pacientes:
+ * - Visualización de citas próximas y completadas
+ * - Estadísticas de citas totales y estado de cuenta
+ * - Acciones rápidas: programar nueva cita, ver todas las citas
+ * - Modal integrado para citas rápidas
+ *
+ * Para Doctores:
+ * - Dashboard de consultas médicas pendientes y completadas
+ * - Vista rápida de próximas consultas con detalles
+ * - Acciones: agendar nueva cita, ver todas las consultas, gestionar pacientes
+ * - Enfoque en gestión de agenda médica
+ *
+ * Para Personal Administrativo:
+ * - Panel de control administrativo
+ * - Acciones: agendar citas, gestión general, panel administrativo
+ * - Vista de estadísticas generales del sistema
+ *
+ * Características técnicas:
+ * - Carga dinámica de datos usando React Query
+ * - Filtrado automático de citas por estado (scheduled, confirmed, completed)
+ * - Formateo de fechas localizado (es-CO)
+ * - Saludos dinámicos basados en hora del día
+ * - Navegación integrada con React Router
+ * - Tema adaptable con variables CSS personalizadas
+ * - Diseño responsivo con Tailwind CSS
+ *
+ * Estados de citas manejados:
+ * - 'scheduled': Cita programada
+ * - 'confirmed': Cita confirmada
+ * - 'completed': Cita completada
+ *
+ * @see {@link useAuth} para la gestión de autenticación y roles de usuario.
+ * @see {@link useAppointments} para los hooks de carga de citas.
+ * @see {@link CreateAppointmentModal} para el modal de citas rápidas.
+ * @see {@link AppointmentsPage} para la vista completa de citas.
  */
 
 import { useState } from 'react';
@@ -10,29 +60,76 @@ import { Button } from '@/components/ui/Button';
 import { Link } from 'react-router-dom';
 import { CreateAppointmentModal } from '@/components/appointments/CreateAppointmentModal';
 
+/**
+ * Página de Dashboard Principal de VitalCare.
+ *
+ * @component
+ * @returns {JSX.Element} Dashboard personalizado según el rol del usuario.
+ */
 export function DashboardPage() {
   const { user } = useAuth();
   const { usePatientAppointments, useDoctorAppointments } = useAppointments();
   const [showCreateModal, setShowCreateModal] = useState(false);
 
+  /**
+   * Determina si el usuario actual es un paciente.
+   * @type {boolean}
+   */
   const isPatient = user?.role?.toLowerCase().includes('patient');
+
+  /**
+   * Determina si el usuario actual es un doctor.
+   * @type {boolean}
+   */
   const isDoctor = user?.role?.toLowerCase().includes('doctor');
+
+  /**
+   * Determina si el usuario actual es personal administrativo.
+   * @type {boolean}
+   */
   const isStaff = user?.role?.toLowerCase().includes('staff');
 
+  /**
+   * Hook para cargar citas del paciente actual.
+   * Solo se ejecuta si el usuario es paciente.
+   */
   const patientAppointments = usePatientAppointments(isPatient && user ? user.id : '');
+
+  /**
+   * Hook para cargar citas del doctor actual.
+   * Solo se ejecuta si el usuario es doctor.
+   */
   const doctorAppointments = useDoctorAppointments(isDoctor && user ? user.id : '');
-  
+
+  /**
+   * Citas del usuario actual (paciente o doctor).
+   * Se selecciona automáticamente basado en el rol.
+   * @type {Appointment[] | undefined}
+   */
   const appointments = isPatient ? patientAppointments.data : doctorAppointments.data;
 
-  // Estadísticas rápidas
-  const upcomingAppointments = appointments?.filter(apt => 
+  /**
+   * Filtra las citas próximas (programadas o confirmadas).
+   * @type {Appointment[]}
+   */
+  const upcomingAppointments = appointments?.filter(apt =>
     apt.status?.toLowerCase() === 'scheduled' || apt.status?.toLowerCase() === 'confirmed'
   ) || [];
-  
-  const completedAppointments = appointments?.filter(apt => 
+
+  /**
+   * Filtra las citas completadas.
+   * @type {Appointment[]}
+   */
+  const completedAppointments = appointments?.filter(apt =>
     apt.status?.toLowerCase() === 'completed'
   ) || [];
 
+  /**
+   * Formatea una fecha para mostrar en formato localizado colombiano.
+   *
+   * @param {string} dateString - Fecha en formato ISO string.
+   * @returns {string} Fecha formateada (ej: "ene 15, 14:30").
+   */
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('es-CO', {
@@ -43,6 +140,11 @@ export function DashboardPage() {
     });
   };
 
+  /**
+   * Genera un saludo dinámico basado en la hora del día.
+   *
+   * @returns {string} Saludo apropiado ('Buenos días', 'Buenas tardes', 'Buenas noches').
+   */
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Buenos días';
@@ -50,6 +152,11 @@ export function DashboardPage() {
     return 'Buenas noches';
   };
 
+  /**
+   * Determina el rol del usuario en formato legible.
+   *
+   * @returns {string} Rol del usuario ('Paciente', 'Doctor', 'Personal Médico', 'Usuario').
+   */
   const getUserRole = () => {
     if (isPatient) return 'Paciente';
     if (isDoctor) return 'Doctor';

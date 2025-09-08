@@ -1,20 +1,109 @@
 /**
- * Componente Toast para mostrar mensajes de retroalimentación
+ * Componente React Toast para mostrar notificaciones individuales en VitalCare.
+ *
+ * Este componente representa una notificación toast individual con diferentes
+ * tipos de mensaje (éxito, error, advertencia, información). Incluye iconos,
+ * estilos temáticos, auto-cierre automático y cierre manual por el usuario.
+ *
+ * @description
+ * Funcionalidades principales:
+ * - Cuatro tipos de toast: success, error, warning, info
+ * - Iconos SVG específicos para cada tipo
+ * - Estilos temáticos con soporte para modo oscuro
+ * - Auto-cierre automático configurable
+ * - Cierre manual con botón X
+ * - Animaciones de transición suaves
+ * - Accesibilidad con roles ARIA
+ * - Diseño responsive y adaptable
+ *
+ * El componente maneja su propio ciclo de vida con auto-cierre y proporciona
+ * una interfaz consistente para diferentes tipos de notificaciones en la aplicación.
+ *
+ * @example
+ * ```typescript
+ * import { Toast } from '@/components/ui/Toast';
+ *
+ * function NotificationExample() {
+ *   const handleClose = (id) => {
+ *     console.log('Toast cerrado:', id);
+ *   };
+ *
+ *   return (
+ *     <Toast
+ *       id="toast-1"
+ *       title="Operación exitosa"
+ *       description="Los datos se guardaron correctamente"
+ *       type="success"
+ *       duration={5000}
+ *       onClose={handleClose}
+ *     />
+ *   );
+ * }
+ * ```
+ *
+ * @see {@link ToastContainer} para el contenedor que gestiona múltiples toasts.
+ * @see {@link ToastContext} para el contexto global de notificaciones.
  */
 
 import { useEffect } from 'react';
 import { cn } from '@/utils/cn';
 
+/**
+ * Props del componente Toast.
+ */
 export interface ToastProps {
+  /** Identificador único del toast */
   id: string;
+  /** Título del toast */
   title: string;
+  /** Descripción opcional del toast */
   description?: string;
+  /** Tipo de toast que determina el estilo y icono */
   type: 'success' | 'error' | 'warning' | 'info';
+  /** Duración en milisegundos antes de auto-cerrarse (por defecto 5000) */
   duration?: number;
+  /** Función callback que se ejecuta al cerrar el toast */
   onClose: (id: string) => void;
 }
 
+/**
+ * Componente Toast que muestra una notificación individual.
+ *
+ * @component
+ * @param {ToastProps} props - Propiedades del componente.
+ * @param {string} props.id - ID único del toast.
+ * @param {string} props.title - Título del toast.
+ * @param {string} [props.description] - Descripción opcional.
+ * @param {'success' | 'error' | 'warning' | 'info'} props.type - Tipo de toast.
+ * @param {number} [props.duration=5000] - Duración en ms antes de auto-cerrarse.
+ * @param {(id: string) => void} props.onClose - Función para cerrar el toast.
+ * @returns {JSX.Element} Elemento toast renderizado.
+ *
+ * @description
+ * Este componente renderiza una notificación toast con:
+ * - Icono específico según el tipo
+ * - Estilos temáticos coherentes
+ * - Auto-cierre automático
+ * - Botón de cierre manual
+ * - Soporte completo para accesibilidad
+ *
+ * @example
+ * ```typescript
+ * <Toast
+ *   id="success-toast"
+ *   title="Guardado exitosamente"
+ *   description="Los cambios han sido guardados"
+ *   type="success"
+ *   onClose={handleClose}
+ * />
+ * ```
+ */
 export function Toast({ id, title, description, type, duration = 5000, onClose }: ToastProps) {
+  /**
+   * Efecto para manejar el auto-cierre del toast.
+   * Configura un temporizador que cierra automáticamente el toast después
+   * de la duración especificada.
+   */
   useEffect(() => {
     if (duration > 0) {
       const timer = setTimeout(() => {
@@ -25,6 +114,12 @@ export function Toast({ id, title, description, type, duration = 5000, onClose }
     }
   }, [id, duration, onClose]);
 
+  /**
+   * Función que retorna los estilos CSS según el tipo de toast.
+   * Incluye colores de fondo, borde, texto e iconos para cada variante.
+   *
+   * @returns {Object} Objeto con clases CSS para diferentes elementos.
+   */
   const getToastStyles = () => {
     switch (type) {
       case 'success':
@@ -63,8 +158,17 @@ export function Toast({ id, title, description, type, duration = 5000, onClose }
     }
   };
 
+  /**
+   * Objeto con los estilos calculados para el toast actual.
+   * @type {Object}
+   */
   const styles = getToastStyles();
 
+  /**
+   * Función que retorna el icono SVG correspondiente al tipo de toast.
+   *
+   * @returns {JSX.Element} Elemento SVG del icono.
+   */
   const getIcon = () => {
     switch (type) {
       case 'success':

@@ -1,47 +1,111 @@
+/**
+ * Estilos globales y sistema de temas para VitalCare.
+ *
+ * Este archivo CSS define el sistema de diseño completo de la aplicación,
+ * incluyendo variables CSS para temas claro/oscuro, tipografía responsive,
+ * utilidades de accesibilidad y estilos base para componentes.
+ *
+ * Ejemplo de uso:
+ * .my-component {
+ *   background: var(--vc-bg);
+ *   color: var(--vc-text);
+ *   border: 1px solid var(--vc-border);
+ * }
+ *
+ * El sistema de temas incluye:
+ * - Variables CSS para colores, fuentes y espaciado
+ * - Tema claro por defecto y oscuro opcional
+ * - Tipografía responsive con escalado dinámico
+ * - Utilidades de accesibilidad (focus, scrollbars)
+ * - Estilos base para formularios y componentes
+ * - Animaciones y transiciones suaves
+ *
+ * Las variables están prefijadas con --vc- (VitalCare) para evitar conflictos.
+ * El tema oscuro se activa agregando la clase 'dark' al elemento :root.
+ */
+
 @import "tailwindcss";
 
 /* =========================================================
    THEME TOKENS (Light defaults + Dark overrides)
    ========================================================= */
+
+/**
+ * Variables CSS para el tema claro (por defecto).
+ * Define todos los colores, fuentes y valores base de la aplicación.
+ */
 :root {
-  --vc-font-scale: 1; /* escalado dinámico */
-  --vc-bg: #ffffff;
-  --vc-text: #1f2937; /* gray-800 */
-  --vc-bg-secondary: #f8fafc;
-  --vc-card-bg: #ffffff;
-  --vc-input-bg: #ffffff;
-  --vc-border: #e2e8f0; /* gray-200 */
-  --vc-hover: #f1f5f9; /* gray-100 */
-  --vc-button-primary: #2563eb; /* blue-600 */
-  --vc-button-secondary: #6b7280; /* gray-500 */
-  --vc-accent: #1d4ed8; /* blue-700 */
-  --vc-accent-contrast: #ffffff;
-  --vc-focus-ring: #3b82f6; /* blue-500 */
-  --vc-error-bg: #fef2f2; /* red-50 */
-  --vc-error-text: #dc2626; /* red-600 */
+  /* Escala de fuente dinámica (controlada por AccessibilityContext) */
+  --vc-font-scale: 1;
+
+  /* Colores principales */
+  --vc-bg: #ffffff;                    /* Fondo principal */
+  --vc-text: #1f2937;                  /* Texto principal (gray-800) */
+  --vc-bg-secondary: #f8fafc;          /* Fondo secundario */
+
+  /* Componentes */
+  --vc-card-bg: #ffffff;               /* Fondo de tarjetas */
+  --vc-input-bg: #ffffff;              /* Fondo de inputs */
+  --vc-border: #e2e8f0;                /* Bordes (gray-200) */
+  --vc-hover: #f1f5f9;                 /* Estados hover (gray-100) */
+
+  /* Botones y acentos */
+  --vc-button-primary: #2563eb;        /* Botón primario (blue-600) */
+  --vc-button-secondary: #6b7280;      /* Botón secundario (gray-500) */
+  --vc-accent: #1d4ed8;                /* Acento (blue-700) */
+  --vc-accent-contrast: #ffffff;       /* Contraste para acentos */
+
+  /* Estados especiales */
+  --vc-focus-ring: #3b82f6;            /* Anillos de foco (blue-500) */
+  --vc-error-bg: #fef2f2;              /* Fondo de errores (red-50) */
+  --vc-error-text: #dc2626;            /* Texto de errores (red-600) */
 }
 
+/**
+ * Variables CSS para el tema oscuro.
+ * Override de las variables cuando se aplica la clase 'dark' al :root.
+ */
 :root.dark {
-  --vc-bg: #0f172a; /* slate-900 */
-  --vc-text: #f8fafc; /* gray-50 */
-  --vc-bg-secondary: #1e293b; /* slate-800 */
-  --vc-card-bg: #1e293b;
-  --vc-input-bg: #334155; /* slate-700 */
-  --vc-border: #334155; /* slate-700 */
-  --vc-hover: #334155; /* slate-700 */
-  --vc-button-primary: #3b82f6; /* blue-500 */
-  --vc-button-secondary: #64748b; /* slate-500 */
-  --vc-accent: #1e40af; /* blue-800 */
-  --vc-accent-contrast: #f8fafc;
-  --vc-focus-ring: #60a5fa; /* blue-400 */
-  --vc-error-bg: #7f1d1d; /* red-900 */
-  --vc-error-text: #fca5a5; /* red-300 */
+  /* Colores principales */
+  --vc-bg: #0f172a;                    /* Fondo principal oscuro (slate-900) */
+  --vc-text: #f8fafc;                  /* Texto principal oscuro (gray-50) */
+  --vc-bg-secondary: #1e293b;          /* Fondo secundario oscuro (slate-800) */
+
+  /* Componentes */
+  --vc-card-bg: #1e293b;               /* Fondo de tarjetas oscuro */
+  --vc-input-bg: #334155;              /* Fondo de inputs oscuro (slate-700) */
+  --vc-border: #334155;                /* Bordes oscuros (slate-700) */
+  --vc-hover: #334155;                 /* Estados hover oscuros (slate-700) */
+
+  /* Botones y acentos */
+  --vc-button-primary: #3b82f6;        /* Botón primario oscuro (blue-500) */
+  --vc-button-secondary: #64748b;      /* Botón secundario oscuro (slate-500) */
+  --vc-accent: #1e40af;                /* Acento oscuro (blue-800) */
+  --vc-accent-contrast: #f8fafc;       /* Contraste para acentos oscuros */
+
+  /* Estados especiales */
+  --vc-focus-ring: #60a5fa;            /* Anillos de foco oscuros (blue-400) */
+  --vc-error-bg: #7f1d1d;              /* Fondo de errores oscuro (red-900) */
+  --vc-error-text: #fca5a5;            /* Texto de errores oscuro (red-300) */
 }
 
+/* =========================================================
+   BASE STYLES
+   ========================================================= */
+
+/** Reset y box-sizing universal */
 * { box-sizing: border-box; }
 
+/**
+ * Estilos base del HTML.
+ * Aplica la escala de fuente dinámica controlada por accesibilidad.
+ */
 html { font-size: calc(16px * var(--vc-font-scale)); }
 
+/**
+ * Estilos base del body.
+ * Define la tipografía, colores base y transiciones suaves.
+ */
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -54,39 +118,86 @@ body {
   transition: background-color .3s ease, color .3s ease, border-color .3s ease;
   color-scheme: light;
 }
+
+/** Color scheme para tema oscuro */
 body.dark { color-scheme: dark; }
 
-/* Scrollbar */
+/* =========================================================
+   SCROLLBAR STYLING
+   ========================================================= */
+
+/** Scrollbar principal */
 ::-webkit-scrollbar { width:8px; }
+
+/** Track del scrollbar */
 ::-webkit-scrollbar-track { background: var(--vc-bg-secondary); }
+
+/** Thumb del scrollbar */
 ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:4px; }
+
+/** Hover del thumb del scrollbar */
 ::-webkit-scrollbar-thumb:hover { background:#94a3b8; }
+
+/** Scrollbar en tema oscuro - track */
 :root.dark ::-webkit-scrollbar-track { background:#1e293b; }
+
+/** Scrollbar en tema oscuro - thumb */
 :root.dark ::-webkit-scrollbar-thumb { background:#475569; }
+
+/** Scrollbar en tema oscuro - hover */
 :root.dark ::-webkit-scrollbar-thumb:hover { background:#64748b; }
 
-/* Animación spin */
+/* =========================================================
+   ANIMATIONS
+   ========================================================= */
+
+/** Animación de giro infinita para spinners */
 .animate-spin { animation: spin 1s linear infinite; }
+
+/** Keyframes para la animación spin */
 @keyframes spin { from { transform:rotate(0deg);} to { transform:rotate(360deg);} }
 
-/* Focus utilities */
+/* =========================================================
+   ACCESSIBILITY & FOCUS
+   ========================================================= */
+
+/** Utilidad para focus visible (solo cuando es apropiado) */
 .focus-visible:focus-visible { outline:2px solid var(--vc-focus-ring); outline-offset:2px; }
 
-/* Form base */
+/* =========================================================
+   FORM STYLES
+   ========================================================= */
+
+/**
+ * Estilos base para elementos de formulario.
+ * Asegura consistencia visual y transiciones suaves.
+ */
 input, textarea, select {
   background: var(--vc-input-bg);
   color: var(--vc-text);
   border:1px solid var(--vc-border);
   transition: background-color .2s ease, color .2s ease, border-color .2s ease, box-shadow .2s ease;
 }
+
+/**
+ * Estados focus para elementos de formulario.
+ * Remueve outline por defecto y usa box-shadow personalizado.
+ */
 input:focus, textarea:focus, select:focus {
   outline:none; border-color:transparent; box-shadow:0 0 0 2px var(--vc-focus-ring);
 }
 
-/* Date inputs */
+/* =========================================================
+   DATE INPUT STYLING
+   ========================================================= */
+
+/** Color scheme para inputs de fecha en tema claro */
 input[type="date"], input[type="datetime-local"], input[type="time"] { color-scheme: light; }
+
+/** Color scheme para inputs de fecha en tema oscuro */
 :root.dark input[type="date"], :root.dark input[type="datetime-local"], :root.dark input[type="time"] { color-scheme: dark; }
 
+/** Estilos para el indicador del calendario */
 input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="datetime-local"]::-webkit-calendar-picker-indicator {
   background: transparent;
@@ -95,21 +206,39 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
   border-radius: 4px;
   filter: grayscale(30%);
 }
+
+/** Indicador del calendario en tema oscuro */
 :root.dark input[type="date"]::-webkit-calendar-picker-indicator,
 :root.dark input[type="datetime-local"]::-webkit-calendar-picker-indicator {
   filter: invert(0.8);
 }
 
-/* Touch targets */
+/* =========================================================
+   TOUCH TARGETS (MOBILE)
+   ========================================================= */
+
+/** Aumenta el tamaño mínimo de touch targets en móviles */
 @media (max-width:640px){ button, input, select, textarea { min-height:44px; } }
 
-/* Transition helper */
+/* =========================================================
+   UTILITY CLASSES
+   ========================================================= */
+
+/** Helper para transiciones de tema */
 .transition-theme { transition: background-color .3s, color .3s, border-color .3s; }
 
-/* Responsive text utilities (con escalado raíz) */
+/* =========================================================
+   RESPONSIVE TEXT UTILITIES
+   ========================================================= */
+
+/** Texto responsive pequeño */
 .text-responsive-sm { font-size:0.875rem; }
 @media (min-width:640px){ .text-responsive-sm { font-size:1rem; } }
+
+/** Texto responsive base */
 .text-responsive-base { font-size:1rem; }
 @media (min-width:640px){ .text-responsive-base { font-size:1.125rem; } }
+
+/** Texto responsive grande */
 .text-responsive-lg { font-size:1.125rem; }
 @media (min-width:640px){ .text-responsive-lg { font-size:1.25rem; } }

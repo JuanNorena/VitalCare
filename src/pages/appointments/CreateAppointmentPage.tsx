@@ -1,5 +1,41 @@
 /**
- * Página dedicada para crear nueva cita médica
+ * Página React para crear nuevas citas médicas en VitalCare.
+ *
+ * Esta página proporciona una interfaz completa para que pacientes, doctores y personal
+ * administrativo puedan crear nuevas citas médicas. Incluye validaciones robustas,
+ * manejo de roles de usuario, normalización de fechas y navegación automática.
+ *
+ * @description
+ * Funcionalidades principales:
+ * - Creación de citas médicas con formulario completo
+ * - Manejo de roles: pacientes pueden solicitar citas, doctores/staff pueden agendar
+ * - Validaciones en tiempo real con mensajes de error específicos
+ * - Normalización automática de fechas para compatibilidad con backend
+ * - Integración con sistema de notificaciones toast
+ * - Navegación automática después de crear cita exitosamente
+ * - Interfaz responsive con diseño moderno
+ * - Soporte completo para modo oscuro
+ *
+ * La página se adapta dinámicamente según el rol del usuario:
+ * - Pacientes: Solo pueden solicitar citas para sí mismos
+ * - Doctores/Staff: Pueden agendar citas para cualquier paciente
+ *
+ * @example
+ * ```typescript
+ * import { CreateAppointmentPage } from '@/pages/appointments/CreateAppointmentPage';
+ *
+ * function App() {
+ *   return (
+ *     <Routes>
+ *       <Route path="/appointments/create" element={<CreateAppointmentPage />} />
+ *     </Routes>
+ *   );
+ * }
+ * ```
+ *
+ * @see {@link useAppointments} para el hook que maneja la lógica de citas.
+ * @see {@link useAuth} para el hook de autenticación.
+ * @see {@link useToast} para el sistema de notificaciones.
  */
 
 import { useState, useEffect } from 'react';
@@ -12,12 +48,55 @@ import { useNavigate } from 'react-router-dom';
 import type { CreateAppointmentRequest } from '@/types/api';
 import { useToast } from '@/contexts/ToastContext';
 
+/**
+ * Componente de página CreateAppointmentPage para crear nuevas citas médicas.
+ *
+ * @component
+ * @returns {JSX.Element} Página completa con formulario para crear citas.
+ *
+ * @description
+ * Esta página renderiza un formulario completo para crear citas médicas con:
+ * - Campos dinámicos según el rol del usuario
+ * - Validaciones en tiempo real
+ * - Manejo de errores con notificaciones toast
+ * - Navegación automática al completar
+ * - Diseño responsive y accesible
+ *
+ * @example
+ * ```typescript
+ * <CreateAppointmentPage />
+ * ```
+ */
 export function CreateAppointmentPage() {
+  /**
+   * Hook de autenticación para obtener información del usuario actual.
+   * @type {Object}
+   */
   const { user } = useAuth();
+
+  /**
+   * Hook de citas para acceder a la funcionalidad de crear citas.
+   * @type {Object}
+   */
   const { createAppointment, isCreating } = useAppointments();
+
+  /**
+   * Hook de navegación de React Router para redireccionar después de crear cita.
+   * @type {Function}
+   */
   const navigate = useNavigate();
+
+  /**
+   * Hook de notificaciones toast para mostrar mensajes de éxito y error.
+   * @type {Object}
+   */
   const { showError, showSuccess } = useToast();
 
+  /**
+   * Estado del formulario que mantiene los datos de la nueva cita.
+   * Se inicializa con valores por defecto basados en el usuario actual.
+   * @type {CreateAppointmentRequest}
+   */
   const [formData, setFormData] = useState<CreateAppointmentRequest>({
     patientId: user?.id || '',
     doctorId: '',
@@ -25,12 +104,25 @@ export function CreateAppointmentPage() {
     scheduledDate: ''
   });
 
+  /**
+   * Estado para manejar errores de validación del formulario.
+   * Cada clave corresponde a un campo del formulario con su mensaje de error.
+   * @type {Record<string, string>}
+   */
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Determinar el rol del usuario
+  /**
+   * Determina si el usuario actual es un paciente basado en su rol.
+   * Esto afecta qué campos se muestran y cómo se comporta el formulario.
+   * @type {boolean}
+   */
   const isPatient = user?.role?.toLowerCase().includes('patient');
 
-  // Si es doctor o staff, el patientId debe ser ingresado manualmente
+  /**
+   * Efecto que configura automáticamente el patientId basado en el rol del usuario.
+   * Para pacientes, usa su propio ID. Para doctores/staff, deja el campo vacío
+   * para que sea ingresado manualmente.
+   */
   useEffect(() => {
     if (isPatient && user?.id) {
       setFormData(prev => ({ ...prev, patientId: user.id }));
@@ -39,19 +131,33 @@ export function CreateAppointmentPage() {
     }
   }, [isPatient, user?.id]);
 
+  /**
+   * Manejador de cambios en los inputs del formulario.
+   * Actualiza el estado del formulario y limpia errores específicos cuando el usuario
+   * comienza a escribir en un campo que tenía error.
+   *
+   * @param {React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>} e - Evento de cambio.
+   */
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value,
     }));
-    
+
     // Limpiar error específico cuando el usuario empiece a escribir
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
 
+  /**
+   * Función de validación del formulario.
+   * Verifica todos los campos requeridos y reglas de negocio específicas.
+   * Actualiza el estado de errores y retorna si el formulario es válido.
+   *
+   * @returns {boolean} true si el formulario es válido, false en caso contrario.
+   */
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -81,16 +187,29 @@ export function CreateAppointmentPage() {
     return Object.keys(newErrors).length === 0;
   };
 
+  /**
+   * Manejador del envío del formulario.
+   * Valida el formulario, normaliza la fecha y crea la cita.
+   * Maneja errores y muestra notificaciones apropiadas.
+   *
+   * @param {React.FormEvent} e - Evento de envío del formulario.
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       showError('Error de validación', 'Por favor revisa los campos marcados');
       return;
     }
 
     try {
-      // Normalizar la fecha antes de enviar
+      /**
+       * Función interna para normalizar la fecha antes de enviar al backend.
+       * Convierte formatos de fecha para compatibilidad con LocalDateTime de Java.
+       *
+       * @param {string} dateString - Cadena de fecha a normalizar.
+       * @returns {string} Fecha normalizada.
+       */
       const normalizeScheduledDate = (dateString: string) => {
         if (!dateString) return dateString;
         // Si el datetime-local produce "YYYY-MM-DDTHH:mm", agregar segundos
@@ -112,21 +231,25 @@ export function CreateAppointmentPage() {
       };
 
       await createAppointment(appointmentData);
-      
+
       showSuccess(
-        'Cita creada exitosamente', 
+        'Cita creada exitosamente',
         isPatient ? 'Tu cita ha sido programada correctamente' : 'La cita ha sido agendada correctamente'
       );
-      
+
       // Redirigir a la página de citas después de crear
       navigate('/appointments');
-      
+
     } catch (error) {
       console.error('Error al crear cita:', error);
       showError('Error al crear cita', 'No se pudo crear la cita. Inténtalo nuevamente.');
     }
   };
 
+  /**
+   * Manejador para cancelar la creación de cita.
+   * Redirige al usuario de vuelta a la página de citas sin guardar cambios.
+   */
   const handleCancel = () => {
     navigate('/appointments');
   };
@@ -151,8 +274,8 @@ export function CreateAppointmentPage() {
                 {isPatient ? 'Solicitar Nueva Cita' : 'Agendar Nueva Cita'}
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-1">
-                {isPatient 
-                  ? 'Completa el formulario para solicitar tu cita médica' 
+                {isPatient
+                  ? 'Completa el formulario para solicitar tu cita médica'
                   : 'Completa el formulario para agendar una cita para un paciente'
                 }
               </p>

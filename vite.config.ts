@@ -1,3 +1,37 @@
+/**
+ * Configuración de Vite para VitalCare Frontend.
+ *
+ * Este archivo define la configuración completa del bundler Vite para el proyecto VitalCare.
+ * Incluye configuración de plugins, aliases de rutas, servidor de desarrollo y proxy para API.
+ *
+ * @description
+ * Configuración principal incluye:
+ * - Plugin de React para soporte JSX/TSX
+ * - Plugin de Tailwind CSS para estilos utilitarios
+ * - Alias de rutas para imports limpios (@/src/*)
+ * - Servidor de desarrollo en puerto 3000
+ * - Proxy configurado para API backend en producción
+ *
+ * El proxy está configurado para redirigir todas las peticiones /api/* al backend
+ * desplegado en Render (https://vitalcare-back.onrender.com).
+ *
+ * Características del proxy:
+ * - Reescritura transparente de URLs
+ * - Logging detallado de requests/responses
+ * - Manejo de errores de conexión
+ * - Configuración CORS automática
+ *
+ * @example
+ * ```typescript
+ * // Para desarrollo local, las peticiones a /api/* se redirigen automáticamente
+ * fetch('/api/appointments')
+ *   // Se convierte en: https://vitalcare-back.onrender.com/api/appointments
+ * ```
+ *
+ * @see {@link https://vitejs.dev/config/} Documentación oficial de Vite
+ * @see {@link https://tailwindcss.com/docs/configuration} Configuración de Tailwind
+ */
+
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'

@@ -1,5 +1,59 @@
 /**
- * Página principal de citas médicas
+ * Página de Gestión de Citas Médicas de VitalCare.
+ *
+ * Esta página permite a pacientes y doctores gestionar completamente sus citas médicas.
+ * Ofrece funcionalidades diferenciadas según el rol del usuario con interfaz adaptativa.
+ * Incluye creación, visualización, cancelación y confirmación de citas médicas.
+ *
+ * @example
+ * ```tsx
+ * // La página se renderiza automáticamente en la ruta /appointments
+ * // Requiere autenticación previa del usuario
+ * // No requiere instanciación manual
+ * ```
+ *
+ * @description
+ * Funcionalidades principales:
+ *
+ * Para Pacientes:
+ * - Visualización completa de todas sus citas médicas
+ * - Creación de nuevas citas mediante formulario o modal
+ * - Cancelación de citas programadas
+ * - Vista detallada con información del doctor y sede
+ * - Estados de citas: programada, confirmada, completada, cancelada
+ *
+ * Para Doctores:
+ * - Dashboard de todas las consultas asignadas
+ * - Confirmación de asistencia de pacientes
+ * - Cancelación de citas cuando sea necesario
+ * - Vista de pacientes asignados con IDs completos
+ * - Gestión eficiente de agenda médica
+ *
+ * Características técnicas:
+ * - Carga asíncrona de datos usando React Query
+ * - Estados de carga y manejo de errores robusto
+ * - Formulario integrado para creación rápida de citas
+ * - Modal separado para creación avanzada de citas
+ * - Diseño responsivo con breakpoints móviles
+ * - Tema adaptable (claro/oscuro) con variables CSS
+ * - Notificaciones toast para feedback de usuario
+ * - Formateo de fechas localizado (es-CO)
+ * - Estados de citas con colores diferenciados
+ *
+ * Estados de citas manejados:
+ * - 'scheduled': Cita programada (azul)
+ * - 'confirmed': Cita confirmada (verde)
+ * - 'cancelled': Cita cancelada (rojo)
+ * - 'completed': Cita completada (gris)
+ *
+ * Componentes internos:
+ * - CreateAppointmentForm: Formulario inline para creación rápida
+ * - CreateAppointmentModal: Modal avanzado para creación detallada
+ *
+ * @see {@link useAuth} para la gestión de autenticación y roles.
+ * @see {@link useAppointments} para los hooks de gestión de citas.
+ * @see {@link CreateAppointmentModal} para el modal de creación avanzada.
+ * @see {@link CreateAppointmentRequest} para la estructura de datos de creación.
  */
 
 import { useState } from 'react';
@@ -11,10 +65,16 @@ import { CreateAppointmentModal } from '@/components/appointments/CreateAppointm
 import type { CreateAppointmentRequest } from '@/types/api';
 import { useToast } from '@/contexts/ToastContext';
 
+/**
+ * Página de Gestión de Citas Médicas de VitalCare.
+ *
+ * @component
+ * @returns {JSX.Element} Interfaz de gestión de citas adaptada al rol del usuario.
+ */
 export function AppointmentsPage() {
   const { user } = useAuth();
-  const { 
-    usePatientAppointments, 
+  const {
+    usePatientAppointments,
     useDoctorAppointments,
     createAppointment,
     cancelAppointment,
@@ -25,19 +85,68 @@ export function AppointmentsPage() {
   } = useAppointments();
   const { showError, showSuccess } = useToast();
 
+  /**
+   * Controla la visibilidad del formulario inline de creación.
+   * @type {boolean}
+   */
   const [showCreateForm, setShowCreateForm] = useState(false);
+
+  /**
+   * Controla la visibilidad del modal de creación de citas.
+   * @type {boolean}
+   */
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  // Determinar qué tipo de usuario es y obtener sus citas
+  /**
+   * Determina si el usuario actual es un paciente.
+   * @type {boolean}
+   */
   const isPatient = user?.role?.toLowerCase().includes('patient');
+
+  /**
+   * Determina si el usuario actual es un doctor.
+   * @type {boolean}
+   */
   const isDoctor = user?.role?.toLowerCase().includes('doctor');
-  
+
+  /**
+   * Hook para cargar citas del paciente actual.
+   * Solo se ejecuta si el usuario es paciente.
+   */
   const patientAppointments = usePatientAppointments(isPatient && user ? user.id : '');
+
+  /**
+   * Hook para cargar citas del doctor actual.
+   * Solo se ejecuta si el usuario es doctor.
+   */
   const doctorAppointments = useDoctorAppointments(isDoctor && user ? user.id : '');
-  
+
+  /**
+   * Lista de citas del usuario actual (paciente o doctor).
+   * @type {Appointment[]}
+   */
   const appointments = isPatient ? patientAppointments.data || [] : doctorAppointments.data || [];
+
+  /**
+   * Estado de carga de las citas.
+   * @type {boolean}
+   */
   const isLoading = isPatient ? patientAppointments.isLoading : doctorAppointments.isLoading;
 
+  /**
+   * Maneja la cancelación de una cita médica.
+   * Solicita confirmación del usuario antes de proceder.
+   *
+   * @param {string} appointmentId - ID único de la cita a cancelar.
+   * @returns {Promise<void>} No retorna valor.
+   *
+   * @description
+   * Proceso de cancelación:
+   * 1. Muestra diálogo de confirmación al usuario
+   * 2. Si confirma, llama al servicio de cancelación
+   * 3. Muestra notificación de éxito
+   * 4. Maneja errores y muestra notificación de error
+   */
   const handleCancelAppointment = async (appointmentId: string) => {
     if (window.confirm('¿Estás seguro de que quieres cancelar esta cita?')) {
       try {
@@ -50,6 +159,19 @@ export function AppointmentsPage() {
     }
   };
 
+  /**
+   * Maneja la confirmación de asistencia a una cita médica.
+   * Solo disponible para doctores.
+   *
+   * @param {string} appointmentId - ID único de la cita.
+   * @returns {Promise<void>} No retorna valor.
+   *
+   * @description
+   * Proceso de confirmación:
+   * 1. Llama al servicio de confirmación de asistencia
+   * 2. Muestra notificación de éxito
+   * 3. Maneja errores y muestra notificación de error
+   */
   const handleConfirmAttendance = async (appointmentId: string) => {
     try {
       await confirmAttendance(appointmentId);
@@ -60,6 +182,13 @@ export function AppointmentsPage() {
     }
   };
 
+  /**
+   * Formatea una fecha para mostrar en formato localizado colombiano.
+   * Incluye año completo para mejor claridad.
+   *
+   * @param {string} dateString - Fecha en formato ISO string.
+   * @returns {string} Fecha formateada completa (ej: "15 de enero de 2024, 14:30").
+   */
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('es-CO', {
@@ -71,6 +200,13 @@ export function AppointmentsPage() {
     });
   };
 
+  /**
+   * Determina la clase CSS de color para un estado de cita.
+   * Utiliza colores semánticos para mejor comprensión visual.
+   *
+   * @param {string} status - Estado de la cita.
+   * @returns {string} Clases CSS de Tailwind para el color del estado.
+   */
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
       case 'scheduled':
@@ -86,6 +222,12 @@ export function AppointmentsPage() {
     }
   };
 
+  /**
+   * Convierte el estado técnico de la cita a texto legible en español.
+   *
+   * @param {string} status - Estado técnico de la cita.
+   * @returns {string} Estado en español o el estado original si no se reconoce.
+   */
   const getStatusText = (status: string) => {
     switch (status?.toLowerCase()) {
       case 'scheduled':
@@ -276,12 +418,53 @@ export function AppointmentsPage() {
 }
 
 // Componente de formulario para crear cita
+/**
+ * Interfaz de propiedades para el componente CreateAppointmentForm.
+ */
 interface CreateAppointmentFormProps {
+  /** Función callback que se ejecuta al enviar el formulario */
   onSubmit: (data: CreateAppointmentRequest) => Promise<void>;
+  /** Indica si el formulario está procesando una solicitud */
   isLoading: boolean;
+  /** ID del usuario actual que está creando la cita */
   currentUserId: string;
 }
 
+/**
+ * Componente de formulario para crear una nueva cita médica.
+ * Formulario inline integrado en la página de citas para creación rápida.
+ *
+ * @component
+ * @param {CreateAppointmentFormProps} props - Propiedades del componente.
+ * @returns {JSX.Element} Formulario de creación de cita médica.
+ *
+ * @description
+ * Este componente proporciona un formulario simplificado para crear citas médicas.
+ * Está diseñado para ser usado inline en la página de citas, ofreciendo una
+ * experiencia de creación rápida sin necesidad de modal separado.
+ *
+ * Campos del formulario:
+ * - doctorId: ID del doctor (requerido)
+ * - siteId: ID de la sede médica (requerido)
+ * - scheduledDate: Fecha y hora de la cita (requerido)
+ * - patientId: Se establece automáticamente con el ID del usuario actual
+ *
+ * Características:
+ * - Validación de campos requeridos
+ * - Estados de carga durante el envío
+ * - Diseño responsivo con grid adaptable
+ * - Tema adaptable (claro/oscuro)
+ * - Transiciones suaves en focus
+ *
+ * @example
+ * ```tsx
+ * <CreateAppointmentForm
+ *   onSubmit={handleCreateAppointment}
+ *   isLoading={false}
+ *   currentUserId="user-123"
+ * />
+ * ```
+ */
 function CreateAppointmentForm({ onSubmit, isLoading, currentUserId }: CreateAppointmentFormProps) {
   const [formData, setFormData] = useState<CreateAppointmentRequest>({
     patientId: currentUserId,

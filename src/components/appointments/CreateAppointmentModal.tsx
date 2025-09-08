@@ -1,5 +1,46 @@
 /**
- * Modal para crear nueva cita médica
+ * Componente modal para crear una nueva cita médica en la aplicación VitalCare.
+ *
+ * Este componente proporciona una interfaz modal para que los usuarios creen citas médicas,
+ * permitiendo ingresar el ID del doctor y seleccionar fecha y hora. Está integrado con
+ * el servicio de citas y maneja validaciones, errores y estados de carga.
+ *
+ * @component
+ * @example
+ * ```tsx
+ * import { CreateAppointmentModal } from '@/components/appointments/CreateAppointmentModal';
+ *
+ * function AppointmentsPage() {
+ *   const [isModalOpen, setIsModalOpen] = useState(false);
+ *
+ *   return (
+ *     <div>
+ *       <button onClick={() => setIsModalOpen(true)}>Nueva Cita</button>
+ *       <CreateAppointmentModal
+ *         isOpen={isModalOpen}
+ *         onClose={() => setIsModalOpen(false)}
+ *       />
+ *     </div>
+ *   );
+ * }
+ * ```
+ *
+ * @description
+ * El modal utiliza React Query para manejar la mutación de creación de citas,
+ * invalidando las consultas relacionadas al éxito. Incluye validaciones del lado
+ * del cliente para campos requeridos y fechas futuras. El ID del paciente se
+ * auto-rellena desde el usuario autenticado.
+ *
+ * Funcionalidades principales:
+ * - Formulario con validación en tiempo real.
+ * - Integración con servicio de citas backend.
+ * - Manejo de errores y estados de carga.
+ * - Soporte para modo oscuro y claro.
+ * - Normalización de fechas para compatibilidad con backend.
+ *
+ * @see {@link appointmentService} para detalles del servicio de citas.
+ * @see {@link useAuth} para gestión de autenticación.
+ * @see {@link useToast} para notificaciones.
  */
 
 import { useState } from 'react';
@@ -12,24 +53,69 @@ import { useAuth } from '@/hooks/useAuth';
 import type { AppointmentCreate } from '@/types/api';
 import { useToast } from '@/contexts/ToastContext';
 
+/**
+ * Props para el componente CreateAppointmentModal.
+ * @interface CreateAppointmentModalProps
+ */
 interface CreateAppointmentModalProps {
+  /** Indica si el modal está abierto y visible */
   isOpen: boolean;
+  /** Función callback para cerrar el modal */
   onClose: () => void;
 }
 
+/**
+ * Componente funcional que renderiza el modal de creación de citas.
+ * @param {CreateAppointmentModalProps} props - Las props del componente.
+ * @returns {JSX.Element | null} El modal renderizado o null si no está abierto.
+ */
 export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentModalProps) {
+  /**
+   * Hook de autenticación para obtener información del usuario actual.
+   * @type {Object}
+   * @property {Object} user - Información del usuario autenticado.
+   * @property {string} user.id - ID único del usuario.
+   */
   const { user } = useAuth();
+
+  /**
+   * Cliente de React Query para invalidar consultas después de mutaciones.
+   * @type {QueryClient}
+   */
   const queryClient = useQueryClient();
+
+  /**
+   * Hook de contexto para mostrar notificaciones de éxito.
+   * @type {Object}
+   * @property {Function} showSuccess - Función para mostrar notificación de éxito.
+   */
   const { showSuccess } = useToast();
-  
+
+  /**
+   * Estado del formulario con los datos de la cita a crear.
+   * @type {Object}
+   * @property {string} patientId - ID del paciente (auto-rellenado desde usuario).
+   * @property {string} doctorId - ID del doctor ingresado manualmente.
+   * @property {string} scheduledDate - Fecha y hora seleccionada en formato datetime-local.
+   */
   const [formData, setFormData] = useState({
     patientId: user?.id || '',
     doctorId: '',
     scheduledDate: ''
   });
 
+  /**
+   * Estado para almacenar errores de validación del formulario.
+   * @type {Record<string, string>}
+   */
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  /**
+   * Mutación de React Query para crear una nueva cita.
+   * Maneja el éxito invalidando consultas y mostrando notificación,
+   * y el error registrándolo en consola y mostrando mensaje.
+   * @type {UseMutationResult}
+   */
   const createMutation = useMutation({
     mutationFn: appointmentService.createAppointment,
     onSuccess: () => {
@@ -49,6 +135,11 @@ export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentMod
     }
   });
 
+  /**
+   * Función manejadora del envío del formulario.
+   * Realiza validaciones del lado del cliente, normaliza la fecha y ejecuta la mutación.
+   * @param {React.FormEvent} e - Evento del formulario.
+   */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -96,6 +187,12 @@ export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentMod
     createMutation.mutate(appointmentData);
   };
 
+  /**
+   * Función manejadora de cambios en los campos del formulario.
+   * Actualiza el estado del formulario y limpia errores relacionados.
+   * @param {string} field - Nombre del campo que cambió.
+   * @param {string} value - Nuevo valor del campo.
+   */
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
@@ -107,11 +204,12 @@ export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentMod
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      {/* modal uses theme background: white in light mode, dark gray in dark mode; text color inherited */}
+      {/* Contenedor del modal con fondo semi-transparente */}
       <div className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+        {/* Tarjeta contenedora sin borde ni sombra para el contenido del modal */}
         <Card className="border-0 shadow-none">
           <div className="p-6">
-            {/* Header */}
+            {/* Encabezado del modal con título y botón de cierre */}
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                 Nueva Cita Médica
@@ -128,9 +226,9 @@ export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentMod
               </Button>
             </div>
 
-            {/* Form */}
+            {/* Formulario de creación de cita */}
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Doctor ID */}
+              {/* Campo para ingresar el ID del doctor */}
               <div>
                 <label className="block text-sm font-medium text-gray-900 dark:text-gray-300 mb-2">
                   ID del Doctor *
@@ -149,7 +247,7 @@ export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentMod
                 )}
               </div>
 
-              {/* Fecha y hora */}
+              {/* Campo para seleccionar fecha y hora */}
               <div>
                 <label className="block text-sm font-medium text-gray-900 dark:text-gray-300 mb-2">
                   Fecha y Hora *
@@ -168,14 +266,14 @@ export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentMod
                 )}
               </div>
 
-              {/* Error de submit */}
+              {/* Mensaje de error general en caso de fallo en la creación */}
               {errors.submit && (
                 <div className="px-4 py-3 bg-red-500 text-white text-sm rounded-lg">
                   {errors.submit}
                 </div>
               )}
 
-              {/* Actions */}
+              {/* Botones de acción: Cancelar y Crear Cita */}
               <div className="flex gap-3 pt-4">
                 <Button
                   type="button"

@@ -1,16 +1,67 @@
 /**
- * Cliente HTTP para comunicación con el backend Java
- * 
- * Backend en Render.com con IPs estáticas de salida:
- * - 44.226.145.213
- * - 54.187.200.255
- * - 34.213.214.55
- * - 35.164.95.156
- * - 44.230.95.183
- * - 44.229.200.200
+ * Cliente HTTP centralizado para comunicación con el backend Java de VitalCare.
+ *
+ * Este módulo proporciona un cliente HTTP genérico y configurado para todas las
+ * comunicaciones con el backend Spring Boot desplegado en Render.com. Incluye
+ * configuración automática de headers de autenticación, manejo de errores,
+ * logging detallado y soporte para diferentes entornos.
+ *
+ * @description
+ * Características principales:
+ * - Configuración automática de URL base según entorno
+ * - Headers de autenticación JWT automáticos
+ * - Manejo robusto de errores con logging detallado
+ * - Soporte para proxy en desarrollo
+ * - Métodos HTTP completos (GET, POST, PUT, DELETE)
+ * - Información de entorno para debugging
+ *
+ * Configuración de backend:
+ * - Producción: https://vitalcare-back.onrender.com/api
+ * - Desarrollo: Proxy Vite (/api) o variable de entorno personalizada
+ * - IPs estáticas de salida de Render incluidas para referencia
+ *
+ * @example
+ * ```typescript
+ * // Uso básico del cliente
+ * import { apiClient } from '@/services/api';
+ *
+ * // GET request
+ * const users = await apiClient.get<User[]>('/users');
+ *
+ * // POST request con datos
+ * const newUser = await apiClient.post<User>('/users', userData);
+ *
+ * // Con manejo de errores
+ * try {
+ *   const result = await apiClient.post('/appointments', appointmentData);
+ * } catch (error) {
+ *   console.error('Error en API:', error.message);
+ * }
+ * ```
+ *
+ * @see {@link getEnvironmentInfo} para información del entorno actual.
+ * @see {@link getAuthHeaders} para configuración de autenticación.
  */
 
 // Configuración de la URL base según el entorno
+/**
+ * Determina la URL base de la API según el entorno de ejecución.
+ *
+ * @returns {string} URL base completa para las peticiones API.
+ *
+ * @description
+ * Lógica de selección de URL:
+ * 1. Variable de entorno VITE_API_BASE_URL (si existe)
+ * 2. Proxy de Vite en desarrollo (/api)
+ * 3. URL de producción (https://vitalcare-back.onrender.com/api)
+ *
+ * @example
+ * ```typescript
+ * // En desarrollo: '/api' (proxy)
+ * // En producción: 'https://vitalcare-back.onrender.com/api'
+ * // Con variable: 'https://custom-api.com/api'
+ * ```
+ */
 const getBaseURL = (): string => {
   // En desarrollo, usar variables de entorno o proxy
   const envBaseURL = import.meta.env.VITE_API_BASE_URL;
@@ -31,6 +82,24 @@ const getBaseURL = (): string => {
 const API_BASE_URL = getBaseURL();
 
 // Configuración de headers con autenticación
+/**
+ * Genera los headers de autenticación para las peticiones HTTP.
+ *
+ * @returns {Record<string, string>} Headers con Content-Type y Authorization si hay token.
+ *
+ * @description
+ * Headers incluidos:
+ * - Content-Type: application/json (siempre)
+ * - Authorization: Bearer {token} (si hay token en localStorage)
+ *
+ * El token se obtiene automáticamente de localStorage con la clave 'accessToken'.
+ *
+ * @example
+ * ```typescript
+ * const headers = getAuthHeaders();
+ * // Resultado: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ey...' }
+ * ```
+ */
 const getAuthHeaders = (): Record<string, string> => {
   const token = localStorage.getItem('accessToken');
   console.log('Access Token:', token); // Verifica el token
@@ -43,6 +112,38 @@ const getAuthHeaders = (): Record<string, string> => {
 
 
 // Función para manejar errores de la API
+/**
+ * Maneja errores de las respuestas HTTP de la API.
+ *
+ * @param {Response} response - Respuesta HTTP que contiene el error.
+ * @returns {never} Lanza un Error con mensaje detallado.
+ *
+ * @description
+ * Proceso de manejo de errores:
+ * 1. Intenta parsear el cuerpo de la respuesta como JSON
+ * 2. Extrae mensaje de error del backend o usa mensaje genérico
+ * 3. Registra información detallada en consola para debugging
+ * 4. Lanza Error con el mensaje apropiado
+ *
+ * Información registrada:
+ * - Código de estado HTTP
+ * - Texto del estado
+ * - URL de la petición
+ * - Detalles del error del backend
+ * - Headers de la respuesta
+ *
+ * @example
+ * ```typescript
+ * try {
+ *   const result = await fetch('/api/users');
+ *   if (!result.ok) {
+ *     await handleApiError(result); // Lanza Error
+ *   }
+ * } catch (error) {
+ *   console.error('Error manejado:', error.message);
+ * }
+ * ```
+ */
 const handleApiError = async (response: Response): Promise<never> => {
   let errorMessage = 'Error desconocido';
   let errorDetails = {};
@@ -68,7 +169,24 @@ const handleApiError = async (response: Response): Promise<never> => {
 };
 
 // Cliente HTTP genérico
+/**
+ * Cliente HTTP genérico para todas las comunicaciones con el backend.
+ * Proporciona métodos para realizar peticiones HTTP con configuración automática.
+ */
 export const apiClient = {
+  /**
+   * Realiza una petición HTTP GET.
+   *
+   * @template T - Tipo de dato esperado en la respuesta.
+   * @param {string} endpoint - Endpoint relativo (sin /api).
+   * @returns {Promise<T>} Datos de la respuesta parseados como JSON.
+   *
+   * @example
+   * ```typescript
+   * const users = await apiClient.get<User[]>('/users');
+   * const user = await apiClient.get<User>('/users/123');
+   * ```
+   */
   get: async <T>(endpoint: string): Promise<T> => {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'GET',
@@ -82,6 +200,26 @@ export const apiClient = {
     return response.json();
   },
 
+  /**
+   * Realiza una petición HTTP POST.
+   *
+   * @template T - Tipo de dato esperado en la respuesta.
+   * @param {string} endpoint - Endpoint relativo (sin /api).
+   * @param {any} [data] - Datos a enviar en el cuerpo de la petición.
+   * @returns {Promise<T>} Datos de la respuesta parseados como JSON.
+   *
+   * @description
+   * Registra información detallada de la petición en consola para debugging.
+   * Convierte automáticamente los datos a JSON si se proporcionan.
+   *
+   * @example
+   * ```typescript
+   * const newUser = await apiClient.post<User>('/users', {
+   *   name: 'Juan',
+   *   email: 'juan@example.com'
+   * });
+   * ```
+   */
   post: async <T>(endpoint: string, data?: any): Promise<T> => {
     console.log('API POST Request:', {
       endpoint: `${API_BASE_URL}${endpoint}`,
@@ -110,6 +248,21 @@ export const apiClient = {
     return response.json();
   },
 
+  /**
+   * Realiza una petición HTTP PUT.
+   *
+   * @template T - Tipo de dato esperado en la respuesta.
+   * @param {string} endpoint - Endpoint relativo (sin /api).
+   * @param {any} [data] - Datos a enviar en el cuerpo de la petición.
+   * @returns {Promise<T>} Datos de la respuesta parseados como JSON.
+   *
+   * @example
+   * ```typescript
+   * const updatedUser = await apiClient.put<User>('/users/123', {
+   *   name: 'Juan Pérez'
+   * });
+   * ```
+   */
   put: async <T>(endpoint: string, data?: any): Promise<T> => {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'PUT',
@@ -124,6 +277,18 @@ export const apiClient = {
     return response.json();
   },
 
+  /**
+   * Realiza una petición HTTP DELETE.
+   *
+   * @template T - Tipo de dato esperado en la respuesta.
+   * @param {string} endpoint - Endpoint relativo (sin /api).
+   * @returns {Promise<T>} Datos de la respuesta parseados como JSON.
+   *
+   * @example
+   * ```typescript
+   * const result = await apiClient.delete<{ success: boolean }>('/users/123');
+   * ```
+   */
   delete: async <T>(endpoint: string): Promise<T> => {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'DELETE',
@@ -139,6 +304,23 @@ export const apiClient = {
 };
 
 // Función para obtener información del entorno
+/**
+ * Obtiene información detallada sobre el entorno actual de ejecución.
+ *
+ * @returns {Object} Información del entorno incluyendo URLs y flags.
+ *
+ * @property {string} baseURL - URL base actual de la API.
+ * @property {string} environment - Entorno configurado (o 'development' por defecto).
+ * @property {boolean} isDevelopment - True si está en modo desarrollo.
+ * @property {boolean} isProduction - True si está en modo producción.
+ *
+ * @example
+ * ```typescript
+ * const env = getEnvironmentInfo();
+ * console.log('API URL:', env.baseURL);
+ * console.log('Es desarrollo:', env.isDevelopment);
+ * ```
+ */
 export const getEnvironmentInfo = () => {
   return {
     baseURL: getBaseURL(),

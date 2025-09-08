@@ -1,14 +1,64 @@
 import { useState } from 'react';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
 
+/**
+ * Componente de menú de accesibilidad para la aplicación VitalCare.
+ *
+ * Este componente proporciona una interfaz de usuario para ajustar configuraciones de accesibilidad,
+ * incluyendo el cambio entre modo oscuro y claro, aumento y disminución del tamaño de fuente,
+ * y reinicio de configuraciones. Está diseñado para ser accesible y responsivo, con versiones
+ * específicas para escritorio y móvil.
+ *
+ * @component
+ * @example
+ * ```tsx
+ * import { AccessibilityMenu } from '@/components/accessibility/AccessibilityMenu';
+ *
+ * function App() {
+ *   return (
+ *     <div>
+ *       <AccessibilityMenu />
+ *     </div>
+ *   );
+ * }
+ * ```
+ *
+ * @description
+ * El componente utiliza el contexto `useAccessibility` para gestionar el estado global de accesibilidad.
+ * En escritorio, se muestra como una barra vertical fija en el lado derecho de la pantalla.
+ * En móvil, se presenta como un menú deslizante que se activa con un botón flotante.
+ *
+ * Funcionalidades principales:
+ * - Alternar entre modo oscuro y claro.
+ * - Aumentar o disminuir el tamaño de fuente.
+ * - Reiniciar todas las configuraciones de accesibilidad a sus valores predeterminados.
+ *
+ * @see {@link useAccessibility} para más detalles sobre el contexto de accesibilidad.
+ */
 export function AccessibilityMenu() {
-  const { dark, toggleDark, increaseFont, decreaseFont, reset } = useAccessibility();
+  /**
+   * Estado interno para controlar la apertura y cierre del menú en dispositivos móviles.
+   * @type {boolean}
+   */
   const [open, setOpen] = useState(false);
+
+  /**
+   * Hook del contexto de accesibilidad que proporciona funciones y estado para gestionar
+   * las configuraciones de accesibilidad a nivel global.
+   * @type {Object}
+   * @property {boolean} dark - Indica si el modo oscuro está activado.
+   * @property {Function} toggleDark - Función para alternar entre modo oscuro y claro.
+   * @property {Function} increaseFont - Función para aumentar el tamaño de fuente.
+   * @property {Function} decreaseFont - Función para disminuir el tamaño de fuente.
+   * @property {Function} reset - Función para reiniciar todas las configuraciones de accesibilidad.
+   */
+  const { dark, toggleDark, increaseFont, decreaseFont, reset } = useAccessibility();
 
   return (
     <div className="fixed right-0 top-1/2 transform -translate-y-1/2 z-50">
-      {/* Desktop: vertical strip exactly like image 2 */}
+      {/* Sección de escritorio: Barra vertical fija con botones de accesibilidad */}
       <div className="hidden md:flex flex-col items-center space-y-2 bg-blue-700 text-white rounded-l-3xl px-4 py-6 shadow-xl">
+        {/* Botón para alternar modo oscuro */}
         <button
           aria-label="Alternar modo oscuro"
           title="Alternar modo oscuro"
@@ -27,6 +77,7 @@ export function AccessibilityMenu() {
           )}
         </button>
 
+        {/* Botón para aumentar tamaño de fuente */}
         <button
           aria-label="Aumentar tamaño de fuente"
           title="Aumentar tamaño"
@@ -36,6 +87,7 @@ export function AccessibilityMenu() {
           <span className="text-xl font-bold text-blue-700">A+</span>
         </button>
 
+        {/* Botón para disminuir tamaño de fuente */}
         <button
           aria-label="Disminuir tamaño de fuente"
           title="Disminuir tamaño"
@@ -45,6 +97,7 @@ export function AccessibilityMenu() {
           <span className="text-xl font-bold text-blue-700">A-</span>
         </button>
 
+        {/* Botón para reiniciar configuración de accesibilidad */}
         <button
           aria-label="Reiniciar configuración de accesibilidad"
           title="Reiniciar"
@@ -58,9 +111,9 @@ export function AccessibilityMenu() {
         </button>
       </div>
 
-      {/* Mobile: sliding drawer from right - responsive sizing */}
+      {/* Sección móvil: Menú deslizante con botón flotante */}
       <div className="md:hidden">
-        {/* Toggle button - only shows when menu is closed */}
+        {/* Botón flotante para abrir el menú - solo visible cuando el menú está cerrado */}
         {!open && (
           <button
             aria-label="Abrir menú de accesibilidad"
@@ -74,11 +127,12 @@ export function AccessibilityMenu() {
           </button>
         )}
 
-        {/* Sliding menu panel - compact on small screens */}
+        {/* Panel deslizante del menú - se anima desde la derecha */}
         <div className={`fixed top-1/2 transform -translate-y-1/2 transition-all duration-300 ease-in-out z-40 ${
           open ? 'right-0' : 'right-[-80px] sm:right-[-100px]'
         }`}>
           <div className="flex flex-col items-center space-y-1 sm:space-y-2 bg-blue-700 text-white rounded-l-2xl sm:rounded-l-3xl px-2 py-3 sm:px-4 sm:py-6 shadow-xl">
+            {/* Botón para alternar modo oscuro en móvil */}
             <button
               aria-label="Alternar modo oscuro"
               title="Alternar modo oscuro"
@@ -97,6 +151,7 @@ export function AccessibilityMenu() {
               )}
             </button>
 
+            {/* Botón para aumentar tamaño de fuente en móvil */}
             <button
               aria-label="Aumentar tamaño de fuente"
               title="Aumentar tamaño"
@@ -106,6 +161,7 @@ export function AccessibilityMenu() {
               <span className="text-lg sm:text-xl font-bold text-blue-700">A+</span>
             </button>
 
+            {/* Botón para disminuir tamaño de fuente en móvil */}
             <button
               aria-label="Disminuir tamaño de fuente"
               title="Disminuir tamaño"
@@ -115,6 +171,7 @@ export function AccessibilityMenu() {
               <span className="text-lg sm:text-xl font-bold text-blue-700">A-</span>
             </button>
 
+            {/* Botón para reiniciar configuración en móvil */}
             <button
               aria-label="Reiniciar configuración de accesibilidad"
               title="Reiniciar"
@@ -127,7 +184,7 @@ export function AccessibilityMenu() {
               </svg>
             </button>
 
-            {/* Close button - arrow pointing left */}
+            {/* Botón para cerrar el menú - flecha apuntando a la izquierda */}
             <button
               aria-label="Cerrar menú de accesibilidad"
               title="Cerrar menú"
@@ -141,7 +198,7 @@ export function AccessibilityMenu() {
           </div>
         </div>
 
-        {/* Backdrop overlay when open - closes menu when clicked */}
+        {/* Overlay de fondo cuando el menú está abierto - cierra el menú al hacer clic */}
         {open && (
           <div 
             className="fixed inset-0 bg-black bg-opacity-20 z-30"

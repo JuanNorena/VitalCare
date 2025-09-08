@@ -1,5 +1,46 @@
 /**
- * Página de registro de usuarios
+ * Página de registro de usuarios en VitalCare.
+ *
+ * Esta página permite el registro de tres tipos de usuarios diferentes:
+ * pacientes, doctores y personal administrativo. Cada tipo tiene campos
+ * específicos y validaciones particulares según sus necesidades.
+ *
+ * @example
+ * ```tsx
+ * // La página se renderiza automáticamente en la ruta /register
+ * // No requiere instanciación manual
+ * ```
+ *
+ * @description
+ * Funcionalidades principales:
+ * - Registro de pacientes con información médica básica (tipo de sangre opcional)
+ * - Registro de doctores con licencia médica, especialidad y apellidos
+ * - Registro de personal administrativo con departamento y cargo
+ * - Validación completa del lado del cliente antes del envío
+ * - Carga dinámica de ciudades desde el backend
+ * - Manejo de errores y estados de carga
+ * - Redirección automática al login después del registro exitoso
+ * - Diseño responsivo con tema adaptable
+ * - Campos condicionales según el tipo de usuario seleccionado
+ *
+ * Campos comunes a todos los usuarios:
+ * - Email (requerido, validación de formato)
+ * - Contraseña (requerido, mínimo 6 caracteres)
+ * - Teléfono (opcional)
+ * - Fecha de nacimiento (opcional, formato YYYY-MM-DD)
+ * - Género (requerido, selección)
+ * - Ciudad (opcional, cargado dinámicamente)
+ * - Dirección (opcional)
+ *
+ * Campos específicos por rol:
+ * - Paciente: Tipo de sangre (opcional)
+ * - Doctor: Apellidos, Licencia médica, Especialidad (todos requeridos)
+ * - Staff: Departamento, Cargo (opcionales)
+ *
+ * @see {@link useAuth} para los métodos de registro.
+ * @see {@link RegistrationRequest} para la estructura de datos.
+ * @see {@link citiesService} para la carga de ciudades.
+ * @see {@link LoginPage} para la página de inicio de sesión.
  */
 
 import { useState, useEffect } from 'react';
@@ -12,21 +53,55 @@ import type { RegistrationRequest } from '@/types/api';
 import { useToast } from '@/contexts/ToastContext';
 import { citiesService, type City } from '@/services/cities';
 
+/**
+ * Tipos de usuario disponibles para registro.
+ * @typedef {'patient' | 'doctor' | 'staff'} UserRole
+ */
 type UserRole = 'patient' | 'doctor' | 'staff';
 
+/**
+ * Página de registro de usuarios en VitalCare.
+ *
+ * @component
+ * @returns {JSX.Element} Formulario de registro con campos dinámicos según rol.
+ */
 export function RegisterPage() {
   const navigate = useNavigate();
-  const { 
-    registerPatient, 
-    registerDoctor, 
-    registerStaff, 
-    isRegisterPending 
+  const {
+    registerPatient,
+    registerDoctor,
+    registerStaff,
+    isRegisterPending
   } = useAuth();
   const { showError, showSuccess } = useToast();
-  
+
+  /**
+   * Rol de usuario seleccionado actualmente.
+   * Determina qué campos adicionales se muestran en el formulario.
+   * @type {UserRole}
+   */
   const [selectedRole, setSelectedRole] = useState<UserRole>('patient');
+
+  /**
+   * Lista de ciudades disponibles para selección.
+   * Se carga dinámicamente desde el backend al inicializar el componente.
+   * @type {City[]}
+   */
   const [cities, setCities] = useState<City[]>([]);
+
+  /**
+   * Estado de carga para las ciudades.
+   * Muestra un indicador mientras se cargan las ciudades desde el backend.
+   * @type {boolean}
+   */
   const [loadingCities, setLoadingCities] = useState(true);
+
+  /**
+   * Estado del formulario de registro.
+   * Contiene todos los campos del formulario según RegistrationRequest.
+   * Los campos específicos por rol se incluyen condicionalmente.
+   * @type {RegistrationRequest}
+   */
   const [formData, setFormData] = useState<RegistrationRequest>({
     email: '',
     password: '',
@@ -44,7 +119,15 @@ export function RegisterPage() {
     position: '',
   });
 
-  // Cargar ciudades al inicializar el componente
+  // ========================================
+  // EFECTOS Y CARGA DE DATOS
+  // ========================================
+
+  /**
+   * Efecto para cargar las ciudades disponibles.
+   * Se ejecuta una vez al montar el componente para poblar el selector de ciudades.
+   * Maneja errores de carga y muestra notificaciones al usuario.
+   */
   useEffect(() => {
     const loadCities = async () => {
       try {
@@ -61,6 +144,17 @@ export function RegisterPage() {
     loadCities();
   }, [showError]);
 
+  // ========================================
+  // MANEJADORES DE EVENTOS
+  // ========================================
+
+  /**
+   * Maneja los cambios en los inputs del formulario.
+   * Actualiza el estado formData con el nuevo valor del campo modificado.
+   * Compatible con inputs, selects y textareas.
+   *
+   * @param {React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>} e - Evento del cambio.
+   */
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -69,7 +163,24 @@ export function RegisterPage() {
     }));
   };
 
-  // Función para validar formulario antes de enviar
+  // ========================================
+  // VALIDACIONES
+  // ========================================
+
+  /**
+   * Valida el formulario antes del envío.
+   * Realiza validaciones del lado del cliente para todos los campos requeridos
+   * y específicos según el rol seleccionado.
+   *
+   * @returns {string | null} Mensaje de error si hay validación fallida, null si es válido.
+   *
+   * @description
+   * Validaciones realizadas:
+   * - Campos básicos: email (formato), contraseña (longitud mínima)
+   * - Doctor: apellidos, licencia médica, especialidad (requeridos)
+   * - Paciente: tipo de sangre (opcional pero validado si se proporciona)
+   * - Fecha de nacimiento: formato YYYY-MM-DD si se proporciona
+   */
   const validateForm = (): string | null => {
     // Validaciones básicas para todos los roles
     if (!formData.email) {
@@ -98,7 +209,7 @@ export function RegisterPage() {
           return 'Especialidad es requerida para doctores';
         }
         break;
-      
+
       case 'patient':
         // Para pacientes, validar tipo de sangre si se proporciona
         if (formData.bloodType) {
@@ -108,7 +219,7 @@ export function RegisterPage() {
           }
         }
         break;
-      
+
       case 'staff':
         // Para staff no hay campos obligatorios adicionales
         break;
@@ -129,13 +240,31 @@ export function RegisterPage() {
     return null;
   };
 
+  /**
+   * Maneja el envío del formulario de registro.
+   * Valida los datos, selecciona la función de registro apropiada según el rol,
+   * y maneja el éxito o error del proceso de registro.
+   *
+   * @param {React.FormEvent} e - Evento del formulario.
+   * @returns {Promise<void>} No retorna valor.
+   *
+   * @description
+   * Proceso de registro:
+   * 1. Previene envío por defecto del formulario
+   * 2. Registra información de debug en consola
+   * 3. Valida formulario del lado del cliente
+   * 4. Selecciona función de registro según rol (patient/doctor/staff)
+   * 5. Ejecuta registro y maneja respuesta
+   * 6. Muestra notificación de éxito y redirige a login
+   * 7. Maneja errores y muestra notificaciones apropiadas
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     console.log('=== INICIANDO PROCESO DE REGISTRO ===');
     console.log('Rol seleccionado:', selectedRole);
     console.log('Datos del formulario:', formData);
-    
+
     // 1. VALIDAR FORMULARIO DEL LADO DEL CLIENTE
     const validationError = validateForm();
     if (validationError) {
@@ -143,12 +272,13 @@ export function RegisterPage() {
       showError('Error de validación', validationError);
       return;
     }
-    
+
     try {
       console.log('✅ Validaciones del cliente pasadas, enviando al servicio...');
-      
+
       let registerFunction;
-      
+
+      // 2. SELECCIONAR FUNCIÓN DE REGISTRO SEGÚN ROL
       switch (selectedRole) {
         case 'patient':
           registerFunction = registerPatient;
@@ -167,23 +297,25 @@ export function RegisterPage() {
       console.log(`Ejecutando registro para ${selectedRole}...`);
       const result = await registerFunction(formData);
       console.log('Registro exitoso:', result);
-      
+
+      // 3. ÉXITO - MOSTRAR NOTIFICACIÓN Y REDIRIGIR
       showSuccess(
         '¡Registro exitoso!',
         'Tu cuenta ha sido creada correctamente. Ya puedes iniciar sesión.'
       );
-      navigate('/login', { 
-        state: { message: 'Registro exitoso. Por favor inicia sesión.' } 
+      navigate('/login', {
+        state: { message: 'Registro exitoso. Por favor inicia sesión.' }
       });
     } catch (error) {
       console.error('Error al registrarse:', error);
-      
+
+      // 4. MANEJO DE ERRORES
       let errorMessage = 'Ocurrió un problema al crear tu cuenta. Por favor intenta nuevamente.';
-      
+
       if (error instanceof Error) {
         errorMessage = error.message;
       }
-      
+
       showError('Error en el registro', errorMessage);
     }
   };
