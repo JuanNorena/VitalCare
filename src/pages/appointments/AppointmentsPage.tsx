@@ -271,7 +271,7 @@ export function AppointmentsPage() {
       <div className="min-h-screen flex items-center justify-center bg-[var(--vc-bg)] px-4">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-[var(--vc-text)]">No autorizado</h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">Por favor inicia sesión</p>
+          <p className="text-[var(--vc-text)]/70 mt-2">Por favor inicia sesión</p>
         </div>
       </div>
     );
@@ -287,7 +287,7 @@ export function AppointmentsPage() {
               <h1 className="text-2xl sm:text-3xl font-bold text-[var(--vc-text)]">
                 {isDoctor ? 'Consultas Médicas' : 'Mis Citas Médicas'}
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">
+              <p className="text-[var(--vc-text)]/70 mt-1">
                 {isDoctor ? 'Gestiona las citas de tus pacientes' : 'Administra tus citas médicas'}
               </p>
             </div>
@@ -307,17 +307,17 @@ export function AppointmentsPage() {
         {/* Lista de citas */}
         {isLoading ? (
           <div className="text-center py-8">
-            <div className="text-[var(--vc-text)] dark:text-gray-400">Cargando citas...</div>
+            <div className="text-[var(--vc-text)]/70">Cargando citas...</div>
           </div>
         ) : error ? (
-          <Card className="p-6 sm:p-8 text-center shadow-lg border-0 bg-[var(--vc-card-bg)] dark:bg-gray-800">
-            <div className="w-16 h-16 mx-auto mb-4 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8 text-red-600 dark:text-red-400" fill="currentColor" viewBox="0 0 20 20">
+          <Card className="p-6 sm:p-8 text-center shadow-lg border-0 bg-[var(--vc-card-bg)]">
+            <div className="w-16 h-16 mx-auto mb-4 bg-red-50 dark:bg-red-900 rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-red-500 dark:text-red-400" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
             </div>
-            <div className="text-[var(--vc-text)] dark:text-gray-400">
-              <p className="text-base sm:text-lg font-medium text-red-600 dark:text-red-400 mb-2">
+            <div className="text-[var(--vc-text)]/70">
+              <p className="text-base sm:text-lg font-medium text-red-500 dark:text-red-400 mb-2">
                 Error al cargar las citas
               </p>
               <p className="text-sm sm:text-base">
@@ -328,13 +328,13 @@ export function AppointmentsPage() {
         ) : appointments && appointments.length > 0 ? (
           <div className="grid gap-4 sm:gap-6">
             {appointments.map((appointment: any) => (
-              <Card key={appointment.id} className="p-4 sm:p-6 shadow-lg border-0 bg-[var(--vc-card-bg)] dark:bg-gray-800 hover:shadow-xl transition-all duration-200">
+              <Card key={appointment.id} className="p-4 sm:p-6 shadow-lg border-0 bg-[var(--vc-card-bg)] hover:shadow-xl transition-all duration-200">
                 <div className="flex flex-col lg:flex-row justify-between items-start gap-4 lg:gap-0">
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        <h3 className="text-base sm:text-lg font-semibold text-[var(--vc-text)] dark:text-white truncate">
+                        <h3 className="text-base sm:text-lg font-semibold text-[var(--vc-text)] truncate">
                           Cita #{appointment.id ? `${appointment.id.substring(0, 8)}...` : 'N/A'}
                         </h3>
                       </div>
@@ -343,15 +343,15 @@ export function AppointmentsPage() {
                       </span>
                     </div>
                     
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-sm sm:text-base text-[var(--vc-text)] dark:text-gray-300">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-sm sm:text-base text-[var(--vc-text)]/70">
                       <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-[var(--vc-text)] dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-4 h-4 text-[var(--vc-text)]/60" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                         </svg>
                         <span><strong>Fecha:</strong> {formatDate(appointment.scheduledDate)}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-[var(--vc-text)] dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-4 h-4 text-[var(--vc-text)]/60" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                         </svg>
                         <span className="break-all">
@@ -363,13 +363,13 @@ export function AppointmentsPage() {
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-[var(--vc-text)] dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-4 h-4 text-[var(--vc-text)]/60" fill="currentColor" viewBox="0 0 20 20">
                           <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <span className="break-all"><strong>Doctor:</strong> {appointment.doctorId.substring(0, 8)}...</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-[var(--vc-text)] dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <svg className="w-4 h-4 text-[var(--vc-text)]/60" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                         </svg>
                         <span className="break-all"><strong>Sede:</strong> {appointment.siteId ? `${appointment.siteId.substring(0, 8)}...` : 'N/A'}</span>
@@ -407,14 +407,14 @@ export function AppointmentsPage() {
             ))}
           </div>
         ) : (
-          <Card className="p-6 sm:p-8 text-center shadow-lg border-0 bg-[var(--vc-card-bg)] dark:bg-gray-800">
-            <div className="w-16 h-16 mx-auto mb-4 bg-[var(--vc-bg)] dark:bg-gray-700 rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8 text-[var(--vc-text)] dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+          <Card className="p-6 sm:p-8 text-center shadow-lg border-0 bg-[var(--vc-card-bg)]">
+            <div className="w-16 h-16 mx-auto mb-4 bg-[var(--vc-bg)] rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-[var(--vc-text)]/40" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
               </svg>
             </div>
-            <div className="text-[var(--vc-text)] dark:text-gray-400">
-              <p className="text-base sm:text-lg font-medium text-[var(--vc-text)] dark:text-white mb-2">
+            <div className="text-[var(--vc-text)]/70">
+              <p className="text-base sm:text-lg font-medium text-[var(--vc-text)] mb-2">
                 No tienes citas programadas
               </p>
               {isPatient && (
