@@ -214,3 +214,71 @@ export interface ApiError {
   /** Ruta del endpoint donde ocurrió el error */
   path: string;
 }
+
+// ========================================
+// TIPOS DE PERFILES DE USUARIO
+// ========================================
+
+/**
+ * Perfil específico de paciente.
+ * Corresponde al PatientProfileDTO del backend Java.
+ * @interface PatientProfile
+ */
+export interface PatientProfile {
+  /** ID único del perfil */
+  id: string;
+  /** Primer nombre del paciente */
+  firstName: string;
+  /** Apellidos del paciente */
+  lastName: string;
+  /** Número de documento de identidad */
+  documentNumber: string;
+  /** Número de teléfono */
+  phone: string;
+  /** Correo electrónico */
+  email: string;
+  /** Dirección de residencia */
+  address: string;
+  /** Género del paciente */
+  gender: string;
+}
+
+/**
+ * Perfil específico de doctor.
+ * Corresponde al DoctorProfileDTO del backend Java.
+ * @interface DoctorProfile
+ */
+export interface DoctorProfile {
+  /** ID único del perfil */
+  id: string;
+  /** Apellidos del doctor */
+  lastName: string;
+  /** Especialidad médica */
+  specialty: string;
+  /** Número de licencia médica */
+  licenseNumber: string;
+  /** Número de teléfono */
+  phone: string;
+  /** Correo electrónico */
+  email: string;
+}
+
+/**
+ * Perfil específico de personal administrativo.
+ * Corresponde al StaffProfileDTO del backend Java.
+ * @interface StaffProfile
+ */
+export interface StaffProfile {
+  /** ID único del perfil */
+  id: string;
+  /** Primer nombre del staff */
+  firstName: string;
+  /** Apellidos del staff */
+  lastName: string;
+  /** Rol específico dentro del staff */
+  role: string;
+  /** Número de teléfono */
+  phone: string;
+  /** Correo electrónico */
+  email: string;
+}

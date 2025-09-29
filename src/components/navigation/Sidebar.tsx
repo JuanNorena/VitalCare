@@ -242,9 +242,14 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-[var(--vc-text)] truncate">
+                <Link
+                  to="/profile"
+                  onClick={onClose}
+                  className="text-sm font-medium text-[var(--vc-text)] truncate hover:text-[var(--vc-accent)] transition-colors duration-200 cursor-pointer block"
+                  title="Ver perfil completo"
+                >
                   {user?.email}
-                </p>
+                </Link>
                 <p className="text-xs text-[var(--vc-text)]/70">
                   {isPatient && 'Paciente'}
                   {isDoctor && 'Doctor'}

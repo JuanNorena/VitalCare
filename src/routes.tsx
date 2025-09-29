@@ -21,6 +21,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { RegisterPage } from '@/pages/auth/RegisterPage';
+import { ProfilePage } from '@/pages/auth/ProfilePage';
 import { AppointmentsPage } from '@/pages/appointments/AppointmentsPage';
 import { CreateAppointmentPage } from '@/pages/appointments/CreateAppointmentPage';
 import { DashboardPage } from '@/pages/dashboard/DashboardPage';
@@ -183,6 +184,17 @@ export function AppRoutes() {
           <ProtectedRoute>
             <MainLayout>
               <CreateAppointmentPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <ProfilePage />
             </MainLayout>
           </ProtectedRoute>
         }
