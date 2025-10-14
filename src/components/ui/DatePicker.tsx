@@ -181,9 +181,17 @@ export const DatePicker = React.forwardRef<HTMLInputElement, DatePickerProps>(
 
         {/* Contenedor del input con icono */}
         <div className="relative">
-          {/* Icono de calendario */}
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-            <Calendar className="w-5 h-5 text-[var(--vc-text)]/60" />
+          {/* Icono de calendario - clickeable para abrir el selector */}
+          <div 
+            className="absolute left-3 top-1/2 -translate-y-1/2 cursor-pointer z-10 hover:scale-110 transition-transform"
+            onClick={() => {
+              // Hacer clic en el input para abrir el selector de fecha
+              if (ref && 'current' in ref && ref.current) {
+                ref.current.showPicker?.();
+              }
+            }}
+          >
+            <Calendar className="w-5 h-5 text-[var(--vc-text)]/60 hover:text-[var(--vc-text)]" />
           </div>
 
           {/* Input nativo con estilos personalizados */}
@@ -214,17 +222,13 @@ export const DatePicker = React.forwardRef<HTMLInputElement, DatePickerProps>(
               "disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50 dark:disabled:bg-gray-800",
               // Estados de error
               error && "border-red-500 focus-visible:ring-red-500",
-              // Estilos del calendario nativo - mejorados para visibilidad
+              // Ocultar el indicador nativo del calendario (usamos nuestro icono personalizado)
+              "[&::-webkit-calendar-picker-indicator]:opacity-0",
               "[&::-webkit-calendar-picker-indicator]:absolute",
-              "[&::-webkit-calendar-picker-indicator]:right-2",
-              "[&::-webkit-calendar-picker-indicator]:w-5",
-              "[&::-webkit-calendar-picker-indicator]:h-5",
+              "[&::-webkit-calendar-picker-indicator]:right-0",
+              "[&::-webkit-calendar-picker-indicator]:w-full",
+              "[&::-webkit-calendar-picker-indicator]:h-full",
               "[&::-webkit-calendar-picker-indicator]:cursor-pointer",
-              "[&::-webkit-calendar-picker-indicator]:opacity-70",
-              "[&::-webkit-calendar-picker-indicator]:hover:opacity-100",
-              "[&::-webkit-calendar-picker-indicator]:transition-opacity",
-              // Filtro para hacer el ícono visible en dark mode
-              "dark:[&::-webkit-calendar-picker-indicator]:invert",
               // Responsive
               "sm:text-base"
             )}
@@ -232,8 +236,16 @@ export const DatePicker = React.forwardRef<HTMLInputElement, DatePickerProps>(
 
           {/* Icono de reloj para indicar que también selecciona hora (solo para datetime-local) */}
           {type === "datetime-local" && (
-            <div className="absolute right-10 top-1/2 -translate-y-1/2 pointer-events-none">
-              <Clock className="w-4 h-4 text-[var(--vc-text)]/40" />
+            <div 
+              className="absolute right-10 top-1/2 -translate-y-1/2 cursor-pointer z-10 hover:scale-110 transition-transform"
+              onClick={() => {
+                // Hacer clic en el input para abrir el selector de fecha y hora
+                if (ref && 'current' in ref && ref.current) {
+                  ref.current.showPicker?.();
+                }
+              }}
+            >
+              <Clock className="w-4 h-4 text-[var(--vc-text)]/40 hover:text-[var(--vc-text)]/60" />
             </div>
           )}
         </div>
