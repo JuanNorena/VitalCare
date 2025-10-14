@@ -48,7 +48,9 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { Card } from '@/components/ui/Card';
+import { TermsAndConditionsModal } from '@/components/legal/TermsAndConditionsModal';
 import type { RegistrationRequest } from '@/types/api';
 import { useToast } from '@/contexts/ToastContext';
 import { citiesService, type City } from '@/services/cities';
@@ -95,6 +97,19 @@ export function RegisterPage() {
    * @type {boolean}
    */
   const [loadingCities, setLoadingCities] = useState(true);
+
+  /**
+   * Estado para controlar la aceptación de términos y condiciones.
+   * El usuario debe aceptar antes de poder registrarse.
+   * @type {boolean}
+   */
+  const [termsAccepted, setTermsAccepted] = useState(false);
+
+  /**
+   * Estado para controlar la visibilidad del modal de términos y condiciones.
+   * @type {boolean}
+   */
+  const [showTermsModal, setShowTermsModal] = useState(false);
 
   /**
    * Estado del formulario de registro.
@@ -235,6 +250,11 @@ export function RegisterPage() {
       if (isNaN(date.getTime())) {
         return 'Fecha de nacimiento debe ser válida';
       }
+    }
+
+    // Validación de aceptación de términos y condiciones
+    if (!termsAccepted) {
+      return 'Debes aceptar los términos y condiciones y la política de tratamiento de datos personales para continuar';
     }
 
     return null;
@@ -413,18 +433,17 @@ export function RegisterPage() {
                 />
               </div>
 
-              <div>
-                <label htmlFor="birthDate" className="block text-sm font-medium text-[var(--vc-text)] mb-1">
-                  Fecha de nacimiento
-                </label>
-                <Input
-                  id="birthDate"
-                  name="birthDate"
-                  type="date"
-                  value={formData.birthDate || ''}
-                  onChange={handleInputChange}
-                />
-              </div>
+              <DatePicker
+                id="birthDate"
+                name="birthDate"
+                type="date"
+                label="Fecha de nacimiento"
+                value={formData.birthDate || ''}
+                onChange={handleInputChange}
+                maxDate={new Date()}
+                required
+                helpText="Debes ser mayor de edad para registrarte"
+              />
 
               <div>
                 <label htmlFor="gender" className="block text-sm font-medium text-[var(--vc-text)] mb-1">
@@ -601,6 +620,36 @@ export function RegisterPage() {
                 </div>
               </div>
             )}
+
+            {/* Términos y Condiciones - Habeas Data */}
+            <div className="pt-6 border-t border-[var(--vc-border)]">
+              <div className="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <input
+                  type="checkbox"
+                  id="termsAccepted"
+                  checked={termsAccepted}
+                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                  className="mt-1 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 cursor-pointer"
+                />
+                <label 
+                  htmlFor="termsAccepted" 
+                  className="text-sm text-[var(--vc-text)]/90 cursor-pointer select-none"
+                >
+                  Acepto los{' '}
+                  <button
+                    type="button"
+                    onClick={() => setShowTermsModal(true)}
+                    className="font-semibold text-blue-600 dark:text-blue-400 hover:underline focus:outline-none focus:underline"
+                  >
+                    Términos y Condiciones
+                  </button>
+                  {' '}y autorizo el tratamiento de mis datos personales, incluyendo datos sensibles 
+                  de salud, conforme a la{' '}
+                  <span className="font-semibold">Ley 1581 de 2012</span> (Habeas Data - Colombia).
+                </label>
+              </div>
+            </div>
+
             <div className="pt-4 sm:pt-6">
               <Button
                 type="submit"
@@ -625,6 +674,16 @@ export function RegisterPage() {
           </form>
         </Card>
       </div>
+
+      {/* Modal de Términos y Condiciones */}
+      <TermsAndConditionsModal
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        onAccept={() => {
+          setTermsAccepted(true);
+          setShowTermsModal(false);
+        }}
+      />
     </div>
   );
 }

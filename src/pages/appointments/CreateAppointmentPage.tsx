@@ -47,6 +47,7 @@ import { useAppointments } from '@/hooks/useAppointments';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { useNavigate } from 'react-router-dom';
 import type { CreateAppointmentRequest } from '@/types/api';
 import { useToast } from '@/contexts/ToastContext';
@@ -444,25 +445,16 @@ export function CreateAppointmentPage() {
             </div>
 
             {/* Fecha y Hora */}
-            <div>
-              <label htmlFor="scheduledDate" className="block text-sm font-medium text-gray-900 dark:text-gray-300 mb-2">
-                Fecha y Hora de la Cita *
-              </label>
-              <Input
-                id="scheduledDate"
-                name="scheduledDate"
-                type="datetime-local"
-                value={formData.scheduledDate}
-                onChange={handleInputChange}
-                min={new Date().toISOString().slice(0, 16)}
-                className={`bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 ${errors.scheduledDate ? 'border-red-500' : ''}`}
-              />
-              {errors.scheduledDate && (
-                <div className="mt-1 px-3 py-1 bg-red-500 text-white text-sm rounded">
-                  {errors.scheduledDate}
-                </div>
-              )}
-            </div>
+            <DatePicker
+              id="scheduledDate"
+              name="scheduledDate"
+              value={formData.scheduledDate}
+              onChange={handleInputChange}
+              label="Fecha y Hora de la Cita"
+              minDate={new Date()}
+              required
+              error={errors.scheduledDate}
+            />
 
             {/* Botones de acción */}
             <div className="flex flex-col sm:flex-row gap-3 pt-4">

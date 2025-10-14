@@ -48,6 +48,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { DatePicker } from '@/components/ui/DatePicker';
 import { appointmentService } from '@/services/appointments';
 import { useAuth } from '@/hooks/useAuth';
 import type { AppointmentCreate } from '@/types/api';
@@ -248,23 +249,14 @@ export function CreateAppointmentModal({ isOpen, onClose }: CreateAppointmentMod
               </div>
 
               {/* Campo para seleccionar fecha y hora */}
-              <div>
-                <label className="block text-sm font-medium text-gray-900 dark:text-gray-300 mb-2">
-                  Fecha y Hora *
-                </label>
-                <Input
-                  type="datetime-local"
-                  value={formData.scheduledDate}
-                  onChange={(e) => handleChange('scheduledDate', e.target.value)}
-                  min={new Date().toISOString().slice(0, 16)}
-                  className={`bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 ${errors.scheduledDate ? 'border-red-500' : ''}`}
-                />
-                {errors.scheduledDate && (
-                  <div className="mt-1 px-3 py-1 bg-red-500 text-white text-sm rounded">
-                    {errors.scheduledDate}
-                  </div>
-                )}
-              </div>
+              <DatePicker
+                value={formData.scheduledDate}
+                onChange={(e) => handleChange('scheduledDate', e.target.value)}
+                label="Fecha y Hora"
+                minDate={new Date()}
+                required
+                error={errors.scheduledDate}
+              />
 
               {/* Mensaje de error general en caso de fallo en la creación */}
               {errors.submit && (
