@@ -139,6 +139,12 @@ export const authService = {
     console.log('Datos recibidos:', data);
 
     // 1. VALIDAR CAMPOS BÁSICOS REQUERIDOS
+    if (!data.name || data.name.trim().length === 0) {
+      throw new Error('Nombre completo es requerido');
+    }
+    if (!data.idNumber || data.idNumber.trim().length === 0) {
+      throw new Error('Número de identificación es requerido');
+    }
     if (!data.email || !authService.isValidEmail(data.email)) {
       throw new Error('Email válido es requerido');
     }
@@ -176,6 +182,8 @@ export const authService = {
     // 3. TRANSFORMAR DATOS SEGÚN BACKEND RegistrationRequest
     const transformedData: any = {
       // Campos básicos (requeridos)
+      name: data.name.trim(),
+      idNumber: data.idNumber.trim(),
       email: data.email.trim(),
       password: data.password,
 
@@ -207,6 +215,12 @@ export const authService = {
     console.log('Datos recibidos:', data);
 
     // 1. VALIDAR CAMPOS BÁSICOS REQUERIDOS
+    if (!data.name || data.name.trim().length === 0) {
+      throw new Error('Nombre completo es requerido');
+    }
+    if (!data.idNumber || data.idNumber.trim().length === 0) {
+      throw new Error('Número de identificación es requerido');
+    }
     if (!data.email || !authService.isValidEmail(data.email)) {
       throw new Error('Email válido es requerido');
     }
@@ -239,6 +253,8 @@ export const authService = {
     // 4. TRANSFORMAR DATOS SEGÚN BACKEND RegistrationRequest
     const transformedData: any = {
       // Campos básicos (requeridos)
+      name: data.name.trim(),
+      idNumber: data.idNumber.trim(),
       email: data.email.trim(),
       password: data.password,
 
@@ -274,6 +290,12 @@ export const authService = {
     console.log('Datos recibidos:', data);
 
     // 1. VALIDAR CAMPOS BÁSICOS REQUERIDOS
+    if (!data.name || data.name.trim().length === 0) {
+      throw new Error('Nombre completo es requerido');
+    }
+    if (!data.idNumber || data.idNumber.trim().length === 0) {
+      throw new Error('Número de identificación es requerido');
+    }
     if (!data.email || !authService.isValidEmail(data.email)) {
       throw new Error('Email válido es requerido');
     }
@@ -295,6 +317,8 @@ export const authService = {
     // 3. TRANSFORMAR DATOS SEGÚN BACKEND RegistrationRequest
     const transformedData: any = {
       // Campos básicos (requeridos)
+      name: data.name.trim(),
+      idNumber: data.idNumber.trim(),
       email: data.email.trim(),
       password: data.password,
 

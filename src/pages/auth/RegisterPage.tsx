@@ -120,6 +120,8 @@ export function RegisterPage() {
   const [formData, setFormData] = useState<RegistrationRequest>({
     email: '',
     password: '',
+    name: '',
+    idNumber: '',
     phone: '',
     address: '',
     birthDate: '',
@@ -198,6 +200,15 @@ export function RegisterPage() {
    */
   const validateForm = (): string | null => {
     // Validaciones básicas para todos los roles
+    if (!formData.name?.trim()) {
+      return 'Nombre completo es requerido';
+    }
+    if (!formData.idNumber?.trim()) {
+      return 'Número de identificación es requerido';
+    }
+    if (!/^\d+$/.test(formData.idNumber.trim())) {
+      return 'Número de identificación debe contener solo dígitos';
+    }
     if (!formData.email) {
       return 'Email es requerido';
     }
@@ -389,6 +400,38 @@ export function RegisterPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              {/* Nombre Completo */}
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-[var(--vc-text)] mb-1">
+                  Nombre Completo <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  id="name"
+                  name="name"
+                  type="text"
+                  required
+                  value={formData.name || ''}
+                  onChange={handleInputChange}
+                  placeholder="Ej: Juan Pérez García"
+                />
+              </div>
+
+              {/* Número de Identificación */}
+              <div>
+                <label htmlFor="idNumber" className="block text-sm font-medium text-[var(--vc-text)] mb-1">
+                  Número de Identificación <span className="text-red-500">*</span>
+                </label>
+                <Input
+                  id="idNumber"
+                  name="idNumber"
+                  type="text"
+                  required
+                  value={formData.idNumber || ''}
+                  onChange={handleInputChange}
+                  placeholder="Ej: 1234567890"
+                />
+              </div>
+
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-[var(--vc-text)] mb-1">
                   Correo electrónico *
@@ -653,11 +696,21 @@ export function RegisterPage() {
             <div className="pt-4 sm:pt-6">
               <Button
                 type="submit"
-                disabled={isRegisterPending}
-                className="w-full h-10 sm:h-11 text-sm sm:text-base"
+                disabled={isRegisterPending || !termsAccepted}
+                className="w-full h-10 sm:h-11 text-sm sm:text-base transition-all"
               >
                 {isRegisterPending ? 'Registrando...' : 'Crear cuenta'}
               </Button>
+              
+              {/* Mensaje de ayuda cuando los términos no están aceptados */}
+              {!termsAccepted && !isRegisterPending && (
+                <p className="mt-2 text-xs text-center text-amber-600 dark:text-amber-400 flex items-center justify-center gap-1.5">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  Debes aceptar los términos y condiciones para continuar
+                </p>
+              )}
             </div>
 
             <div className="text-center pt-4 sm:pt-6">

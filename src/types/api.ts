@@ -83,6 +83,10 @@ export interface RegistrationRequest {
   email: string;
   /** Contraseña del usuario (mínimo 6 caracteres) */
   password: string;
+  /** Nombre completo del usuario */
+  name?: string;
+  /** Número de identificación (cédula, pasaporte, etc.) */
+  idNumber?: string;
 
   // Campos específicos para pacientes (todos opcionales)
   /** Género del paciente */
