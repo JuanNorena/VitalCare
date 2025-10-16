@@ -106,7 +106,6 @@ export function CreateAppointmentPage() {
    */
   const [formData, setFormData] = useState<CreateAppointmentRequest>({
     doctorId: '',
-    siteId: '',
     scheduledDate: '',
     // Solo usar email para crear citas
     patientEmail: user?.email || ''
@@ -287,14 +286,19 @@ export function CreateAppointmentPage() {
 
       const appointmentData: CreateAppointmentRequest = {
         ...formData,
-        scheduledDate: normalizeScheduledDate(formData.scheduledDate),
-        // Eliminar campos vacíos opcionales
-        ...(formData.siteId ? { siteId: formData.siteId } : {})
+        scheduledDate: normalizeScheduledDate(formData.scheduledDate)
       };
 
       // El hook useCreateAppointment ahora detecta automáticamente qué endpoint usar
       console.log('🔄 [CreateAppointmentPage] Creando cita con datos:', appointmentData);
-      await createAppointment(appointmentData);
+      const createdAppointment = await createAppointment(appointmentData);
+
+      // SOLUCIÓN AL PROBLEMA User.id ≠ PatientProfile.id:
+      // Guardar el patientId correcto que retorna el backend
+      if (createdAppointment.patientId && isPatient && user) {
+        console.log('💾 [CreateAppointmentPage] Guardando patientId correcto:', createdAppointment.patientId);
+        localStorage.setItem(`patientProfileId_${user.id}`, createdAppointment.patientId);
+      }
 
       showSuccess(
         'Cita creada exitosamente',
@@ -425,22 +429,6 @@ export function CreateAppointmentPage() {
                     🔄 Cargando lista de doctores...
                   </div>
                 )}
-              </div>
-
-              {/* ID de la Sede */}
-              <div>
-                <label htmlFor="siteId" className="block text-sm font-medium text-gray-900 dark:text-gray-300 mb-2">
-                  ID de la Sede
-                </label>
-                <Input
-                  id="siteId"
-                  name="siteId"
-                  type="text"
-                  value={formData.siteId}
-                  onChange={handleInputChange}
-                  placeholder="Ingresa el ID de la sede (opcional)"
-                  className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
-                />
               </div>
             </div>
 

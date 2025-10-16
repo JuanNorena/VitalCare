@@ -56,7 +56,6 @@
  * @see {@link CreateAppointmentRequest} para la estructura de datos de creación.
  */
 
-import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { 
   usePatientAppointments,
@@ -66,9 +65,9 @@ import {
 } from '@/hooks/useAppointments';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { CreateAppointmentModal } from '@/components/appointments/CreateAppointmentModal';
 import type { AppointmentDTO } from '@/services/appointments';
 import { useToast } from '@/contexts/ToastContext';
+import { Link } from 'react-router-dom';
 
 /**
  * Página de Gestión de Citas Médicas de VitalCare.
@@ -79,12 +78,6 @@ import { useToast } from '@/contexts/ToastContext';
 export function AppointmentsPage() {
   const { user } = useAuth();
   const { showError, showSuccess } = useToast();
-
-  /**
-   * Controla la visibilidad del modal de creación de citas.
-   * @type {boolean}
-   */
-  const [showCreateModal, setShowCreateModal] = useState(false);
 
   /**
    * Determina si el usuario actual es un paciente.
@@ -99,10 +92,35 @@ export function AppointmentsPage() {
   const isDoctor = user?.role?.toLowerCase().includes('doctor');
 
   /**
+   * SOLUCIÓN AL PROBLEMA User.id ≠ PatientProfile.id:
+   * Intenta obtener el patientProfileId guardado en localStorage.
+   * Si no existe, usa user.id como fallback (aunque probablemente retorne vacío).
+   * 
+   * El patientProfileId se guarda cuando el usuario crea su primera cita.
+   * @type {string}
+   */
+  const getPatientId = (): string => {
+    if (!isPatient || !user) return '';
+    
+    // Intentar obtener el patientProfileId de localStorage
+    const storedPatientId = localStorage.getItem(`patientProfileId_${user.id}`);
+    
+    if (storedPatientId) {
+      console.log('✅ [AppointmentsPage] Usando patientProfileId de localStorage:', storedPatientId);
+      return storedPatientId;
+    }
+    
+    console.warn('⚠️ [AppointmentsPage] No hay patientProfileId en localStorage. Usando User.id (puede retornar vacío):', user.id);
+    console.warn('💡 [AppointmentsPage] Crea tu primera cita para que se guarde el ID correcto.');
+    return user.id;
+  };
+
+  /**
    * Hook para cargar citas del paciente actual.
    * Solo se ejecuta si el usuario es paciente.
+   * Usa el patientProfileId correcto obtenido de localStorage.
    */
-  const patientAppointments = usePatientAppointments(isPatient && user ? user.id : '');
+  const patientAppointments = usePatientAppointments(getPatientId());
 
   /**
    * Hook para cargar citas del doctor actual.
@@ -149,6 +167,7 @@ export function AppointmentsPage() {
   console.log('[AppointmentsPage] Raw query data - Patient:', patientAppointments.data);
   console.log('[AppointmentsPage] Raw query data - Doctor:', doctorAppointments.data);
 
+
   /**
    * Estados de loading para las mutations (no se usan actualmente).
    */
@@ -161,23 +180,33 @@ export function AppointmentsPage() {
    * Solicita confirmación del usuario antes de proceder.
    *
    * @param {string} appointmentId - ID único de la cita a cancelar.
+   * @param {string} scheduledDate - Fecha programada de la cita (para mostrar en el mensaje).
    * @returns {Promise<void>} No retorna valor.
    *
    * @description
    * Proceso de cancelación:
-   * 1. Muestra diálogo de confirmación al usuario
+   * 1. Muestra diálogo de confirmación al usuario con detalles de la cita
    * 2. Si confirma, llama al servicio de cancelación
    * 3. Muestra notificación de éxito
    * 4. Maneja errores y muestra notificación de error
    */
-  const handleCancelAppointment = async (appointmentId: string) => {
-    if (window.confirm('¿Estás seguro de que quieres cancelar esta cita?')) {
+  const handleCancelAppointment = async (appointmentId: string, scheduledDate?: string) => {
+    const dateInfo = scheduledDate ? `\n\nFecha programada: ${formatDate(scheduledDate)}` : '';
+    const confirmMessage = `¿Estás seguro de que quieres cancelar esta cita?${dateInfo}\n\nEsta acción no se puede deshacer.`;
+    
+    if (window.confirm(confirmMessage)) {
       try {
         await cancelMutation.mutateAsync(appointmentId);
-        showSuccess('Cita cancelada', 'La cita ha sido cancelada exitosamente');
+        showSuccess(
+          '✅ Cita cancelada exitosamente', 
+          'La cita ha sido cancelada correctamente. Se ha enviado una notificación.'
+        );
       } catch (error) {
         console.error('Error al cancelar cita:', error);
-        showError('Error al cancelar cita', 'No se pudo cancelar la cita. Inténtalo nuevamente.');
+        showError(
+          '❌ Error al cancelar cita', 
+          'No se pudo cancelar la cita. Por favor, inténtalo nuevamente o contacta con soporte.'
+        );
       }
     }
   };
@@ -291,23 +320,24 @@ export function AppointmentsPage() {
                 {isDoctor ? 'Gestiona las citas de tus pacientes' : 'Administra tus citas médicas'}
               </p>
             </div>
-            {isPatient && (
-              <Button 
-                onClick={() => setShowCreateModal(true)}
-                className="w-full sm:w-auto text-sm sm:text-base"
-              >
-                Nueva Cita
-              </Button>
-            )}
           </div>
         </div>
 
-        {/* Formulario de crear cita eliminado - Solo usar modal */}
-
         {/* Lista de citas */}
         {isLoading ? (
-          <div className="text-center py-8">
-            <div className="text-[var(--vc-text)]/70">Cargando citas...</div>
+          <div className="text-center py-12">
+            <div className="inline-flex flex-col items-center gap-4">
+              <div className="relative">
+                <div className="w-16 h-16 border-4 border-blue-200 dark:border-blue-800 rounded-full animate-pulse"></div>
+                <div className="absolute top-0 left-0 w-16 h-16 border-4 border-t-blue-500 dark:border-t-blue-400 rounded-full animate-spin"></div>
+              </div>
+              <p className="text-[var(--vc-text)]/70 text-lg font-medium">
+                Cargando tus citas médicas...
+              </p>
+              <p className="text-[var(--vc-text)]/50 text-sm">
+                Por favor espera un momento
+              </p>
+            </div>
           </div>
         ) : error ? (
           <Card className="p-6 sm:p-8 text-center shadow-lg border-0 bg-[var(--vc-card-bg)]">
@@ -356,9 +386,13 @@ export function AppointmentsPage() {
                         </svg>
                         <span className="break-all">
                           <strong>Paciente:</strong> {
-                            appointment.patientId 
-                              ? `${appointment.patientId.substring(0, 8)}...` 
-                              : appointment.patientEmail || 'N/A'
+                            appointment.patient 
+                              ? (appointment.patient.username || appointment.patient.email)
+                              : appointment.patientEmail
+                              ? appointment.patientEmail
+                              : appointment.patientId 
+                                ? `ID: ${appointment.patientId.substring(0, 8)}...`
+                                : 'N/A'
                           }
                         </span>
                       </div>
@@ -366,13 +400,19 @@ export function AppointmentsPage() {
                         <svg className="w-4 h-4 text-[var(--vc-text)]/60" fill="currentColor" viewBox="0 0 20 20">
                           <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span className="break-all"><strong>Doctor:</strong> {appointment.doctorId.substring(0, 8)}...</span>
+                        <span className="break-all">
+                          <strong>Doctor:</strong> {
+                            appointment.doctor
+                              ? (appointment.doctor.username || appointment.doctor.email)
+                              : (appointment.doctorId ? `ID: ${appointment.doctorId.substring(0, 8)}...` : 'No asignado')
+                          }
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <svg className="w-4 h-4 text-[var(--vc-text)]/60" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                         </svg>
-                        <span className="break-all"><strong>Sede:</strong> {appointment.siteId ? `${appointment.siteId.substring(0, 8)}...` : 'N/A'}</span>
+                        <span className="break-all"><strong>Sede:</strong> {appointment.siteId ? `${appointment.siteId.substring(0, 8)}...` : 'No especificada'}</span>
                       </div>
                     </div>
                   </div>
@@ -385,21 +425,41 @@ export function AppointmentsPage() {
                             onClick={() => appointment.id && handleConfirmAttendance(appointment.id)}
                             disabled={isConfirming || !appointment.id}
                             size="sm"
-                            className="flex-1 lg:flex-initial text-xs sm:text-sm"
+                            className="flex-1 lg:flex-initial text-xs sm:text-sm bg-green-600 hover:bg-green-700"
                           >
-                            Confirmar
+                            ✓ Confirmar
                           </Button>
                         )}
                         <Button
-                          onClick={() => appointment.id && handleCancelAppointment(appointment.id)}
+                          onClick={() => appointment.id && handleCancelAppointment(appointment.id, appointment.scheduledDate)}
                           disabled={isCancelling || !appointment.id}
                           variant="outline"
                           size="sm"
-                          className="flex-1 lg:flex-initial text-xs sm:text-sm"
+                          className="flex-1 lg:flex-initial text-xs sm:text-sm border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900"
                         >
-                          Cancelar
+                          ✕ Cancelar Cita
                         </Button>
                       </>
+                    )}
+                    {appointment.status?.toLowerCase() === 'cancelled' && (
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-red-50 dark:bg-red-900/30 rounded-md">
+                        <svg className="w-4 h-4 text-red-600 dark:text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-xs sm:text-sm text-red-600 dark:text-red-400 font-medium">
+                          Cancelada
+                        </span>
+                      </div>
+                    )}
+                    {appointment.status?.toLowerCase() === 'completed' && (
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-900/30 rounded-md">
+                        <svg className="w-4 h-4 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-xs sm:text-sm text-green-600 dark:text-green-400 font-medium">
+                          Completada
+                        </span>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -407,31 +467,35 @@ export function AppointmentsPage() {
             ))}
           </div>
         ) : (
-          <Card className="p-6 sm:p-8 text-center shadow-lg border-0 bg-[var(--vc-card-bg)]">
-            <div className="w-16 h-16 mx-auto mb-4 bg-[var(--vc-bg)] rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8 text-[var(--vc-text)]/40" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="text-[var(--vc-text)]/70">
-              <p className="text-base sm:text-lg font-medium text-[var(--vc-text)] mb-2">
-                No tienes citas programadas
+          <Card className="p-8 sm:p-12 text-center shadow-lg border-0 bg-[var(--vc-card-bg)]">
+            <div className="max-w-md mx-auto">
+              <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-full flex items-center justify-center">
+                <svg className="w-10 h-10 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h3 className="text-xl sm:text-2xl font-bold text-[var(--vc-text)] mb-3">
+                {isPatient ? 'No tienes citas programadas' : 'No hay citas registradas'}
+              </h3>
+              <p className="text-[var(--vc-text)]/70 mb-6 text-sm sm:text-base max-w-md mx-auto">
+                {isPatient 
+                  ? 'Aún no has agendado ninguna cita médica. Una vez que crees tu primera cita, aparecerá aquí automáticamente. ¡Comienza a cuidar tu salud hoy!'
+                  : 'No se han encontrado citas en este momento.'}
               </p>
               {isPatient && (
-                <p className="text-sm sm:text-base">
-                  Haz clic en "Nueva Cita" para programar tu primera cita médica.
-                </p>
+                <Link to="/create-appointment">
+                  <Button className="mx-auto">
+                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                    </svg>
+                    Programar Mi Primera Cita
+                  </Button>
+                </Link>
               )}
             </div>
           </Card>
         )}
       </main>
-
-      {/* Modal para crear nueva cita */}
-      <CreateAppointmentModal 
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-      />
     </div>
   );
 }

@@ -48,17 +48,14 @@
  *
  * @see {@link useAuth} para la gestión de autenticación y roles de usuario.
  * @see {@link useAppointments} para los hooks de carga de citas.
- * @see {@link CreateAppointmentModal} para el modal de citas rápidas.
  * @see {@link AppointmentsPage} para la vista completa de citas.
  */
 
-import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useAppointments } from '@/hooks/useAppointments';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Link } from 'react-router-dom';
-import { CreateAppointmentModal } from '@/components/appointments/CreateAppointmentModal';
 
 /**
  * Página de Dashboard Principal de VitalCare.
@@ -69,7 +66,6 @@ import { CreateAppointmentModal } from '@/components/appointments/CreateAppointm
 export function DashboardPage() {
   const { user } = useAuth();
   const { usePatientAppointments, useDoctorAppointments } = useAppointments();
-  const [showCreateModal, setShowCreateModal] = useState(false);
 
   /**
    * Determina si el usuario actual es un paciente.
@@ -308,27 +304,14 @@ export function DashboardPage() {
             
             <div className="space-y-3">
               {isPatient && (
-                <>
-                  <Link to="/create-appointment">
-                    <Button className="w-full justify-start gap-3" variant="outline">
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-                      </svg>
-                      Programar Nueva Cita
-                    </Button>
-                  </Link>
-                  
-                  <Button 
-                    className="w-full justify-start gap-3" 
-                    variant="outline"
-                    onClick={() => setShowCreateModal(true)}
-                  >
+                <Link to="/create-appointment">
+                  <Button className="w-full justify-start gap-3" variant="outline">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                      <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
                     </svg>
-                    Cita Rápida (Modal)
+                    Programar Nueva Cita
                   </Button>
-                </>
+                </Link>
               )}
               
               {!isPatient && (
@@ -347,7 +330,7 @@ export function DashboardPage() {
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                   </svg>
-                  Ver Todas las Citas
+                  Ver Mis Citas
                 </Button>
               </Link>
 
@@ -372,12 +355,6 @@ export function DashboardPage() {
           </Card>
         </div>
       </main>
-
-      {/* Modal para crear nueva cita */}
-      <CreateAppointmentModal 
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-      />
     </div>
   );
 }

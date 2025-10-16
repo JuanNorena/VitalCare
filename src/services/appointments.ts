@@ -62,6 +62,22 @@ export interface AppointmentDTO {
   status?: AppointmentStatus;
   /** Email del paciente (requerido cuando no se usa patientId) */
   patientEmail?: string;
+  /** Información completa del paciente (solo en respuestas del backend) */
+  patient?: {
+    id: string;
+    email: string;
+    username?: string;
+    role: string;
+    enabled: boolean;
+  };
+  /** Información completa del doctor (solo en respuestas del backend) */
+  doctor?: {
+    id: string;
+    email: string;
+    username?: string;
+    role: string;
+    enabled: boolean;
+  };
 }
 
 /**
@@ -196,6 +212,21 @@ export const appointmentService = {
       const result = await apiClient.get<AppointmentDTO[]>(`/appointments/patient/${patientId}`);
       console.log(`✅ Citas del paciente obtenidas: ${result.length}`);
       console.log('📋 Datos de citas:', result);
+      
+      // Si el resultado tiene citas, loggear detalles
+      if (result.length > 0) {
+        result.forEach((apt, index) => {
+          console.log(`  📌 Cita ${index + 1}:`, {
+            id: apt.id,
+            patientId: apt.patientId,
+            patientEmail: apt.patientEmail || apt.patient?.email,
+            doctorId: apt.doctorId,
+            scheduledDate: apt.scheduledDate,
+            status: apt.status
+          });
+        });
+      }
+      
       return result;
     } catch (error) {
       console.error('❌ Error al obtener citas del paciente:', error);
