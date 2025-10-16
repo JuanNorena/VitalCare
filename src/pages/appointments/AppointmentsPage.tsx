@@ -68,6 +68,8 @@ import { Card } from '@/components/ui/Card';
 import type { AppointmentDTO } from '@/services/appointments';
 import { useToast } from '@/contexts/ToastContext';
 import { Link } from 'react-router-dom';
+import { CancelAppointmentModal } from '@/components/appointments/CancelAppointmentModal';
+import { useState } from 'react';
 
 /**
  * Página de Gestión de Citas Médicas de VitalCare.
@@ -128,6 +130,15 @@ export function AppointmentsPage() {
    */
   const doctorAppointments = useDoctorAppointments(isDoctor && user ? user.id : '');
 
+  /**
+   * Estados para el modal de cancelación.
+   */
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [appointmentToCancel, setAppointmentToCancel] = useState<{
+    id: string;
+    date: string;
+  } | null>(null);
+
   // Debug logging
   console.log('[AppointmentsPage] Usuario:', user);
   console.log('[AppointmentsPage] Es paciente:', isPatient);
@@ -177,37 +188,59 @@ export function AppointmentsPage() {
 
   /**
    * Maneja la cancelación de una cita médica.
-   * Solicita confirmación del usuario antes de proceder.
+   * Abre el modal de confirmación antes de proceder.
    *
    * @param {string} appointmentId - ID único de la cita a cancelar.
-   * @param {string} scheduledDate - Fecha programada de la cita (para mostrar en el mensaje).
-   * @returns {Promise<void>} No retorna valor.
+   * @param {string} scheduledDate - Fecha programada de la cita (para mostrar en el modal).
+   * @returns {void} No retorna valor.
    *
    * @description
    * Proceso de cancelación:
-   * 1. Muestra diálogo de confirmación al usuario con detalles de la cita
-   * 2. Si confirma, llama al servicio de cancelación
-   * 3. Muestra notificación de éxito
-   * 4. Maneja errores y muestra notificación de error
+   * 1. Guarda los datos de la cita a cancelar en el estado
+   * 2. Abre el modal de confirmación
+   * 3. El usuario confirma o rechaza en el modal
    */
-  const handleCancelAppointment = async (appointmentId: string, scheduledDate?: string) => {
-    const dateInfo = scheduledDate ? `\n\nFecha programada: ${formatDate(scheduledDate)}` : '';
-    const confirmMessage = `¿Estás seguro de que quieres cancelar esta cita?${dateInfo}\n\nEsta acción no se puede deshacer.`;
-    
-    if (window.confirm(confirmMessage)) {
-      try {
-        await cancelMutation.mutateAsync(appointmentId);
-        showSuccess(
-          '✅ Cita cancelada exitosamente', 
-          'La cita ha sido cancelada correctamente. Se ha enviado una notificación.'
-        );
-      } catch (error) {
-        console.error('Error al cancelar cita:', error);
-        showError(
-          '❌ Error al cancelar cita', 
-          'No se pudo cancelar la cita. Por favor, inténtalo nuevamente o contacta con soporte.'
-        );
-      }
+  const handleCancelAppointment = (appointmentId: string, scheduledDate?: string) => {
+    const formattedDate = scheduledDate ? formatDate(scheduledDate) : 'Fecha no especificada';
+    setAppointmentToCancel({
+      id: appointmentId,
+      date: formattedDate
+    });
+    setShowCancelModal(true);
+  };
+
+  /**
+   * Confirma y ejecuta la cancelación de la cita.
+   * Llamado desde el modal cuando el usuario confirma la acción.
+   */
+  const confirmCancelAppointment = async () => {
+    if (!appointmentToCancel) return;
+
+    try {
+      await cancelMutation.mutateAsync(appointmentToCancel.id);
+      showSuccess(
+        '✅ Cita cancelada exitosamente', 
+        'La cita ha sido cancelada correctamente. Se ha enviado una notificación.'
+      );
+      // Cerrar modal y limpiar estado
+      setShowCancelModal(false);
+      setAppointmentToCancel(null);
+    } catch (error) {
+      console.error('Error al cancelar cita:', error);
+      showError(
+        '❌ Error al cancelar cita', 
+        'No se pudo cancelar la cita. Por favor, inténtalo nuevamente o contacta con soporte.'
+      );
+    }
+  };
+
+  /**
+   * Cierra el modal de cancelación sin ejecutar la acción.
+   */
+  const handleCloseCancelModal = () => {
+    if (!isCancelling) {
+      setShowCancelModal(false);
+      setAppointmentToCancel(null);
     }
   };
 
@@ -496,6 +529,15 @@ export function AppointmentsPage() {
           </Card>
         )}
       </main>
+
+      {/* Modal de Confirmación para Cancelar Cita */}
+      <CancelAppointmentModal
+        isOpen={showCancelModal}
+        onClose={handleCloseCancelModal}
+        onConfirm={confirmCancelAppointment}
+        appointmentDate={appointmentToCancel?.date || ''}
+        isLoading={isCancelling}
+      />
     </div>
   );
 }

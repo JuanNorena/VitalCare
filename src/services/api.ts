@@ -295,7 +295,19 @@ export const apiClient = {
       await handleApiError(response);
     }
 
-    return response.json();
+    // Si el backend retorna 204 No Content, no hay JSON para parsear
+    if (response.status === 204) {
+      return {} as T;
+    }
+
+    // Verificar si la respuesta tiene contenido antes de parsear
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      return response.json();
+    }
+
+    // Si no hay contenido JSON, retornar objeto vacío
+    return {} as T;
   },
 
   /**

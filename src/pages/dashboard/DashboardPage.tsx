@@ -86,10 +86,32 @@ export function DashboardPage() {
   const isStaff = user?.role?.toLowerCase().includes('staff');
 
   /**
+   * SOLUCIÓN AL PROBLEMA User.id ≠ PatientProfile.id:
+   * Obtiene el patientProfileId correcto desde localStorage.
+   * Si no existe, usa user.id como fallback.
+   * @returns {string} ID correcto del paciente
+   */
+  const getPatientId = (): string => {
+    if (!isPatient || !user) return '';
+    
+    // Intentar obtener el patientProfileId de localStorage
+    const storedPatientId = localStorage.getItem(`patientProfileId_${user.id}`);
+    
+    if (storedPatientId) {
+      console.log('✅ [Dashboard] Usando patientProfileId de localStorage:', storedPatientId);
+      return storedPatientId;
+    }
+    
+    console.warn('⚠️ [Dashboard] No hay patientProfileId en localStorage. Usando User.id:', user.id);
+    return user.id;
+  };
+
+  /**
    * Hook para cargar citas del paciente actual.
    * Solo se ejecuta si el usuario es paciente.
+   * Usa el patientProfileId correcto obtenido de localStorage.
    */
-  const patientAppointments = usePatientAppointments(isPatient && user ? user.id : '');
+  const patientAppointments = usePatientAppointments(getPatientId());
 
   /**
    * Hook para cargar citas del doctor actual.
@@ -119,6 +141,26 @@ export function DashboardPage() {
   const completedAppointments = appointments?.filter(apt =>
     apt.status?.toLowerCase() === 'completed'
   ) || [];
+
+  /**
+   * Filtra las citas canceladas.
+   * @type {Appointment[]}
+   */
+  const cancelledAppointments = appointments?.filter(apt =>
+    apt.status?.toLowerCase() === 'cancelled'
+  ) || [];
+
+  // Debug logs para verificar estadísticas
+  console.log('📊 [Dashboard] Estadísticas:', {
+    total: appointments?.length || 0,
+    proximas: upcomingAppointments.length,
+    completadas: completedAppointments.length,
+    canceladas: cancelledAppointments.length,
+    isPatient,
+    isDoctor,
+    userId: user?.id,
+    patientProfileId: isPatient ? getPatientId() : 'N/A'
+  });
 
   /**
    * Formatea una fecha para mostrar en formato localizado colombiano.
@@ -266,19 +308,26 @@ export function DashboardPage() {
             {upcomingAppointments.length > 0 ? (
               <div className="space-y-3">
                 {upcomingAppointments.slice(0, 3).map((appointment) => (
-                  <div key={appointment.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div 
+                    key={appointment.id} 
+                    className="flex items-center justify-between p-4 bg-[var(--vc-card-bg)] border border-[var(--vc-border)] rounded-lg hover:shadow-md transition-shadow duration-200"
+                  >
                     <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      {/* Indicador de estado */}
+                      <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full animate-pulse"></div>
+                      
                       <div>
                         <p className="text-sm font-medium text-[var(--vc-text)]">
                           Cita #{appointment.id ? appointment.id.substring(0, 8) : 'N/A'}...
                         </p>
-                        <p className="text-xs text-[var(--vc-text)]/70">
+                        <p className="text-xs text-[var(--vc-text)]/60 mt-0.5">
                           {formatDate(appointment.scheduledDate)}
                         </p>
                       </div>
                     </div>
-                    <span className="text-xs font-medium text-blue-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-900 px-2 py-1 rounded-full">
+                    
+                    {/* Badge de estado */}
+                    <span className="text-xs font-semibold text-blue-700 dark:text-blue-700 bg-blue-100 dark:bg-blue-900/40 px-3 py-1.5 rounded-full border border-blue-200 dark:border-blue-800">
                       {appointment.status === 'SCHEDULED' ? 'Programada' : 'Confirmada'}
                     </span>
                   </div>
