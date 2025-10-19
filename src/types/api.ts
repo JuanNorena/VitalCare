@@ -49,6 +49,13 @@
 export interface User {
   /** Identificador único del usuario (UUID) */
   id: string;
+  /** 
+   * ID del perfil asociado (DoctorProfile.id o PatientProfile.id)
+   * Este campo es CRÍTICO para consultas de citas, ya que las citas
+   * se relacionan con DoctorProfile.id/PatientProfile.id, NO con User.id
+   * @since Backend v1.1 (pending)
+   */
+  profileId?: string;
   /** Nombre de usuario (opcional, puede ser null) */
   username?: string;
   /** Correo electrónico del usuario */

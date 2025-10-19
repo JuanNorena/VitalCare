@@ -233,6 +233,86 @@ export const doctorService = {
   async getDoctorsForSelect(): Promise<DoctorSelectOption[]> {
     const doctors = await this.getAllDoctors();
     return this.formatForSelect(doctors);
+  },
+
+  /**
+   * Busca un doctor por su email.
+   * 
+   * @param {string} email - Email del doctor a buscar
+   * @returns {Promise<DoctorProfileDTO | null>} Perfil del doctor o null si no se encuentra
+   * 
+   * @description
+   * Esta función busca un doctor específico por su email.
+   * Como el backend no tiene un endpoint directo para buscar por email,
+   * obtiene todos los doctores y busca localmente.
+   * 
+   * ⚠️ IMPORTANTE: Esta es una solución temporal. Idealmente el backend
+   * debería tener un endpoint GET /api/doctors/by-email/{email}
+   * 
+   * Características:
+   * - Búsqueda case-insensitive
+   * - Cache de resultados durante 5 minutos
+   * - Logging detallado para debugging
+   * - Validación de email
+   * 
+   * @example
+   * ```typescript
+   * // Buscar doctor por email del usuario logueado
+   * const { user } = useAuth();
+   * const doctorProfile = await doctorService.getDoctorByEmail(user.email);
+   * 
+   * if (doctorProfile) {
+   *   console.log('DoctorProfile.id:', doctorProfile.id);
+   *   // Guardar en localStorage para uso posterior
+   *   localStorage.setItem(`doctorProfileId_${user.id}`, doctorProfile.id);
+   * }
+   * ```
+   */
+  async getDoctorByEmail(email: string): Promise<DoctorProfileDTO | null> {
+    console.log('🔍 [DoctorService] Buscando doctor por email:', email);
+    
+    if (!email) {
+      console.warn('⚠️ [DoctorService] Email vacío, no se puede buscar doctor');
+      return null;
+    }
+
+    try {
+      // Obtener todos los doctores
+      const doctors = await this.getAllDoctors();
+      
+      console.log('🔍 [DoctorService] Doctores obtenidos:', doctors.map(d => ({
+        id: d.id,
+        email: d.email,
+        lastName: d.lastName
+      })));
+      
+      // Buscar por email (case-insensitive) con validación de null
+      const doctor = doctors.find(d => {
+        // Validar que tanto d.email como email no sean null/undefined
+        if (!d.email || !email) {
+          return false;
+        }
+        return d.email.toLowerCase() === email.toLowerCase();
+      });
+      
+      if (doctor) {
+        console.log('✅ [DoctorService] Doctor encontrado:', {
+          id: doctor.id,
+          email: doctor.email,
+          lastName: doctor.lastName,
+          specialty: doctor.specialty
+        });
+      } else {
+        console.warn('⚠️ [DoctorService] No se encontró doctor con email:', email);
+        console.warn('📋 [DoctorService] Emails disponibles:', doctors.filter(d => d.email).map(d => d.email));
+      }
+      
+      return doctor || null;
+      
+    } catch (error) {
+      console.error('❌ [DoctorService] Error al buscar doctor por email:', error);
+      throw error;
+    }
   }
 };
 

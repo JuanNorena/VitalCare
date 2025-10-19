@@ -94,7 +94,29 @@ export function useAuth() {
   const { data: user, isLoading, error } = useQuery<User | null>({
     queryKey: ['current-user'],
     queryFn: async () => {
-      return await authService.getCurrentUser();
+      const user = await authService.getCurrentUser();
+      
+      // ✅ VALIDACIÓN: Advertir si doctor/paciente no tiene profileId
+      if (user && (user.role.includes('DOCTOR') || user.role.includes('PATIENT'))) {
+        if (!user.profileId) {
+          console.warn(
+            '⚠️ ADVERTENCIA: Usuario de tipo',
+            user.role,
+            'no tiene profileId.',
+            '\n📋 Esto puede causar que no se carguen las citas correctamente.',
+            '\n🔧 Solución: Actualizar el backend para incluir profileId en UserDTO.',
+            '\n📖 Ver: SOLUCION_DOCTOR_APPOINTMENTS.md'
+          );
+        } else {
+          console.log('✅ Usuario con profileId correcto:', {
+            userId: user.id,
+            profileId: user.profileId,
+            role: user.role
+          });
+        }
+      }
+      
+      return user;
     },
     enabled: !!localStorage.getItem('accessToken'), // Solo ejecuta si hay token
     retry: false,

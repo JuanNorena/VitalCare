@@ -53,6 +53,7 @@
 
 import { useAuth } from '@/hooks/useAuth';
 import { useAppointments } from '@/hooks/useAppointments';
+import { useDoctorProfileId } from '@/hooks/useDoctorProfile';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Link } from 'react-router-dom';
@@ -87,37 +88,52 @@ export function DashboardPage() {
 
   /**
    * SOLUCIÓN AL PROBLEMA User.id ≠ PatientProfile.id:
-   * Obtiene el patientProfileId correcto desde localStorage.
-   * Si no existe, usa user.id como fallback.
+   * Obtiene el patientProfileId correcto desde user.profileId.
+   * Si no existe, usa user.id como fallback (temporal).
    * @returns {string} ID correcto del paciente
    */
   const getPatientId = (): string => {
     if (!isPatient || !user) return '';
     
-    // Intentar obtener el patientProfileId de localStorage
-    const storedPatientId = localStorage.getItem(`patientProfileId_${user.id}`);
+    // ✅ OPCIÓN 1: Backend actualizado con profileId
+    if (user.profileId) {
+      console.log('✅ [Dashboard] Usando PatientProfile.id del backend:', user.profileId);
+      return user.profileId;
+    }
     
+    // ⚠️ OPCIÓN 2: Intentar obtener de localStorage (legacy)
+    const storedPatientId = localStorage.getItem(`patientProfileId_${user.id}`);
     if (storedPatientId) {
       console.log('✅ [Dashboard] Usando patientProfileId de localStorage:', storedPatientId);
       return storedPatientId;
     }
     
-    console.warn('⚠️ [Dashboard] No hay patientProfileId en localStorage. Usando User.id:', user.id);
+    // ⚠️ OPCIÓN 3: Backend no actualizado, usar User.id como fallback
+    console.warn('⚠️ [Dashboard] No hay patientProfileId. Usando User.id:', user.id);
     return user.id;
   };
 
   /**
+   * SOLUCIÓN AL PROBLEMA User.id ≠ DoctorProfile.id:
+   * Usa el hook useDoctorProfileId para obtener el ID correcto.
+   * 
+   * @returns {string} ID correcto del doctor
+   */
+  const doctorProfileId = useDoctorProfileId(isDoctor ? (user || null) : null);
+
+  /**
    * Hook para cargar citas del paciente actual.
    * Solo se ejecuta si el usuario es paciente.
-   * Usa el patientProfileId correcto obtenido de localStorage.
+   * Usa el patientProfileId correcto obtenido de user.profileId o localStorage.
    */
   const patientAppointments = usePatientAppointments(getPatientId());
 
   /**
    * Hook para cargar citas del doctor actual.
    * Solo se ejecuta si el usuario es doctor.
+   * Usa el doctorProfileId correcto obtenido del hook useDoctorProfileId.
    */
-  const doctorAppointments = useDoctorAppointments(isDoctor && user ? user.id : '');
+  const doctorAppointments = useDoctorAppointments(doctorProfileId);
 
   /**
    * Citas del usuario actual (paciente o doctor).

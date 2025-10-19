@@ -191,9 +191,17 @@ export function LoginPage() {
 
           {/* Campo de contraseña */}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-[var(--vc-text)] mb-1">
-              Contraseña
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-[var(--vc-text)]">
+                Contraseña
+              </label>
+              <Link
+                to="/auth/forgot-password"
+                className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
             <Input
               id="password"
               name="password"

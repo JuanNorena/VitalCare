@@ -266,7 +266,24 @@ export const apiClient = {
       await handleApiError(response);
     }
 
-    return response.json();
+    // Si el backend retorna 204 No Content, no hay JSON para parsear
+    if (response.status === 204) {
+      return {} as T;
+    }
+
+    // Verificar si la respuesta tiene contenido JSON antes de parsear
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      return response.json();
+    }
+
+    // Si la respuesta es texto plano, retornarlo como string
+    const textResponse = await response.text();
+    console.log('API POST Text Response:', textResponse);
+    
+    // Si T es string, retornar el texto directamente
+    // Si no, intentar wrapearlo en un objeto (útil para respuestas simples del backend)
+    return textResponse as T;
   },
 
   /**

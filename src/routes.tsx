@@ -22,9 +22,14 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { RegisterPage } from '@/pages/auth/RegisterPage';
 import { ProfilePage } from '@/pages/auth/ProfilePage';
+import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage';
+import { VerifyResetCodePage } from '@/pages/auth/VerifyResetCodePage';
+import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage';
 import { AppointmentsPage } from '@/pages/appointments/AppointmentsPage';
 import { CreateAppointmentPage } from '@/pages/appointments/CreateAppointmentPage';
 import { DashboardPage } from '@/pages/dashboard/DashboardPage';
+import { DoctorAppointmentsPage } from '@/pages/doctor/DoctorAppointmentsPage';
+import { ConsultationPage } from '@/pages/doctor/ConsultationPage';
 import { useAuth } from '@/hooks/useAuth';
 
 // ========================================
@@ -152,6 +157,32 @@ export function AppRoutes() {
         }
       />
 
+      {/* Rutas de recuperación de contraseña */}
+      <Route
+        path="/auth/forgot-password"
+        element={
+          <PublicRoute>
+            <ForgotPasswordPage />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/auth/verify-reset-code"
+        element={
+          <PublicRoute>
+            <VerifyResetCodePage />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/auth/reset-password"
+        element={
+          <PublicRoute>
+            <ResetPasswordPage />
+          </PublicRoute>
+        }
+      />
+
       {/* ======================================== */}
       {/* RUTAS PROTEGIDAS - Requieren autenticación */}
       {/* ======================================== */}
@@ -201,14 +232,40 @@ export function AppRoutes() {
       />
 
       {/* ======================================== */}
+      {/* RUTAS DEL MÓDULO DOCTOR */}
+      {/* ======================================== */}
+
+      <Route
+        path="/doctor/appointments"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <DoctorAppointmentsPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/doctor/consultation/:id"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <ConsultationPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ======================================== */}
       {/* REDIRECCIONAMIENTOS */}
       {/* ======================================== */}
 
-      {/* Redireccionamiento por defecto al dashboard */}
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      {/* Redireccionamiento por defecto al login */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
 
-      {/* Ruta 404 - redirigir al dashboard */}
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      {/* Ruta 404 - redirigir al login */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }
