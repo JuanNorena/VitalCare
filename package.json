@@ -9,7 +9,12 @@
     "build": "tsc && vite build --mode production",
     "build:dev": "tsc && vite build --mode development",
     "preview": "vite preview",
-    "preview:dev": "vite preview --mode development"
+    "preview:dev": "vite preview --mode development",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest watch"
   },
   "repository": {
     "type": "git",
@@ -39,8 +44,15 @@
     "vite": "^7.1.4"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^24.3.1",
     "@types/react-router-dom": "^5.3.3",
-    "autoprefixer": "^10.4.21"
+    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/ui": "^3.2.4",
+    "autoprefixer": "^10.4.21",
+    "jsdom": "^27.0.1",
+    "vitest": "^3.2.4"
   }
 }

@@ -252,16 +252,21 @@
        * Alias para el directorio src.
        * '@/*' se resuelve a './src/*' desde la raíz del proyecto.
        */
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      /**
+       * Alias para el directorio de tests.
+       * '@/tests/*' se resuelve a './tests/*' desde la raíz del proyecto.
+       */
+      "@/tests/*": ["./tests/*"]
     }
   },
 
   /**
    * Archivos y directorios incluidos en la compilación.
-   * Solo el directorio 'src' se incluye para compilación,
+   * Solo el directorio 'src' y 'tests' se incluyen para compilación,
    * excluyendo node_modules, dist, etc.
    */
-  "include": ["src"],
+  "include": ["src", "tests"],
 
   /**
    * Referencias a otros archivos tsconfig.
