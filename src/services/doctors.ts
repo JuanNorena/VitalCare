@@ -59,8 +59,12 @@ import { apiClient } from './api';
  * @interface DoctorProfileDTO
  */
 export interface DoctorProfileDTO {
-  /** ID único del doctor (UUID) */
+  /** ID único del doctor (UUID) - DoctorProfile.id */
   id: string;
+  /** Nombre del usuario (User.name) */
+  name?: string;
+  /** Número de identificación del usuario (User.idNumber) */
+  idNumber?: string;
   /** Apellido del doctor */
   lastName: string;
   /** Especialidad médica del doctor */
@@ -68,8 +72,8 @@ export interface DoctorProfileDTO {
   /** Número de licencia médica */
   licenseNumber: string;
   /** Número de teléfono del doctor */
-  phone: string;
-  /** Email del doctor */
+  phone?: string;
+  /** Email del usuario (User.email) */
   email: string;
 }
 
@@ -236,22 +240,29 @@ export const doctorService = {
   },
 
   /**
-   * Busca un doctor por su email.
+   * Busca un doctor por su email usando el endpoint del backend.
    * 
    * @param {string} email - Email del doctor a buscar
    * @returns {Promise<DoctorProfileDTO | null>} Perfil del doctor o null si no se encuentra
    * 
    * @description
-   * Esta función busca un doctor específico por su email.
-   * Como el backend no tiene un endpoint directo para buscar por email,
-   * obtiene todos los doctores y busca localmente.
+   * Esta función busca un doctor específico por su email usando el endpoint
+   * GET /api/doctors/by-email?email={email} del backend.
    * 
-   * ⚠️ IMPORTANTE: Esta es una solución temporal. Idealmente el backend
-   * debería tener un endpoint GET /api/doctors/by-email/{email}
+   * El backend realiza un JOIN entre DoctorProfile y User para obtener
+   * todos los datos necesarios, incluyendo el DoctorProfile.id que es
+   * esencial para consultar las citas del doctor.
+   * 
+   * Endpoint del backend:
+   * - GET /api/doctors/by-email?email={email}
+   * - Controller: DoctorProfileController.getDoctorByEmail()
+   * - Service: DoctorProfileService.getDoctorByEmail()
+   * - Repository: DoctorProfileRepository.findDoctorProfileDtoByUserEmail()
    * 
    * Características:
-   * - Búsqueda case-insensitive
-   * - Cache de resultados durante 5 minutos
+   * - Consulta directa al backend (más eficiente que getAllDoctors)
+   * - Retorna DoctorProfileDTO completo con todos los campos
+   * - Maneja errores 404 cuando no se encuentra el doctor
    * - Logging detallado para debugging
    * - Validación de email
    * 
@@ -277,39 +288,28 @@ export const doctorService = {
     }
 
     try {
-      // Obtener todos los doctores
-      const doctors = await this.getAllDoctors();
+      // Llamar al endpoint específico del backend
+      const doctor = await apiClient.get<DoctorProfileDTO>(`/doctors/by-email?email=${encodeURIComponent(email)}`);
       
-      console.log('🔍 [DoctorService] Doctores obtenidos:', doctors.map(d => ({
-        id: d.id,
-        email: d.email,
-        lastName: d.lastName
-      })));
-      
-      // Buscar por email (case-insensitive) con validación de null
-      const doctor = doctors.find(d => {
-        // Validar que tanto d.email como email no sean null/undefined
-        if (!d.email || !email) {
-          return false;
-        }
-        return d.email.toLowerCase() === email.toLowerCase();
+      console.log('✅ [DoctorService] Doctor encontrado:', {
+        id: doctor.id,
+        email: doctor.email,
+        name: doctor.name,
+        lastName: doctor.lastName,
+        specialty: doctor.specialty,
+        licenseNumber: doctor.licenseNumber
       });
       
-      if (doctor) {
-        console.log('✅ [DoctorService] Doctor encontrado:', {
-          id: doctor.id,
-          email: doctor.email,
-          lastName: doctor.lastName,
-          specialty: doctor.specialty
-        });
-      } else {
+      return doctor;
+      
+    } catch (error: any) {
+      // Si el error es 404, el doctor no existe (no es un error crítico)
+      if (error?.response?.status === 404 || error?.message?.includes('404')) {
         console.warn('⚠️ [DoctorService] No se encontró doctor con email:', email);
-        console.warn('📋 [DoctorService] Emails disponibles:', doctors.filter(d => d.email).map(d => d.email));
+        return null;
       }
       
-      return doctor || null;
-      
-    } catch (error) {
+      // Para otros errores, loggear y relanzar
       console.error('❌ [DoctorService] Error al buscar doctor por email:', error);
       throw error;
     }

@@ -24,14 +24,41 @@ export const verifyResetCode = async (
   email: string,
   code: string
 ): Promise<{ refreshToken: string }> => {
-  const response = await apiClient.post<{ refreshToken: string }>(
-    '/auth/verify-reset-code',
-    {
-      email,
-      code,
+  console.log('🔐 [VERIFY CODE] Verificando código:', {
+    email,
+    codeLength: code.length,
+    code: code.substring(0, 2) + '****'
+  });
+
+  try {
+    const response = await apiClient.post<{ refreshToken: string }>(
+      '/auth/verify-reset-code',
+      {
+        email,
+        code,
+      }
+    );
+    
+    console.log('✅ [VERIFY CODE] Código verificado exitosamente');
+    return response;
+  } catch (error: any) {
+    console.error('❌ [VERIFY CODE] Error al verificar código:', error);
+    
+    // Mejorar mensajes de error según el tipo
+    if (error?.message?.includes('Failed to fetch') || error?.message?.includes('ERR_NETWORK')) {
+      throw new Error('Error de conexión. Por favor, verifica tu internet e intenta nuevamente.');
     }
-  );
-  return response;
+    
+    if (error?.message?.includes('404')) {
+      throw new Error('Código inválido o expirado. Solicita un nuevo código.');
+    }
+    
+    if (error?.message?.includes('401') || error?.message?.includes('403')) {
+      throw new Error('Código incorrecto. Verifica e intenta nuevamente.');
+    }
+    
+    throw error;
+  }
 };
 
 /**

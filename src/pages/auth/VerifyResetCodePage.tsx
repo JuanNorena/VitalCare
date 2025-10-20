@@ -21,6 +21,7 @@ export const VerifyResetCodePage = () => {
   const [error, setError] = useState('');
   const [isResending, setIsResending] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false); // ← Bandera para prevenir múltiples submits
 
   // Referencias para los inputs
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -60,7 +61,7 @@ export const VerifyResetCodePage = () => {
     }
 
     // Auto-submit cuando se completan los 6 dígitos
-    if (index === 5 && value) {
+    if (index === 5 && value && !isSubmitting) {  // ← Agregar check de isSubmitting
       const fullCode = newCode.join('');
       if (fullCode.length === 6) {
         handleVerifyCode(fullCode);
@@ -84,7 +85,7 @@ export const VerifyResetCodePage = () => {
           if (i < 6) newCode[i] = digit;
         });
         setCode(newCode);
-        if (digits.length === 6) {
+        if (digits.length === 6 && !isSubmitting) {  // ← Agregar check de isSubmitting
           handleVerifyCode(newCode.join(''));
         } else {
           inputRefs.current[Math.min(digits.length, 5)]?.focus();
@@ -94,12 +95,21 @@ export const VerifyResetCodePage = () => {
   };
 
   const handleVerifyCode = async (fullCode: string) => {
+    // Prevenir múltiples submissions
+    if (isSubmitting || isLoading) {
+      console.log('⚠️ [VERIFY CODE] Ya hay una verificación en proceso');
+      return;
+    }
+
+    setIsSubmitting(true);
     setIsLoading(true);
     setError('');
 
     try {
+      console.log('🔐 [VERIFY CODE] Iniciando verificación...');
       const response = await verifyResetCode(email, fullCode);
       
+      console.log('✅ [VERIFY CODE] Verificación exitosa, redirigiendo...');
       // Redirigir a la página de nueva contraseña con el token
       navigate('/auth/reset-password', {
         state: {
@@ -109,21 +119,29 @@ export const VerifyResetCodePage = () => {
         replace: true,
       });
     } catch (err: any) {
-      console.error('Error al verificar código:', err);
+      console.error('❌ [VERIFY CODE] Error al verificar código:', err);
 
-      if (err?.message?.includes('expirado')) {
-        setError('El código ha expirado. Solicita uno nuevo');
-      } else if (err?.message?.includes('inválido')) {
-        setError('Código incorrecto. Verifica e intenta nuevamente');
-      } else {
-        setError(err?.message || 'Error al verificar el código');
+      // Mensajes de error mejorados
+      let errorMessage = 'Error al verificar el código';
+      
+      if (err?.message?.includes('conexión') || err?.message?.includes('internet')) {
+        errorMessage = 'Error de conexión. Verifica tu internet e intenta nuevamente';
+      } else if (err?.message?.includes('expirado')) {
+        errorMessage = 'El código ha expirado. Solicita uno nuevo';
+      } else if (err?.message?.includes('inválido') || err?.message?.includes('incorrecto')) {
+        errorMessage = 'Código incorrecto. Verifica e intenta nuevamente';
+      } else if (err?.message) {
+        errorMessage = err.message;
       }
+      
+      setError(errorMessage);
 
       // Limpiar el código
       setCode(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
     } finally {
       setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
