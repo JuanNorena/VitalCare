@@ -688,7 +688,303 @@ yarn preview
 
 ## 📱 Funcionalidades
 
-### 👤 Sistema de Autenticación
+### � Sistema de Facturación y Pagos (Proceso 4)
+
+#### **📋 Objetivo del Proceso**
+Gestionar de forma ágil, precisa y segura la generación de facturas y el procesamiento de pagos por los servicios médicos prestados, asegurando el cumplimiento de las normativas contables y tributarias.
+
+#### **🎯 Alcance**
+Desde la finalización de la atención médica hasta la emisión de la factura y confirmación del pago por parte del paciente o su aseguradora.
+
+---
+
+#### **🔄 Flujo del Proceso de Facturación**
+
+```mermaid
+sequenceDiagram
+    participant Doctor
+    participant Sistema
+    participant Paciente
+    participant Wompi
+    participant Backend
+    
+    Doctor->>Sistema: Completa Consulta Médica
+    Sistema->>Backend: Guardar Consultation
+    Backend->>Backend: Generar Invoice (PENDING)
+    Backend-->>Sistema: Invoice creada
+    Sistema-->>Doctor: Consulta finalizada
+    
+    Paciente->>Sistema: Ver Facturas Pendientes
+    Sistema->>Backend: GET /api/invoices
+    Backend-->>Sistema: Lista de facturas
+    Sistema-->>Paciente: Mostrar facturas pendientes
+    
+    Paciente->>Sistema: Pagar Factura
+    Sistema->>Backend: POST /api/payments/session
+    Backend->>Backend: Crear Payment (PENDING)
+    Backend->>Backend: Generar firma Wompi
+    Backend-->>Sistema: Datos de sesión (ref, signature)
+    
+    Sistema->>Wompi: Abrir Checkout Widget
+    Paciente->>Wompi: Ingresar datos de pago
+    Wompi-->>Paciente: Procesar pago
+    
+    Wompi->>Backend: Webhook (estado de transacción)
+    Backend->>Backend: Validar firma webhook
+    Backend->>Backend: Actualizar Payment status
+    Backend->>Backend: Actualizar Invoice → PAID
+    Backend-->>Wompi: 204 No Content
+    
+    Sistema->>Backend: Polling: verificar estado
+    Backend-->>Sistema: Invoice PAID
+    Sistema-->>Paciente: ✅ Pago exitoso
+```
+
+---
+
+#### **💰 Entidades del Sistema de Facturación**
+
+**1. Invoice (Factura)**
+```typescript
+interface Invoice {
+  id: string;                    // UUID
+  patientId: string;             // UUID del paciente
+  consultationId?: string;       // UUID de la consulta (opcional)
+  total: number;                 // Monto total
+  status: 'PENDING' | 'PAID' | 'CANCELLED';
+  createdAt: string;             // ISO 8601
+  updatedAt: string;             // ISO 8601
+}
+```
+
+**2. Payment (Pago)**
+```typescript
+interface Payment {
+  id: string;                    // UUID
+  invoiceId: string;             // UUID de la factura
+  amount: number;                // Monto del pago
+  method: 'CASH' | 'CREDIT_CARD' | 'DEBIT_CARD' | 'INSURANCE' | 'WOMPI';
+  paymentDate: string;           // ISO 8601
+  reference?: string;            // Referencia única para Wompi
+  transactionId?: string;        // ID de transacción de Wompi
+  status: 'PENDING' | 'APPROVED' | 'DECLINED' | 'ERROR' | 'VOIDED';
+}
+```
+
+---
+
+#### **🔌 Integración con Wompi**
+
+**Wompi** es la pasarela de pagos integrada que permite:
+- ✅ Pagos con tarjetas de crédito/débito
+- ✅ PSE (Pagos ACH en Colombia)
+- ✅ Bancolombia y otros métodos
+- ✅ Checkout embebido (Widget)
+- ✅ Webhooks para confirmación asíncrona
+
+**Flujo de Pago con Wompi:**
+
+1. **Crear Sesión de Pago**
+```typescript
+// POST /api/payments/session
+const request = {
+  invoiceId: "uuid-de-la-factura",
+  currency: "COP"
+};
+
+// Response
+const session = {
+  reference: "INV-1234567890",      // Referencia única
+  amountInCents: 5000000,           // $50,000 COP
+  currency: "COP",
+  signature: "md5-hash",             // Firma de integridad
+  publicKey: "pub_test_xxxxx"       // Llave pública de Wompi
+};
+```
+
+2. **Abrir Checkout Widget**
+```typescript
+// Frontend - Inicializar widget de Wompi
+const checkout = new WidgetCheckout({
+  currency: session.currency,
+  amountInCents: session.amountInCents,
+  reference: session.reference,
+  publicKey: session.publicKey,
+  signature: {
+    integrity: session.signature
+  }
+});
+
+checkout.open((result) => {
+  if (result.transaction?.status === 'APPROVED') {
+    // Pago exitoso
+    checkPaymentStatus(invoiceId);
+  }
+});
+```
+
+3. **Webhook de Confirmación**
+```typescript
+// Backend recibe webhook automáticamente
+// POST /api/payments/webhook
+{
+  "event": "transaction.updated",
+  "data": {
+    "transaction": {
+      "id": "123-wompi",
+      "reference": "INV-1234567890",
+      "status": "APPROVED",
+      "amount_in_cents": 5000000,
+      ...
+    }
+  },
+  "sent_at": "2025-11-11T10:30:00Z",
+  "signature": {
+    "checksum": "sha256-hash"
+  }
+}
+```
+
+4. **Actualización Automática**
+- Backend valida la firma del webhook
+- Actualiza el `Payment` → status = APPROVED
+- Actualiza la `Invoice` → status = PAID
+- Frontend puede polling o recibir notificación
+
+---
+
+#### **📊 Estados de Factura y Pago**
+
+**Estados de Invoice:**
+| Estado | Descripción | Acción Permitida |
+|--------|-------------|------------------|
+| `PENDING` | Factura creada, esperando pago | Pagar, Cancelar |
+| `PAID` | Factura pagada completamente | Ver comprobante |
+| `CANCELLED` | Factura anulada | Solo lectura |
+
+**Estados de Payment:**
+| Estado | Descripción | Origen |
+|--------|-------------|--------|
+| `PENDING` | Pago iniciado, esperando confirmación | Backend |
+| `APPROVED` | Pago aprobado exitosamente | Wompi Webhook |
+| `DECLINED` | Pago rechazado por el banco | Wompi Webhook |
+| `ERROR` | Error técnico durante el pago | Wompi Webhook |
+| `VOIDED` | Pago anulado/reversado | Wompi Webhook |
+
+---
+
+#### **👥 Roles y Permisos**
+
+| Rol | Permisos |
+|-----|----------|
+| **Personal Admin/Contable** | • Ver todas las facturas<br>• Generar facturas manualmente<br>• Cancelar facturas<br>• Ver reportes de facturación |
+| **Doctor** | • Ver facturas de sus consultas<br>• Generar factura al finalizar consulta |
+| **Paciente** | • Ver sus propias facturas<br>• Pagar facturas pendientes<br>• Descargar comprobantes |
+
+---
+
+#### **🎨 Componentes del Sistema de Facturación**
+
+**1. InvoicesPage** (Vista de Facturas)
+- Lista de facturas del usuario actual
+- Filtros por estado y fecha
+- Acciones: Pagar, Ver detalles, Descargar
+
+**2. InvoiceDetailsModal** (Modal de Detalles)
+- Información completa de la factura
+- Detalle de servicios prestados
+- Historial de pagos
+
+**3. PaymentCheckoutModal** (Modal de Pago)
+- Integración con Wompi Widget
+- Selección de método de pago
+- Confirmación de pago
+
+**4. PaymentConfirmationPage** (Confirmación)
+- Resultado del pago
+- Comprobante descargable
+- Opciones de navegación
+
+---
+
+#### **🔐 Seguridad del Sistema de Pagos**
+
+✅ **Firma de Integridad (MD5)**
+- Cada sesión de pago incluye firma MD5
+- Evita manipulación del monto
+- Fórmula: `MD5(reference + amountInCents + currency + integrityKey)`
+
+✅ **Validación de Webhook (SHA-256)**
+- Backend valida firma de cada webhook
+- Previene webhooks falsos
+- Fórmula: `SHA256(rawBody + eventsSecret)`
+
+✅ **HTTPS Obligatorio**
+- Todas las comunicaciones encriptadas
+- Certificados SSL válidos
+
+✅ **Tokens JWT**
+- Autenticación en todas las peticiones
+- Validación de permisos por rol
+
+---
+
+#### **📈 KPIs e Indicadores**
+
+| KPI | Descripción | Meta |
+|-----|-------------|------|
+| **Tiempo Promedio de Facturación** | Tiempo desde fin de consulta hasta generación de factura | < 5 minutos |
+| **% Facturas Pagadas a Tiempo** | Porcentaje de facturas pagadas en < 24h | > 80% |
+| **Tasa de Errores en Facturación** | % de facturas con errores que requieren corrección | < 2% |
+| **% Pagos Exitosos** | Porcentaje de pagos aprobados vs. iniciados | > 90% |
+| **Tiempo Promedio de Pago** | Tiempo desde inicio hasta confirmación de pago | < 3 minutos |
+
+---
+
+#### **📋 Normativas y Compliance**
+
+✅ **Facturación Electrónica**
+- Cumple con resolución DIAN (Colombia)
+- Formato XML estructurado
+- Firma digital (próximamente)
+
+✅ **Protección de Datos**
+- Cumple con Ley 1581 de 2012 (Colombia)
+- Encriptación de datos sensibles
+- Anonimización en reportes
+
+✅ **Retención de Información**
+- Facturas almacenadas por 10 años
+- Auditoría completa de pagos
+- Trazabilidad de transacciones
+
+---
+
+#### **🔗 Dependencias con Otros Procesos**
+
+```mermaid
+graph LR
+    A[Gestión de Citas] --> B[Consulta Médica]
+    B --> C[Facturación]
+    C --> D[Procesamiento de Pago]
+    D --> E[Registro Contable]
+    
+    F[Autenticación] --> A
+    F --> C
+    
+    style C fill:#3b82f6,stroke:#1e40af,color:#fff
+    style D fill:#10b981,stroke:#047857,color:#fff
+```
+
+**Procesos Relacionados:**
+1. **Gestión de Citas** → Origen de los servicios facturados
+2. **Consulta Médica** → Genera la factura automáticamente
+3. **Autenticación** → Validación de datos del paciente
+4. **Notificaciones** → Alertas de facturas y pagos
+
+---
+
+### �👤 Sistema de Autenticación
 
 #### **Inicio de Sesión** 🔐
 - **Autenticación JWT**: Tokens seguros con refresh automático

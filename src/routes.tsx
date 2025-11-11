@@ -30,6 +30,7 @@ import { CreateAppointmentPage } from '@/pages/appointments/CreateAppointmentPag
 import { DashboardPage } from '@/pages/dashboard/DashboardPage';
 import { DoctorAppointmentsPage } from '@/pages/doctor/DoctorAppointmentsPage';
 import { ConsultationPage } from '@/pages/doctor/ConsultationPage';
+import { InvoicesPage } from '@/pages/billing/InvoicesPage';
 import { useAuth } from '@/hooks/useAuth';
 
 // ========================================
@@ -252,6 +253,32 @@ export function AppRoutes() {
           <ProtectedRoute>
             <MainLayout>
               <ConsultationPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ======================================== */}
+      {/* RUTAS DEL MÓDULO FACTURACIÓN */}
+      {/* ======================================== */}
+
+      <Route
+        path="/billing"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <InvoicesPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/invoices"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <InvoicesPage />
             </MainLayout>
           </ProtectedRoute>
         }
